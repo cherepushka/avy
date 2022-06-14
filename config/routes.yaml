@@ -1,0 +1,11 @@
+controllers:
+    resource: ../src/Controller/
+    type: attribute
+
+a-flow_controllers:
+    resource: /var/www/html/avy/src/Controller/Domains/A_flow/
+    host: "a-flow.%main_domain%"
+
+hy-lock_controllers:
+    resource: /var/www/html/avy/src/Controller/Domains/Hy_lock/
+    host: "hy-lock.%main_domain%"

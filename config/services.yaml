@@ -1,0 +1,50 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    main_domain: '%env(resolve:APP_MAIN_DOMAIN)%'
+
+    upload_directory: '%kernel.project_dir%/public/uploads/'
+
+    app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'
+    app.elasticsearch.host: '%env(resolve:ELASTICSEARCH_HOST)%'
+    app.elasticsearch.user: '%env(resolve:ELASTICSEARCH_USER)%'
+    app.elasticsearch.password: '%env(resolve:ELASTICSEARCH_PASSWORD)%'
+    app.elasticsearch.cloud_id: '%env(resolve:ELASTICSEARCH_CLOUD_ID)%'
+    app.elasticsearch.api_key: '%env(resolve:ELASTICSEARCH_API_KEY)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Service\Elasticsearch:
+        arguments:
+            $elasticsearch_connection_type: '%app.elasticsearch.connection_type%'
+            $elasticsearch_host: '%app.elasticsearch.host%'
+            $elasticsearch_user: '%app.elasticsearch.user%'
+            $elasticsearch_password: '%app.elasticsearch.password%'
+            $elasticsearch_cloud_id: '%app.elasticsearch.cloud_id%'
+            $elasticsearch_api_key: '%app.elasticsearch.api_key%'
+
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%upload_directory%'
+
+    App\EventListener\AllowAllCorsRequest:
+        tags:
+            - { name: kernel.event_listener, event: kernel.response }
