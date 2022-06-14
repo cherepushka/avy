@@ -2,17 +2,18 @@ version: '3.8'
 
 services:
   elasticsearch:
-    image: elasticsearch:8.2.0
+    image: elasticsearch:8.2.2
+    init: true
     environment:
       - node.name=catalog_es1
       - cluster.name=es-docker-cluster
       - bootstrap.memory_lock=true
       - "discovery.type=single-node"
-      - "xpack.security.enabled=true"
+      - "xpack.security.enabled=false"
       - "ELASTIC_PASSWORD=123123"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-      - ./var/log/elasticsearch:/usr/share/elasticsearch/logs
+      - ./elasticsearch/log/:/usr/share/elasticsearch/logs
     ulimits:
       memlock:
         soft: -1
@@ -20,27 +21,23 @@ services:
     ports:
       - '127.0.0.1:9200:9200'
     networks:
-      - avy
+      - LAMP
 
-  #  kibana:
-  #    image: kibana:8.2.2
-  #    depends_on:
-  #      - elasticsearch
-  #    environment:
-  #      - "xpack.security.enabled=false"
-  #      - SERVER_NAME=kibana.demo-search.loc
-  #      - ELASTICSEARCH_URL="https://localhost:9200"
-  #      - ELASTICSEARCH_USERNAME=kibana_system
-  #      - ELASTICSEARCH_PASSWORD=$KIBANA_SYSTEM_PASSWORD
-  #      - server.host=127.0.0.1
-  #    networks:
-  #      - avy
-  #    ports:
-  #      - "5601:5601"
+  kibana:
+    image: kibana:8.2.2
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL="http://localhost:9200"
+      - server.host=127.0.0.1
+    networks:
+      - LAMP
+    ports:
+      - "5601:5601"
 
 volumes:
   db-data:
 
 networks:
-  catalog-elasticsearch:
-    driver: bridge
+  LAMP:
+    name: LAMP
