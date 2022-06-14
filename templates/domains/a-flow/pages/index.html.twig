@@ -5,9 +5,11 @@
         <div class="wc">
             <div class="l-head-top row">
                 <div class="col col-md-8">
-                    <form action='./search/result' method='POST' autocomplete="off">
+                    <form action='{{ path('app_search_result') }}' method='GET' autocomplete="off">
                         <div class="input-group input-group-lg mb-3 p-3">
-                            <input placeholder="Введите название продукта, бренда или артикул" type="text" name="state[]" id="searchInput" class="form-control search-input search-input-main ">
+                            <input placeholder="Введите название продукта, бренда или артикул" type="text" name="search_text"
+                                   id="searchInput" class="form-control search-input search-input-main ">
+
                             <button class="btn btn-primary btn-search-border px-5" type='submit'>Найти</button>
                             <div class="suggestions suggest-absolute" id='suggest'></div>
                         </div>
@@ -29,7 +31,9 @@
     <div class="l-about">
         <div class="wc">
             <div class="l-about-bread_crumbs">
-                <span class="bread_crumbs-main">Производители</span><span class="bread_crumbs-delimiter">❯</span><span class="bread_crumbs-exta">A-Flow</span>
+                <span class="bread_crumbs-main">Производители</span>
+                <span class="bread_crumbs-delimiter">❯</span>
+                <span class="bread_crumbs-exta">A-Flow</span>
             </div>
             <div class="h2">
                 О компании A-Flow

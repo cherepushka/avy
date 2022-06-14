@@ -37,29 +37,29 @@ export default class{
         this.clearSuggests();
 
         if (suggests.length !== 0) {
-            if (suggests[0].options) {
-                suggests[0].options.forEach( suggest => {
-                    let suggest_div = document.createElement("div");
-                    let suggest_span = document.createElement("span");
-                    let suggest_highlight = document.createElement("b");
+            suggests.forEach( suggest => {
+                let suggest_div = document.createElement("div");
+                let suggest_span = document.createElement("span");
+                let suggest_highlight = document.createElement("b");
 
-                    suggest_div.classList.add(this.suggestDivClass);
-                    suggest_span.classList.add(this.suggestItemClass);
-                    suggest_highlight.classList.add(this.HighlightedSuggestItemClass);
+                suggest_div.classList.add(this.suggestDivClass);
+                suggest_span.classList.add(this.suggestItemClass);
+                suggest_highlight.classList.add(this.HighlightedSuggestItemClass);
 
-                    const split = suggest.highlighted.split('<highlight>');
+                const split = suggest.split('<highlight>');
 
-                    suggest_highlight.innerText = split[1];
-                    suggest_span.innerText = split[0];
+                suggest_highlight.innerText = split[1];
+                suggest_span.innerText = split[0];
 
-                    suggest_span.addEventListener('click', function() { document.getElementById('suggest').innerHTML = ""; })
+                suggest_span.addEventListener('click', function() {
+                    document.getElementById('suggest').innerHTML = "";
+                })
 
-                    suggest_span.appendChild(suggest_highlight);
-                    suggest_div.appendChild(suggest_span);
+                suggest_span.appendChild(suggest_highlight);
+                suggest_div.appendChild(suggest_span);
 
-                    this.suggestions_container.appendChild(suggest_div);
-                });
-            }
+                this.suggestions_container.appendChild(suggest_div);
+            });
 
             this.suggestions_container.style.display = 'block';
         }

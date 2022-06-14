@@ -23,16 +23,16 @@ class SearchController extends AbstractController
      * @throws ServerResponseException
      * @throws MissingParameterException
      */
-    #[Route('/search/result', name: 'app_search_result')]
+    #[Route('/search/result', name: 'app_search_result', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        $search_text = ($request->request->all())['search_text'];
+        $search_text = $request->query->get('search_text');
 
         $items = $this->elasticsearch->search($search_text);
 
         $catalogs = $items['hits']['hits'];
 
-        return $this->render('shared/pages/search_result.html.twig', [
+        return $this->render('shared/pages/search_results.html.twig', [
             'catalog_items' => $catalogs,
         ]);
     }

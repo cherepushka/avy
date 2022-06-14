@@ -21,6 +21,7 @@ class AllowAllCorsRequest implements EventSubscriberInterface
         if ($event->getRequest()->getMethod() === Request::METHOD_OPTIONS) {
             $event->setResponse(
                 new Response('', 204, [
+                    'Access-Control-Allow-Origin' => '*',
                     'Access-Control-Allow-Credentials' => 'true',
                     'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
                     'Access-Control-Allow-Headers' => 'DNT, X-User-Token, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type',

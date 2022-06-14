@@ -16,6 +16,8 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "dotenv-expand": "^8.0.3"
+        "dotenv": "^16.0.1",
+        "dotenv-expand": "^8.0.3",
+        "file-loader": "^6.2.0"
     }
 }

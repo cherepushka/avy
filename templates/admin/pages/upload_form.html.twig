@@ -1,0 +1,14 @@
+{% extends 'layouts/admin/base.html.twig' %}
+
+{% block body %}
+    <div class='container-div'>
+        <form action='{{ path('admin_document_upload') }}' method='POST' enctype="multipart/form-data">
+            <div>
+                <input class='form-control' type='file' name='download'>
+            </div>
+            <div style='width: 100%; text-align:center;'>
+                <button class='btn btn-secondary' type='submit'>Загрузить</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

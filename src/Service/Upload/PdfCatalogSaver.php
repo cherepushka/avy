@@ -1,23 +1,20 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Upload;
 
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class FileUploader
+class PdfCatalogSaver
 {
-    private $targetDirectory;
-    private $slugger;
 
-    public function __construct($targetDirectory, SluggerInterface $slugger)
-    {
-        $this->targetDirectory = $targetDirectory;
-        $this->slugger = $slugger;
-    }
+    public function __construct(
+        private readonly string  $upload_directory_path,
+        private readonly SluggerInterface $slugger
+    ){}
 
-    public function upload(UploadedFile $file)
+    public function save(UploadedFile $file): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
@@ -29,11 +26,11 @@ class FileUploader
             // ... handle exception if something happens during file upload
         }
 
-        return $fileName;
+        return $this->getTargetDirectory() . '/' . $fileName;
     }
 
-    public function getTargetDirectory()
+    public function getTargetDirectory(): string
     {
-        return $this->targetDirectory;
+        return $this->upload_directory_path;
     }
 }

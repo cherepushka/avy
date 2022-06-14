@@ -79,6 +79,8 @@ class Elasticsearch
     }
 
     /**
+     * Fetching search suggests in `catalogs` index
+     *
      * @param string $text
      * @return array
      *
@@ -108,7 +110,9 @@ class Elasticsearch
 
         $items = [];
         foreach ($response['suggest']['highlight-suggest'] as $item) {
-            $items[] = $item;
+            foreach ($item['options'] as $option) {
+                $items[] = $option['highlighted'];
+            }
         }
         return $items;
     }
@@ -118,15 +122,17 @@ class Elasticsearch
      * @throws ServerResponseException
      * @throws MissingParameterException
      */
-    public function uploadDocument(int $id, string $title, string $text, int $size): Elasticsearch_Response|Promise
+    public function uploadDocument(string $filename, int $filesize, string $elastic_content): Elasticsearch_Response|Promise
     {
         return $this->client->create([
-            'id' => $id,
+            'id' => uniqid(),
             'index' => 'catalogs',
             'body' => [
-                'title' => $title,
-                'text' => $text,
-                'size' => $size,
+                'suggest-completion' => explode(" ", $elastic_content),
+                'suggest-hints' => $elastic_content,
+                'suggest-text-content' => $elastic_content,
+                'file-name' => $filename,
+                'file-size' => $filesize
             ]
         ]);
     }
