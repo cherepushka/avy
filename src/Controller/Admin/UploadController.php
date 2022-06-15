@@ -3,7 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Service\Elasticsearch;
-use App\Service\Upload\PdfCatalogParser;
+use App\Service\Pdf\Parser;
 use App\Service\Upload\PdfCatalogSaver;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,31 +26,30 @@ class UploadController extends AbstractController
      */
     #[Route('/upload', name: 'admin_document_upload', methods: ['POST'])]
     public function upload_document(
-        Request             $request,
-        PdfCatalogSaver     $fileSaver,
-        PdfCatalogParser    $fileParser,
-        Elasticsearch       $elasticsearch
+        Request         $request,
+        PdfCatalogSaver $fileSaver,
+        Parser          $pdfParser,
+        Elasticsearch   $elasticsearch
     ): JsonResponse
     {
-        //TODO сделать валидацию расширения файла
+        foreach ($request->files->get('documents') as $document) {
+            $filepath = $fileSaver->save($document);
+            $text = $pdfParser->textFromFile($filepath);
 
-        $file = $request->files->get('download');
-        $filepath = $fileSaver->save($file);
+            $elastic_response = $elasticsearch->uploadDocument(
+                explode(".pdf", $document->getClientOriginalName())[0],
+                filesize($filepath),
+                $text
+            );
+            $elastic_response_code = $elastic_response->getStatusCode();
 
-        $clean_text = $fileParser->filter_content_from_file($filepath);
-
-        $elastic_response = $elasticsearch->uploadDocument(
-            explode(".pdf", $file->getClientOriginalName())[0],
-            filesize($filepath),
-            $clean_text
-        );
-        $elastic_response_code = $elastic_response->getStatusCode();
-
-        if ($elastic_response_code >= 200 && $elastic_response_code <= 299){
-            return new JsonResponse(['file' => $filepath, 'message' => 'upload successful!']);
-        } else {
-            return new JsonResponse(['file' => $filepath, 'message' => 'upload error.']);
+            if ($elastic_response_code < 200 || $elastic_response_code > 299){
+                unlink($filepath);
+                return new JsonResponse(['file' => $filepath, 'message' => 'upload error.']);
+            }
         }
+
+        return new JsonResponse(['message' => 'upload successful!']);
     }
 
 }

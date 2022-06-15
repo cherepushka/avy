@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Service\Upload;
+namespace App\Service\Pdf;
 
 use Exception;
-use Smalot\PdfParser\Parser;
+use Smalot\PdfParser\Parser as PdfParser;
 
-class PdfCatalogParser extends Parser
+class Parser
 {
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    public function __construct(
+        private PdfParser $parser
+    ){}
 
     /**
      * @throws Exception
      */
-    public function filter_content_from_file(string $filepath ): string
+    public function textFromFile(string $filepath): string
     {
-        $pdf_obj = $this->parseFile($filepath);
+        $pdf_obj = $this->parser->parseFile($filepath);
         $text = explode("\n", $pdf_obj->getText());
 
         $elastic_content_array = [];

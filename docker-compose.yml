@@ -13,7 +13,7 @@ services:
       - "ELASTIC_PASSWORD=123123"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-      - ./elasticsearch/log/:/usr/share/elasticsearch/logs
+      - ./docker-services/elasticsearch/log/:/usr/share/elasticsearch/logs
     ulimits:
       memlock:
         soft: -1
@@ -34,6 +34,22 @@ services:
       - LAMP
     ports:
       - "5601:5601"
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'avy'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: '123123'
+      MYSQL_ROOT_PASSWORD: '123123'
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3306:3306'
+    volumes:
+      - './docker-services/mysql:/var/lib/mysql'
+    networks:
+      - 'LAMP'
 
 volumes:
   db-data:

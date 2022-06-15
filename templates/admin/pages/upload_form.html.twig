@@ -4,7 +4,7 @@
     <div class='container-div'>
         <form action='{{ path('admin_document_upload') }}' method='POST' enctype="multipart/form-data">
             <div>
-                <input class='form-control' type='file' name='download'>
+                <input class='form-control' type='file' name='documents[]' multiple accept="application/pdf">
             </div>
             <div style='width: 100%; text-align:center;'>
                 <button class='btn btn-secondary' type='submit'>Загрузить</button>
