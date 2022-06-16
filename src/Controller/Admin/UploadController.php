@@ -2,15 +2,15 @@
 
 namespace App\Controller\Admin;
 
-use App\Service\Elasticsearch;
-use App\Service\Pdf\Parser;
-use App\Service\Upload\PdfCatalogSaver;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\Pdf\Parser;
+use App\Service\Elasticsearch;
+use App\Service\Upload\PdfCatalogSaver;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class UploadController extends AbstractController
 {
