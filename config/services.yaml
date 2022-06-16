@@ -3,7 +3,7 @@ parameters:
     main_domain: '%env(resolve:APP_MAIN_DOMAIN)%'
     main_url: '%env(resolve:APP_MAIN_DOMAIN)%'
 
-    #directory for storing uploaded PDF files
+    #directory for storing uploaded files
     app.upload_directory_path: '%kernel.project_dir%/var/uploads'
 
     app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'

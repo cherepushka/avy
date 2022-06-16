@@ -2,10 +2,18 @@
 
 namespace App\Controller\Admin;
 
+use App\Service\CatalogService;
+use App\Service\ManufacturerService;
+use App\Service\Pdf\CatalogFile;
+use Doctrine\ORM\NonUniqueResultException;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\MissingParameterException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
-use App\Service\Pdf\Parser;
+use App\Service\Pdf\CatalogParser;
 use App\Service\Elasticsearch;
-use App\Service\Upload\PdfCatalogSaver;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,30 +34,74 @@ class UploadController extends AbstractController
      */
     #[Route('/upload', name: 'admin_document_upload', methods: ['POST'])]
     public function upload_document(
-        Request         $request,
-        PdfCatalogSaver $fileSaver,
-        Parser          $pdfParser,
-        Elasticsearch   $elasticsearch
-    ): JsonResponse
+        Request             $request,
+        CatalogFile         $fileHandler,
+        CatalogParser       $pdfParser,
+        ManufacturerService $manufacturerService
+    ): JsonResponse|Response
     {
+        $documents = [];
+
+        /** @var UploadedFile $document */
         foreach ($request->files->get('documents') as $document) {
-            $filepath = $fileSaver->save($document);
-            $text = $pdfParser->textFromFile($filepath);
+            $new_document = [];
+            $filepath = $fileHandler->saveUploadedFile($document);
+
+            $new_document['text'] = $pdfParser->textFromFile($filepath);
+            $new_document['filename'] = (new File($filepath))->getBasename();
+            $new_document['origin_filename'] = $document->getClientOriginalName();
+            $documents[] = $new_document;
+        }
+
+        $manufacturers = $manufacturerService->getAll();
+
+        return $this->render('admin/pages/upload_confirm_form.html.twig', [
+            'documents'     => $documents,
+            'manufacturers' => $manufacturers,
+        ]);
+    }
+
+    /**
+     * @throws ClientResponseException
+     * @throws NonUniqueResultException
+     * @throws ServerResponseException
+     * @throws MissingParameterException
+     */
+    #[Route('/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
+    public function confirm_upload_document(
+        Request             $request,
+        Elasticsearch       $elasticsearch,
+        CatalogService      $catalogService,
+        CatalogFile         $catalogFile
+    ): Response
+    {
+        $files_data = $request->request->all();
+
+        foreach ($files_data as $file_data) {
+
+            $catalogService->insertCatalog(
+                filename: $file_data['filename'],
+                origin_filename: $file_data['origin_filename'],
+                manufacturer_name: $file_data['manufacturer'],
+                series: $file_data['series'],
+            );
+
+            $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
 
             $elastic_response = $elasticsearch->uploadDocument(
-                explode(".pdf", $document->getClientOriginalName())[0],
-                filesize($filepath),
-                $text
+                $file_data['filename'],
+                filesize($catalog_path),
+                $file_data['text']
             );
             $elastic_response_code = $elastic_response->getStatusCode();
 
             if ($elastic_response_code < 200 || $elastic_response_code > 299){
-                unlink($filepath);
-                return new JsonResponse(['file' => $filepath, 'message' => 'upload error.']);
+                unlink($catalog_path);
+                return new JsonResponse(['file' => $catalog_path, 'message' => 'upload error.']);
             }
         }
 
-        return new JsonResponse(['message' => 'upload successful!']);
+        return $this->render('admin/pages/upload_form.html.twig');
     }
 
 }

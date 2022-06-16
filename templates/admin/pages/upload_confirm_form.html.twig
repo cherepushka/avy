@@ -1,0 +1,48 @@
+{% extends 'layouts/admin/base.html.twig' %}
+
+{% block body %}
+    <div class='container'>
+        <h1>Проверка корректности обработки текста</h1>
+
+        <form action='{{ path('admin_document_confirm_upload') }}' method='POST' enctype="multipart/form-data">
+            {% for document in documents %}
+                <div>
+
+                    <div class="form-group">
+                        <label for="">Название файла</label>
+
+                        <input class="form-control" name="{{ document.filename }}[origin_filename]" type="text" value="{{ document.origin_filename }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Название производителя</label>
+
+                        <select class="form-control" name="{{ document.filename }}[manufacturer]">
+                            {% for manufacturer in manufacturers %}
+                                <option>{{ manufacturer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Серия (вводите только цифры)</label>
+                        <input class="form-control" type="text" name="{{ document.filename }}[series]">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Текст файла</label>
+                        <textarea class="form-control" name='{{ document.filename }}[text]' style="width: 100%">
+                            {{ document.text }}
+                        </textarea>
+                    </div>
+
+                    <input type="hidden" name="{{ document.filename }}[filename]" value="{{ document.filename }}">
+                </div>
+            {% endfor %}
+
+            <div style='width: 100%; text-align:center;'>
+                <button class='btn btn-secondary' type='submit'>Загрузить</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
