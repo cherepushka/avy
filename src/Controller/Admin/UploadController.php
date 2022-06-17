@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Service\CatalogService;
+use App\Service\LanguageService;
 use App\Service\ManufacturerService;
 use App\Service\Pdf\CatalogFile;
 use Doctrine\ORM\NonUniqueResultException;
@@ -23,21 +24,24 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class UploadController extends AbstractController
 {
 
-    #[Route('/upload', name: 'admin_document_upload_form', methods: ['GET'])]
+    #[Route('/catalogs/upload', name: 'admin_document_upload_form', methods: ['GET'])]
     public function upload_form(): Response
     {
-        return $this->render('admin/pages/upload_form.html.twig');
+        return $this->render('admin/pages/upload_form.html.twig', [
+            'max_file_uploads' => ini_get('max_file_uploads'),
+        ]);
     }
 
     /**
      * @throws Exception
      */
-    #[Route('/upload', name: 'admin_document_upload', methods: ['POST'])]
+    #[Route('/catalogs/upload', name: 'admin_document_upload', methods: ['POST'])]
     public function upload_document(
         Request             $request,
         CatalogFile         $fileHandler,
         CatalogParser       $pdfParser,
-        ManufacturerService $manufacturerService
+        ManufacturerService $manufacturerService,
+        LanguageService     $languageService
     ): JsonResponse|Response
     {
         $documents = [];
@@ -54,10 +58,12 @@ class UploadController extends AbstractController
         }
 
         $manufacturers = $manufacturerService->getAll();
+        $languages = $languageService->getAll();
 
         return $this->render('admin/pages/upload_confirm_form.html.twig', [
             'documents'     => $documents,
             'manufacturers' => $manufacturers,
+            'languages'     => $languages,
         ]);
     }
 
@@ -67,7 +73,7 @@ class UploadController extends AbstractController
      * @throws ServerResponseException
      * @throws MissingParameterException
      */
-    #[Route('/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
+    #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
     public function confirm_upload_document(
         Request             $request,
         Elasticsearch       $elasticsearch,
@@ -75,6 +81,8 @@ class UploadController extends AbstractController
         CatalogFile         $catalogFile
     ): Response
     {
+        //TODO сделать добавление в базу миграцией
+
         $files_data = $request->request->all();
 
         foreach ($files_data as $file_data) {
@@ -84,6 +92,7 @@ class UploadController extends AbstractController
                 origin_filename: $file_data['origin_filename'],
                 manufacturer_name: $file_data['manufacturer'],
                 series: $file_data['series'],
+                language_name: $file_data['lang']
             );
 
             $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
@@ -91,7 +100,7 @@ class UploadController extends AbstractController
             $elastic_response = $elasticsearch->uploadDocument(
                 $file_data['filename'],
                 filesize($catalog_path),
-                $file_data['text']
+                mb_convert_encoding($file_data['text'], 'UTF-8', 'UTF-8')
             );
             $elastic_response_code = $elastic_response->getStatusCode();
 
@@ -101,7 +110,9 @@ class UploadController extends AbstractController
             }
         }
 
-        return $this->render('admin/pages/upload_form.html.twig');
+        return $this->render('admin/pages/upload_form.html.twig', [
+            'max_file_uploads' => ini_get('max_file_uploads'),
+        ]);
     }
 
 }

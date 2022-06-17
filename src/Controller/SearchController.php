@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Service\Elasticsearch;
+use App\Service\SearchService;
+use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
@@ -15,25 +17,24 @@ class SearchController extends AbstractController
 {
 
     public function __construct(
-        private readonly Elasticsearch $elasticsearch
+        private readonly SearchService $searchService
     ){}
 
     /**
      * @throws ClientResponseException
      * @throws ServerResponseException
      * @throws MissingParameterException
+     * @throws NonUniqueResultException
      */
     #[Route('/search/result', name: 'app_search_result', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        $search_text = $request->query->get('search_text');
+        $search_text = trim($request->query->get('search_text'));
 
-        $items = $this->elasticsearch->search($search_text);
-
-        $catalogs = $items['hits']['hits'];
+        $catalogs = $this->searchService->search($search_text);
 
         return $this->render('shared/pages/search_results.html.twig', [
-            'catalog_items' => $catalogs,
+            'catalog_items' => $catalogs->getItems(),
         ]);
     }
 }

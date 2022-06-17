@@ -1,7 +1,7 @@
 export default class{
 
     constructor() {
-        this.search_api_suggests_url = process.env.APP_MAIN_URL + '/api/search/highlight';
+        this.search_api_suggests_url = process.env.APP_MAIN_URL + '/api/v1/search/highlight';
 
         this.search_input = document.querySelector('.search-input');
         this.suggestions_container = document.querySelector('.suggestions');

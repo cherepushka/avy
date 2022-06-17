@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Catalog;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -54,13 +55,15 @@ class CatalogRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Catalog
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneByFilename(string $filename): ?Catalog
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.filename = :val')
+            ->setParameter('val', $filename)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

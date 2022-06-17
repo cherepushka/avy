@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-class Manufacturer
+class ManufacturerItem
 {
 
     private int $id;

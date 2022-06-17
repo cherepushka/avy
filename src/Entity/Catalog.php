@@ -23,8 +23,12 @@ class Catalog
     #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id")]
     private Manufacturer $manufacturer;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
-    private string $series;
+    #[ORM\Column(type: 'integer', length: 255, nullable: false)]
+    private int $series;
+
+    #[ORM\ManyToOne(targetEntity: Language::class)]
+    #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id")]
+    private Language $lang;
 
     public function getId(): ?int
     {
@@ -67,14 +71,26 @@ class Catalog
         return $this;
     }
 
-    public function getSeries(): string
+    public function getSeries(): int
     {
         return $this->series;
     }
 
-    public function setSeries(string $series): self
+    public function setSeries(int $series): self
     {
         $this->series = $series;
+
+        return $this;
+    }
+
+    public function getLang(): Language
+    {
+        return $this->lang;
+    }
+
+    public function setLang(Language $lang): self
+    {
+        $this->lang = $lang;
 
         return $this;
     }

@@ -35,9 +35,13 @@ Mariadb.
 Данные для аутентификации не требуются
 
 ### Kibana
-адрес по умолчанию: `http://localhost:5601`
+адрес по умолчанию: `http://localhost:5601`.  
+Данные для аутентификации не требуются
 
 ## Установка (development)
-- `composer install --dev`
-- `npm install --save-dev`
-- `npm run dev` или `npm run watch`
+1. `composer install --dev`
+2. Заполнить `.env` файл необходимыми переменными
+3. `npm install --save-dev`
+4. `npm run dev` или `npm run watch`
+5. `php bin/console doctrine:migrations:migrate`
+6. `php bin/console doctrine:fixtures:load`

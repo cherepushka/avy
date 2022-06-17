@@ -25,19 +25,31 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Серия (вводите только цифры)</label>
+                        <label for="">Языка каталога</label>
+
+                        <select class="form-control" name="{{ document.filename }}[lang]">
+                            {% for lang in languages %}
+                                <option>{{ lang.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Серия</label>
                         <input class="form-control" type="text" name="{{ document.filename }}[series]">
                     </div>
 
                     <div class="form-group">
                         <label>Текст файла</label>
-                        <textarea class="form-control" name='{{ document.filename }}[text]' style="width: 100%">
+                        <textarea class="form-control" name='{{ document.filename }}[text]' style="width: 100%; min-height: 500px">
                             {{ document.text }}
                         </textarea>
                     </div>
 
                     <input type="hidden" name="{{ document.filename }}[filename]" value="{{ document.filename }}">
                 </div>
+
+                <hr class="m-b-2">
             {% endfor %}
 
             <div style='width: 100%; text-align:center;'>

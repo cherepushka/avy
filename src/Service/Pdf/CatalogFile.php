@@ -4,13 +4,14 @@ namespace App\Service\Pdf;
 
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CatalogFile
 {
 
-    private string $catalogs_dir;
+    private readonly string $catalogs_dir;
 
     public function __construct(
         string  $upload_directory_path,
@@ -31,15 +32,21 @@ class CatalogFile
      */
     public function saveUploadedFile(UploadedFile $file): string
     {
+        if ($file->getError()) {
+            throw new UploadException($file->getErrorMessage());
+        }
+
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
         $safeFilename = $this->slugger->slug($originalFilename);
-        $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        $fileName = sprintf('%s-%s.%s', $safeFilename, uniqid(), $file->guessExtension());
 
         $file->move($this->getCatalogsDirectory(), $fileName);
 
         return $this->getCatalogsDirectory() . '/' . $fileName;
     }
 
+    /** @throws FileNotFoundException $catalogName */
     public function getCatalogPath(string $catalogName): string
     {
         $filepath = $this->getCatalogsDirectory() . '/' . $catalogName;

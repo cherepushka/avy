@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
-use App\Model\Manufacturer as ManufacturerModel;
-use App\Entity\Manufacturer as ManufacturerEntity;
+use App\Model\ManufacturerItem;
+use App\Entity\Manufacturer;
 use App\Model\ManufacturerList;
 use App\Repository\ManufacturerRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -23,7 +23,7 @@ class ManufacturerService
         $manufacturers = $this->manufacturerRepository->findAll();
 
         $items = array_map(
-            fn(ManufacturerEntity $manufacturer) => (new ManufacturerModel())
+            fn(Manufacturer $manufacturer) => (new ManufacturerItem())
                 ->setId($manufacturer->getId())
                 ->setName($manufacturer->getName()),
             $manufacturers
@@ -35,11 +35,11 @@ class ManufacturerService
     /**
      * @throws NonUniqueResultException
      */
-    public function getByName(string $name): ManufacturerModel
+    public function getByName(string $name): ManufacturerItem
     {
         $manufacturer = $this->manufacturerRepository->findOneByName($name);
 
-        return (new ManufacturerModel())
+        return (new ManufacturerItem())
             ->setId($manufacturer->getId())
             ->setName($manufacturer->getName());
     }

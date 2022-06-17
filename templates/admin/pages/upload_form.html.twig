@@ -1,10 +1,11 @@
 {% extends 'layouts/admin/base.html.twig' %}
 
 {% block body %}
-    <div class='container-div'>
+    <div>
+        <h2>Максимальное количество файлов для загрузки: {{ max_file_uploads }}</h2>
         <form action='{{ path('admin_document_upload') }}' method='POST' enctype="multipart/form-data">
             <div>
-                <input class='form-control' type='file' name='documents[]' multiple accept="application/pdf">
+                <input class='form-control' type='file' name='documents[]' multiple accept="application/pdf" max="">
             </div>
             <div style='width: 100%; text-align:center;'>
                 <button class='btn btn-secondary' type='submit'>Загрузить</button>
