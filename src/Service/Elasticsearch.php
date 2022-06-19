@@ -79,6 +79,36 @@ class Elasticsearch
     }
 
     /**
+     * @throws ServerResponseException
+     * @throws ClientResponseException
+     * @throws MissingParameterException
+     */
+    public function searchCollapseBySeries(string $text): array
+    {
+        return $this->client->search([
+            'index' => 'catalogs',
+            'body' => [
+                '_source' => false,
+                'query' => [
+                    'match' => [
+                        "suggest-text-content" => $text
+                    ]
+                ],
+                'collapse' => [
+                    'field' => 'series',
+                    'inner_hits' => [
+                        '_source' => false,
+                        'fields' => ['file-name'],
+                        'name' => 'file-name',
+                        'size' => 5
+                    ],
+                    'max_concurrent_group_searches' => 3
+                ]
+            ]
+        ])->asArray();
+    }
+
+    /**
      * Fetching search suggests in `catalogs` index
      *
      * @param string $text
@@ -88,7 +118,7 @@ class Elasticsearch
      * @throws ClientResponseException
      * @throws MissingParameterException
      */
-    public function suggests(string $text)
+    public function suggests(string $text): array
     {
         $response = $this->client->search([
             'index' => 'catalogs',
@@ -122,7 +152,7 @@ class Elasticsearch
      * @throws ServerResponseException
      * @throws MissingParameterException
      */
-    public function uploadDocument(string $filename, int $filesize, string $elastic_content): Elasticsearch_Response|Promise
+    public function uploadDocument(string $filename, int $filesize, string $elastic_content, int $series): Elasticsearch_Response|Promise
     {
         return $this->client->create([
             'id' => uniqid(),
@@ -132,7 +162,8 @@ class Elasticsearch
                 'suggest-hints' => $elastic_content,
                 'suggest-text-content' => $elastic_content,
                 'file-name' => $filename,
-                'file-size' => $filesize
+                'file-size' => $filesize,
+                'series' => $series
             ]
         ]);
     }

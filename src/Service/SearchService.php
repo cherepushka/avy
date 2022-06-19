@@ -7,6 +7,7 @@ use App\Model\SearchResultList;
 use App\Repository\CatalogRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -21,16 +22,35 @@ class SearchService
     ){}
 
     /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
-     * @throws NonUniqueResultException
+     * @throws ElasticsearchException|NonUniqueResultException
      */
     public function search(string $text): SearchResultList
     {
         $elastic_response = $this->elasticsearch->search($text);
 
         return $this->mapElasticHits($elastic_response['hits']['hits']);
+    }
+
+    /**
+     * @throws ElasticsearchException
+     */
+    public function searchSeriesCollapse(string $text): array
+    {
+        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text);
+
+        $items = [];
+
+        foreach ($elastic_response['hits']['hits'] as $series){
+            $item = [];
+
+            foreach ($series['inner_hits']['file-name']['hits']['hits'] as $inner_item) {
+                $item[] = $inner_item['fields']['file-name'][0];
+            }
+
+            $items[$series['fields']['series'][0]] = $item;
+        }
+
+        return $items;
     }
 
     /**
@@ -43,7 +63,6 @@ class SearchService
             $source = $hit['_source'];
             $catalog = $this->catalogRepository->findOneByFilename($source['file-name']);
 
-            //TODO поправить
             $items[] = (new SearchResultItem())
                 ->setSuggestText($source['suggest-hints'])
                 ->setOriginName($catalog->getOriginFilename())

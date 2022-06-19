@@ -6,6 +6,7 @@ use App\Service\Elasticsearch;
 use App\Service\SearchService;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,9 +24,7 @@ class SearchController extends AbstractController
     ){}
 
     /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
+     * @throws ElasticsearchException
      */
     #[Route('/search/highlight', name: '_search_highlight', methods: ['POST'])]
     public function highlights(Request $request): JsonResponse
@@ -41,12 +40,9 @@ class SearchController extends AbstractController
     }
 
     /**
-     * @throws ClientResponseException
-     * @throws NonUniqueResultException
-     * @throws ServerResponseException
-     * @throws MissingParameterException
+     * @throws ElasticsearchException
      */
-    #[Route('/search/series-grouping', name: '_search', methods: ['POST'])]
+    #[Route('/search/by-series', name: '_search', methods: ['POST'])]
     public function searchSeriesGrouping(Request $request): JsonResponse
     {
         if (empty($request->toArray()) || !isset($request->toArray()['search'])){
@@ -56,7 +52,7 @@ class SearchController extends AbstractController
         }
 
         $search_text = $request->toArray()['search'];
-        $items = $this->searchService->search($search_text);
+        $items = $this->searchService->searchSeriesCollapse($search_text);
 
         return $this->json($items);
     }

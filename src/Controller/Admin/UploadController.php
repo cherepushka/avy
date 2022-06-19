@@ -100,7 +100,8 @@ class UploadController extends AbstractController
             $elastic_response = $elasticsearch->uploadDocument(
                 $file_data['filename'],
                 filesize($catalog_path),
-                mb_convert_encoding($file_data['text'], 'UTF-8', 'UTF-8')
+                mb_convert_encoding($file_data['text'], 'UTF-8', 'UTF-8'),
+                $file_data['series']
             );
             $elastic_response_code = $elastic_response->getStatusCode();
 
