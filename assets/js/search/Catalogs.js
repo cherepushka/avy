@@ -37,25 +37,21 @@ export default class{
         this.clearSuggests();
 
         if (suggests.length !== 0) {
+            const suggest_div = document.createElement("div");
+            suggest_div.classList.add(this.suggestDivClass);
+
             suggests.forEach( suggest => {
-                let suggest_div = document.createElement("div");
                 let suggest_span = document.createElement("span");
-                let suggest_highlight = document.createElement("b");
 
-                suggest_div.classList.add(this.suggestDivClass);
                 suggest_span.classList.add(this.suggestItemClass);
-                suggest_highlight.classList.add(this.HighlightedSuggestItemClass);
 
-                const split = suggest.split('<highlight>');
-
-                suggest_highlight.innerText = split[1];
-                suggest_span.innerText = split[0];
+                suggest_span.innerText = suggest;
 
                 suggest_span.addEventListener('click', function() {
                     document.getElementById('suggest').innerHTML = "";
                 })
 
-                suggest_span.appendChild(suggest_highlight);
+                // suggest_span.appendChild(suggest_highlight);
                 suggest_div.appendChild(suggest_span);
 
                 this.suggestions_container.appendChild(suggest_div);

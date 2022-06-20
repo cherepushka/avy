@@ -6,15 +6,20 @@ use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Elastic\Elasticsearch\Response\Elasticsearch as Elasticsearch_Response;
 use GuzzleHttp\Client as GuzzleClient;
 use Http\Promise\Promise;
-use RuntimeException;
 
 class Elasticsearch
 {
+
+    const PRE_TAG = '<highlight>';
+    const POST_TAG = '</highlight>';
+    const INNER_HITS_SIZE = 5;
+    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series'];
 
     private Client $client;
 
@@ -44,7 +49,7 @@ class Elasticsearch
                     ->setApiKey($elasticsearch_api_key);
                 break;
             default:
-                throw new RuntimeException('Elasticsearch connection type don`t specified');
+                throw new AuthenticationException('Elasticsearch connection type don`t specified');
         }
 
         $this->client = $Elasticsearch_client->build();
@@ -63,15 +68,19 @@ class Elasticsearch
         return $this->client->search([
             'index' => 'catalogs',
             'body' => [
-                '_source' => [
-                    'suggest-hints',
-                    'file-name',
-                    'file-url',
-                    'file-size'
-                ],
+                '_source' => false,
+                'fields' => self::STD_SEARCH_FIELDS,
                 'query' => [
                     'match' => [
                         "suggest-text-content" => $text
+                    ]
+                ],
+                'highlight' => [
+                    'fields' => [
+                        'suggest-text-content' => [
+                            'pre_tags' => self::PRE_TAG,
+                            'post_tags' => self::POST_TAG
+                        ]
                     ]
                 ]
             ]
@@ -79,11 +88,11 @@ class Elasticsearch
     }
 
     /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
+     * Search in 'catalogs' index and collapsing result on 'series' field
+     *
+     * @throws ElasticsearchException
      */
-    public function searchCollapseBySeries(string $text): array
+    public function searchCollapseBySeries(string $text, int $inner_hits_size = null): array
     {
         return $this->client->search([
             'index' => 'catalogs',
@@ -98,9 +107,17 @@ class Elasticsearch
                     'field' => 'series',
                     'inner_hits' => [
                         '_source' => false,
-                        'fields' => ['file-name'],
+                        'fields' => self::STD_SEARCH_FIELDS,
                         'name' => 'file-name',
-                        'size' => 5
+                        'size' => $inner_hits_size ?? self::INNER_HITS_SIZE,
+                        'highlight' => [
+                            'fields' => [
+                                'suggest-text-content' => [
+                                    'pre_tags' => self::PRE_TAG,
+                                    'post_tags' => self::POST_TAG
+                                ]
+                            ]
+                        ]
                     ],
                     'max_concurrent_group_searches' => 3
                 ]
@@ -118,48 +135,44 @@ class Elasticsearch
      * @throws ClientResponseException
      * @throws MissingParameterException
      */
-    public function suggests(string $text): array
+    public function suggestsDefault(string $text): array
     {
-        $response = $this->client->search([
+        return $this->client->search([
             'index' => 'catalogs',
             'body' => [
                 "suggest" => [
                     "highlight-suggest" => [
                         "prefix" => $text,
-                        "phrase" => [
-                            "field" => "suggest-hints",
-                            "highlight" => [
-                                "pre_tag" => "<highlight>",
-                                "post_tag" => "<highlight>"
-                            ]
+                        "completion" => [
+                            "field" => "suggest-completion",
+//                            "highlight" => [
+//                                "pre_tag" => self::PRE_TAG,
+//                                "post_tag" => self::POST_TAG
+//                            ]
                         ]
                     ]
                 ]
             ]
         ])->asArray();
-
-        $items = [];
-        foreach ($response['suggest']['highlight-suggest'] as $item) {
-            foreach ($item['options'] as $option) {
-                $items[] = $option['highlighted'];
-            }
-        }
-        return $items;
     }
 
     /**
-     * @throws ClientResponseException
-     * @throws ServerResponseException
-     * @throws MissingParameterException
+     * @throws ElasticsearchException
      */
-    public function uploadDocument(string $filename, int $filesize, string $elastic_content, int $series): Elasticsearch_Response|Promise
+    public function uploadDocument(
+        int $id,
+        string $filename,
+        int $filesize,
+        string $elastic_content,
+        int $series
+    ): Elasticsearch_Response|Promise
     {
         return $this->client->create([
-            'id' => uniqid(),
+            'id' => $id,
             'index' => 'catalogs',
             'body' => [
-                'suggest-completion' => explode(" ", $elastic_content),
-                'suggest-hints' => $elastic_content,
+                'suggest-completion' => $elastic_content,
+//                'suggest-hints' => $elastic_content,
                 'suggest-text-content' => $elastic_content,
                 'file-name' => $filename,
                 'file-size' => $filesize,

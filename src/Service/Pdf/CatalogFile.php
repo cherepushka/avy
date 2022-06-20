@@ -18,6 +18,9 @@ class CatalogFile
         private readonly SluggerInterface $slugger
     ){
         $this->catalogs_dir = rtrim($upload_directory_path, '\\/');
+        if (!is_dir($this->catalogs_dir)){
+            mkdir($this->catalogs_dir, 0777);
+        }
     }
 
     public function getCatalogsDirectory(): string

@@ -19,13 +19,10 @@ class SearchController extends AbstractController
 {
 
     public function __construct(
-        private readonly Elasticsearch $elasticsearch,
         private readonly SearchService $searchService,
     ){}
 
-    /**
-     * @throws ElasticsearchException
-     */
+    /** @throws ElasticsearchException */
     #[Route('/search/highlight', name: '_search_highlight', methods: ['POST'])]
     public function highlights(Request $request): JsonResponse
     {
@@ -34,13 +31,13 @@ class SearchController extends AbstractController
         }
         $search_text = $request->toArray()['search'];
 
-        $items = $this->elasticsearch->suggests($search_text);
+        $items = $this->searchService->suggestsDefault($search_text);
 
         return $this->json($items);
     }
 
     /**
-     * @throws ElasticsearchException
+     * @throws ElasticsearchException|NonUniqueResultException
      */
     #[Route('/search/by-series', name: '_search', methods: ['POST'])]
     public function searchSeriesGrouping(Request $request): JsonResponse
@@ -52,7 +49,7 @@ class SearchController extends AbstractController
         }
 
         $search_text = $request->toArray()['search'];
-        $items = $this->searchService->searchSeriesCollapse($search_text);
+        $items = $this->searchService->searchSeriesCollapsed($search_text);
 
         return $this->json($items);
     }

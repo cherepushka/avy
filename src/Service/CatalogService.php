@@ -26,7 +26,7 @@ class CatalogService
         string  $manufacturer_name,
         int     $series,
         string  $language_name,
-    ): void
+    ): int
     {
         $manufacturer = $this->manufacturerRepository->findOneByName($manufacturer_name);
         $language = $this->languageRepository->findOneByName($language_name);
@@ -39,6 +39,8 @@ class CatalogService
             ->setLang($language);
 
         $this->catalogRepository->add($catalog, true);
+
+        return $catalog->getId();
     }
 
 }

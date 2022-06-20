@@ -45,7 +45,7 @@ class CatalogParser
             }
         }
 
-        return implode(" ", $elastic_content_array);
+        return mb_convert_encoding(implode(" ", $elastic_content_array), 'utf8', 'utf8');
     }
 
     /**

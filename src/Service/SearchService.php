@@ -2,78 +2,54 @@
 
 namespace App\Service;
 
-use App\Model\SearchResultItem;
-use App\Model\SearchResultList;
-use App\Repository\CatalogRepository;
+use App\Mapper\Elasticsearch\SearchDefaultSuggestsMapper;
+use App\Model\Elasticsearch\Default\SearchResultList;
+use App\Mapper\Elasticsearch\SearchDefaultMapper;
+use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SearchService
 {
 
     public function __construct(
-        private readonly Elasticsearch $elasticsearch,
-        private readonly CatalogRepository $catalogRepository,
-        private readonly UrlGeneratorInterface $router,
+        private readonly Elasticsearch                  $elasticsearch,
+        private readonly SearchDefaultMapper            $defaultResultMapper,
+        private readonly SearchSeriesCollapsedMapper    $searchSeriesCollapsedMapper,
+        private readonly SearchDefaultSuggestsMapper    $searchDefaultSuggestsMapper
     ){}
-
-    /**
-     * @throws ElasticsearchException|NonUniqueResultException
-     */
-    public function search(string $text): SearchResultList
-    {
-        $elastic_response = $this->elasticsearch->search($text);
-
-        return $this->mapElasticHits($elastic_response['hits']['hits']);
-    }
 
     /**
      * @throws ElasticsearchException
      */
-    public function searchSeriesCollapse(string $text): array
+    public function suggestsDefault(string $text): array
     {
-        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text);
+        $elastic_response = $this->elasticsearch->suggestsDefault($text);
 
-        $items = [];
-
-        foreach ($elastic_response['hits']['hits'] as $series){
-            $item = [];
-
-            foreach ($series['inner_hits']['file-name']['hits']['hits'] as $inner_item) {
-                $item[] = $inner_item['fields']['file-name'][0];
-            }
-
-            $items[$series['fields']['series'][0]] = $item;
-        }
-
-        return $items;
+        return $this->searchDefaultSuggestsMapper->map($elastic_response);
     }
 
     /**
-     * @throws NonUniqueResultException
+     * @throws ElasticsearchException|NonUniqueResultException
      */
-    private function mapElasticHits(array $hits): SearchResultList
+    public function searchDefault(string $text): SearchResultList
     {
-        $items = [];
-        foreach ($hits as $hit){
-            $source = $hit['_source'];
-            $catalog = $this->catalogRepository->findOneByFilename($source['file-name']);
+        $elastic_response = $this->elasticsearch->search($text);
 
-            $items[] = (new SearchResultItem())
-                ->setSuggestText($source['suggest-hints'])
-                ->setOriginName($catalog->getOriginFilename())
-                ->setDownloadLink($this->router->generate('app_catalogs_pdf_show', [
-                    'name' => $catalog->getFilename()
-                ]))
-                ->setByteSize($source['file-size'])
-                ->setLangAlias($catalog->getLang()->getAlias());
-        }
+        return $this->defaultResultMapper->map($elastic_response);
+    }
 
-        return new SearchResultList($items);
+    /**
+     * @throws ElasticsearchException|NonUniqueResultException
+     */
+    public function searchSeriesCollapsed(string $text): array
+    {
+        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text);
+
+        return $this->searchSeriesCollapsedMapper->map($elastic_response);
     }
 
 }

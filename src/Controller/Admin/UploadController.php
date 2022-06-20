@@ -8,6 +8,7 @@ use App\Service\ManufacturerService;
 use App\Service\Pdf\CatalogFile;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
@@ -68,10 +69,8 @@ class UploadController extends AbstractController
     }
 
     /**
-     * @throws ClientResponseException
+     * @throws ElasticsearchException
      * @throws NonUniqueResultException
-     * @throws ServerResponseException
-     * @throws MissingParameterException
      */
     #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
     public function confirm_upload_document(
@@ -87,20 +86,21 @@ class UploadController extends AbstractController
 
         foreach ($files_data as $file_data) {
 
-            $catalogService->insertCatalog(
-                filename: $file_data['filename'],
-                origin_filename: $file_data['origin_filename'],
-                manufacturer_name: $file_data['manufacturer'],
-                series: $file_data['series'],
-                language_name: $file_data['lang']
+            $catalogID = $catalogService->insertCatalog(
+                $file_data['filename'],
+                $file_data['origin_filename'],
+                $file_data['manufacturer'],
+                $file_data['series'],
+                $file_data['lang']
             );
 
             $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
 
             $elastic_response = $elasticsearch->uploadDocument(
+                $catalogID,
                 $file_data['filename'],
                 filesize($catalog_path),
-                mb_convert_encoding($file_data['text'], 'UTF-8', 'UTF-8'),
+                $file_data['text'],
                 $file_data['series']
             );
             $elastic_response_code = $elastic_response->getStatusCode();

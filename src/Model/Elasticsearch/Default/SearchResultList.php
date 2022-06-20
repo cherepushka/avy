@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Model;
+namespace App\Model\Elasticsearch\Default;
+
+use App\Model\Elasticsearch\SearchResultItem;
 
 class SearchResultList
 {
