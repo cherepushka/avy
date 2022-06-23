@@ -1,24 +1,28 @@
 {
-    "devDependencies": {
-        "@hotwired/stimulus": "^3.0.0",
-        "@symfony/stimulus-bridge": "^3.0.0",
-        "@symfony/webpack-encore": "^2.0.0",
-        "core-js": "^3.0.0",
-        "elasticdump": "^6.84.1",
-        "regenerator-runtime": "^0.13.2",
-        "webpack-notifier": "^1.6.0"
-    },
-    "license": "UNLICENSED",
-    "private": true,
-    "scripts": {
-        "dev-server": "encore dev-server",
-        "dev": "encore dev",
-        "watch": "encore dev --watch",
-        "build": "encore production --progress"
-    },
-    "dependencies": {
-        "dotenv": "^16.0.1",
-        "dotenv-expand": "^8.0.3",
-        "file-loader": "^6.2.0"
-    }
+  "scripts": {
+    "build-admin": "webpack --progress --config webpack.admin.config.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.5",
+    "@babel/plugin-transform-runtime": "^7.18.5",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-react": "^7.17.12",
+    "@babel/runtime": "^7.18.3",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.5",
+    "eslint": "^8.18.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jest": "^26.5.3",
+    "path": "^0.12.7",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "antd": "^4.21.3",
+    "css-loader": "^6.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
 }

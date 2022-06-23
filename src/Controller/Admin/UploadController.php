@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Service\CatalogService;
+use App\Service\CategoryTree;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
 use App\Service\Pdf\CatalogFile;
@@ -42,7 +43,8 @@ class UploadController extends AbstractController
         CatalogFile         $fileHandler,
         CatalogParser       $pdfParser,
         ManufacturerService $manufacturerService,
-        LanguageService     $languageService
+        LanguageService     $languageService,
+        CategoryTree        $categoryTree
     ): JsonResponse|Response
     {
         $documents = [];
@@ -65,6 +67,7 @@ class UploadController extends AbstractController
             'documents'     => $documents,
             'manufacturers' => $manufacturers,
             'languages'     => $languages,
+            'category_tree' => $categoryTree->getRemoteTree()
         ]);
     }
 
@@ -113,6 +116,7 @@ class UploadController extends AbstractController
 
         return $this->render('admin/pages/upload_form.html.twig', [
             'max_file_uploads' => ini_get('max_file_uploads'),
+            'categoriesTree'
         ]);
     }
 
