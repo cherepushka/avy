@@ -88,12 +88,13 @@ class UploadController extends AbstractController
         $files_data = $request->request->all();
 
         foreach ($files_data as $file_data) {
+            $categories_ids = explode(',', $file_data['category_ids']);
 
             $catalogID = $catalogService->insertCatalog(
                 $file_data['filename'],
                 $file_data['origin_filename'],
                 $file_data['manufacturer'],
-                $file_data['series'],
+                $categories_ids,
                 $file_data['lang']
             );
 

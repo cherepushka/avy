@@ -3,6 +3,11 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    <FilesMatch "\.(js)$">
+        Header set Pragma "no-cache"
+        Header set Cache-Control "no-cache, no-store"
+    </FilesMatch>
+
     RewriteEngine On
 
     # Handle Authorization Header

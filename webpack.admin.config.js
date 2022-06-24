@@ -7,7 +7,7 @@ module.exports = {
     //to use its built-in optimizations accordingly. default is production
     mode: "development",
     //the entry point
-    entry: "./resources/js/admin.js",
+    entry: "./resources/js/admin/index.js",
     output: {
         //the folder path of the output file
         path: path.resolve(__dirname, "public/assets/js/admin"),

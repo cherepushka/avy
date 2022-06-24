@@ -405,25 +405,25 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
-/***/ "./resources/js/admin.js":
-/*!*******************************!*\
-  !*** ./resources/js/admin.js ***!
-  \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom/client */ \"./node_modules/react-dom/client.js\");\n/* harmony import */ var _components_admin_CategoryTree__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/admin/CategoryTree */ \"./resources/js/components/admin/CategoryTree.js\");\n/* harmony import */ var antd_dist_antd_compact_min_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! antd/dist/antd.compact.min.css */ \"./node_modules/antd/dist/antd.compact.min.css\");\n\n\n\n\ndocument.adoptedStyleSheets = [antd_dist_antd_compact_min_css__WEBPACK_IMPORTED_MODULE_3__[\"default\"]];\ndocument.querySelectorAll('.tree-container').forEach(function (container) {\n  var treeContainer = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(container);\n  treeContainer.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_admin_CategoryTree__WEBPACK_IMPORTED_MODULE_2__[\"default\"], null));\n});\n\n//# sourceURL=webpack:///./resources/js/admin.js?");
-
-/***/ }),
-
-/***/ "./resources/js/components/admin/CategoryTree.js":
+/***/ "./resources/js/admin/components/CategoryTree.js":
 /*!*******************************************************!*\
-  !*** ./resources/js/components/admin/CategoryTree.js ***!
+  !*** ./resources/js/admin/components/CategoryTree.js ***!
   \*******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ \"./node_modules/@babel/runtime/helpers/esm/slicedToArray.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var antd__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! antd */ \"./node_modules/antd/es/tree/index.js\");\n\n\n\n\n\nfunction CategoriesTree() {\n  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]),\n      _useState2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__[\"default\"])(_useState, 2),\n      checkedKeys = _useState2[0],\n      setCheckedKeys = _useState2[1];\n\n  var onCheck = function onCheck(checkedKeysValue, event) {\n    setCheckedKeys(checkedKeysValue);\n    console.log(checkedKeysValue, event.halfCheckedKeys);\n  };\n\n  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(antd__WEBPACK_IMPORTED_MODULE_2__[\"default\"], {\n    checkable: true,\n    treeData: treeData,\n    checkedKeys: checkedKeys,\n    onCheck: onCheck\n  });\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CategoriesTree);\n\n//# sourceURL=webpack:///./resources/js/components/admin/CategoryTree.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ \"./node_modules/@babel/runtime/helpers/esm/slicedToArray.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var antd__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! antd */ \"./node_modules/antd/es/tree/index.js\");\n\n\n\n\n\nfunction CategoriesTree(_ref) {\n  var categoriesInput = _ref.categoriesInput;\n\n  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]),\n      _useState2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__[\"default\"])(_useState, 2),\n      checkedKeys = _useState2[0],\n      setCheckedKeys = _useState2[1];\n\n  var onCheck = function onCheck(checkedKeysValue, event) {\n    var checkedKeys = checkedKeysValue.concat(event.halfCheckedKeys);\n    setCheckedKeys(checkedKeysValue);\n    categoriesInput.value = checkedKeys.join(',');\n  };\n\n  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(antd__WEBPACK_IMPORTED_MODULE_2__[\"default\"], {\n    checkable: true,\n    treeData: treeData,\n    checkedKeys: checkedKeys,\n    onCheck: onCheck\n  });\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CategoriesTree);\n\n//# sourceURL=webpack:///./resources/js/admin/components/CategoryTree.js?");
+
+/***/ }),
+
+/***/ "./resources/js/admin/index.js":
+/*!*************************************!*\
+  !*** ./resources/js/admin/index.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom/client */ \"./node_modules/react-dom/client.js\");\n/* harmony import */ var _components_CategoryTree__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/CategoryTree */ \"./resources/js/admin/components/CategoryTree.js\");\n/* harmony import */ var antd_dist_antd_compact_min_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! antd/dist/antd.compact.min.css */ \"./node_modules/antd/dist/antd.compact.min.css\");\n\n\n\n\ndocument.adoptedStyleSheets = [antd_dist_antd_compact_min_css__WEBPACK_IMPORTED_MODULE_3__[\"default\"]];\ndocument.querySelectorAll('.tree-container').forEach(function (container) {\n  var treeContainer = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(container);\n  var inputsContainer = container.parentNode.querySelector('.catalog-upload-inputs');\n  var categoriesInput = inputsContainer.querySelector('.category_ids_input');\n  treeContainer.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CategoryTree__WEBPACK_IMPORTED_MODULE_2__[\"default\"], {\n    categoriesInput: categoriesInput\n  }));\n});\n\n//# sourceURL=webpack:///./resources/js/admin/index.js?");
 
 /***/ }),
 
@@ -1629,7 +1629,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./resources/js/admin.js");
+/******/ 	var __webpack_exports__ = __webpack_require__("./resources/js/admin/index.js");
 /******/ 	
 /******/ })()
 ;

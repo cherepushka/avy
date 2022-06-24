@@ -36,7 +36,8 @@ services:
       - "5601:5601"
 
   mariadb:
-    image: mariadb
+    build:
+      context: docker-services/mariadb
     restart: always
     environment:
       MARIADB_DATABASE: 'avy'
@@ -47,7 +48,8 @@ services:
     ports:
       - '3308:3306'
     volumes:
-      - './docker-services/mariadb:/var/lib/mysql'
+      - './docker-services/mariadb/data:/var/lib/mysql'
+      - './docker-services/mariadb/logs:/var/log/mysql'
     networks:
       - 'LAMP'
 

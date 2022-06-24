@@ -5,13 +5,15 @@
     <div class='container'>
         <h1>Проверка корректности обработки текста</h1>
 
+        <form action='{{ path('admin_document_confirm_upload') }}' method='POST' enctype="multipart/form-data">
 
-        {% for document in documents %}
-            <div class="upload-item row">
-                <div class="tree-container col-4"></div>
+            {% for document in documents %}
+                <div class="upload-item row">
+                    {# react-tree #}
+                    <div class="tree-container col-4"></div>
+                    {# /react-tree #}
 
-                <form class="col-8" action='{{ path('admin_document_confirm_upload') }}' method='POST' enctype="multipart/form-data">
-                    <div>
+                    <div class="catalog-upload-inputs col-8">
 
                         <div class="form-group">
                             <label for="">Название файла</label>
@@ -52,16 +54,17 @@
                         </div>
 
                         <input type="hidden" name="{{ document.filename }}[filename]" value="{{ document.filename }}">
+                        <input type="hidden" name="{{ document.filename }}[category_ids]" value="" class="category_ids_input">
                     </div>
+                </div>
 
-                    <div style='width: 100%; text-align:center;'>
-                        <button class='btn btn-secondary' type='submit'>Загрузить</button>
-                    </div>
-                </form>
+                <hr class="m-b-2">
+            {% endfor %}
+
+            <div style='width: 100%; text-align:center;'>
+                <button class='btn btn-secondary' type='submit'>Загрузить</button>
             </div>
-
-            <hr class="m-b-2">
-        {% endfor %}
+        </form>
     </div>
 {% endblock %}
 

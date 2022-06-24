@@ -28,8 +28,6 @@ Mariadb.
 
 - `docker-compose up -d`
 
-<hr>
-
 ### Elasticsearch
 адрес по умолчанию: `http://localhost:9200`.
 Данные для аутентификации не требуются
@@ -38,6 +36,8 @@ Mariadb.
 адрес по умолчанию: `http://localhost:5601`.  
 Данные для аутентификации не требуются
 
+<hr>
+
 ## Установка (development)
 1. `composer install --dev`
 2. Заполнить `.env` файл необходимыми переменными
@@ -45,3 +45,5 @@ Mariadb.
 4. `npm run dev` или `npm run watch`
 5. `php bin/console doctrine:migrations:migrate`
 6. `php bin/console doctrine:fixtures:load`
+7. `php bin/console php bin/console MigrateTreeFromJson ./.dev-data/category-tree.json`  
+    \- загрузка тестовых данных о дереве категорий
