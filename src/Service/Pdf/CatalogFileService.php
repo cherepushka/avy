@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class CatalogFile
+class CatalogFileService
 {
 
     private readonly string $catalogs_dir;

@@ -10,7 +10,6 @@ use App\Repository\CatalogRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LanguageRepository;
 use App\Repository\ManufacturerRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 
 class CatalogService

@@ -4,20 +4,17 @@ namespace App\Controller\Admin;
 
 use App\Service\CatalogService;
 use App\Service\CategoryTree;
+use App\Service\Pdf\ImageBuilder;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
-use App\Service\Pdf\CatalogFile;
+use App\Service\OCR\OCRVision;
+use App\Service\Pdf\CatalogFileService;
 use Doctrine\ORM\NonUniqueResultException;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
-use App\Service\Pdf\CatalogParser;
 use App\Service\Elasticsearch;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,9 +27,7 @@ class UploadController extends AbstractController
     #[Route('/catalogs/upload', name: 'admin_document_upload_form', methods: ['GET'])]
     public function upload_form(): Response
     {
-        return $this->render('admin/pages/upload_form.html.twig', [
-            'max_file_uploads' => ini_get('max_file_uploads'),
-        ]);
+        return $this->render('admin/pages/upload_form.html.twig');
     }
 
     /**
@@ -41,21 +36,24 @@ class UploadController extends AbstractController
     #[Route('/catalogs/upload', name: 'admin_document_upload', methods: ['POST'])]
     public function upload_document(
         Request             $request,
-        CatalogFile         $fileHandler,
-        CatalogParser       $pdfParser,
+        CatalogFileService  $fileHandler,
         ManufacturerService $manufacturerService,
         LanguageService     $languageService,
-        CategoryTree        $categoryTree
+        CategoryTree        $categoryTree,
+        ImageBuilder        $imageBuilder,
+        OCRVision           $OcrWrapper
     ): JsonResponse|Response
     {
         $documents = [];
+        $OCR = $OcrWrapper->getOcr();
 
         /** @var UploadedFile $document */
         foreach ($request->files->get('documents') as $document) {
             $new_document = [];
             $filepath = $fileHandler->saveUploadedFile($document);
 
-            $new_document['text'] = $pdfParser->textFromFile($filepath);
+            $imageArray = $imageBuilder->generateImagickImages($filepath);
+            $new_document['text'] = $OCR->findImageAnnotations($imageArray);
             $new_document['filename'] = (new File($filepath))->getBasename();
             $new_document['origin_filename'] = $document->getClientOriginalName();
             $documents[] = $new_document;
@@ -73,7 +71,6 @@ class UploadController extends AbstractController
     }
 
     /**
-     * @throws ElasticsearchException
      * @throws NonUniqueResultException
      */
     #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
@@ -81,7 +78,7 @@ class UploadController extends AbstractController
         Request             $request,
         Elasticsearch       $elasticsearch,
         CatalogService      $catalogService,
-        CatalogFile         $catalogFile
+        CatalogFileService  $catalogFile
     ): Response
     {
         //TODO сделать добавление в базу миграцией
@@ -101,16 +98,15 @@ class UploadController extends AbstractController
 
             $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
 
-            $elastic_response = $elasticsearch->uploadDocument(
-                $catalogID,
-                $file_data['filename'],
-                filesize($catalog_path),
-                $file_data['text'],
-                $categories_ids
-            );
-            $elastic_response_code = $elastic_response->getStatusCode();
-
-            if ($elastic_response_code < 200 || $elastic_response_code > 299){
+            try {
+                $elasticsearch->uploadDocument(
+                    $catalogID,
+                    $file_data['filename'],
+                    filesize($catalog_path),
+                    $file_data['text'],
+                    $categories_ids
+                );
+            } catch (ElasticsearchException) {
                 unlink($catalog_path);
                 return new JsonResponse(['file' => $catalog_path, 'message' => 'upload error.']);
             }
