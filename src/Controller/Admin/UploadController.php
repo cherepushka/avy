@@ -17,6 +17,7 @@ use App\Service\Pdf\CatalogParser;
 use App\Service\Elasticsearch;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -105,7 +106,7 @@ class UploadController extends AbstractController
                 $file_data['filename'],
                 filesize($catalog_path),
                 $file_data['text'],
-                $file_data['series']
+                $categories_ids
             );
             $elastic_response_code = $elastic_response->getStatusCode();
 
@@ -115,10 +116,7 @@ class UploadController extends AbstractController
             }
         }
 
-        return $this->render('admin/pages/upload_form.html.twig', [
-            'max_file_uploads' => ini_get('max_file_uploads'),
-            'categoriesTree'
-        ]);
+        return $this->redirectToRoute('admin_document_upload_form');
     }
 
 }

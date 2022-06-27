@@ -10,6 +10,7 @@ use App\Repository\CatalogRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LanguageRepository;
 use App\Repository\ManufacturerRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 
 class CatalogService
@@ -20,7 +21,7 @@ class CatalogService
         private readonly ManufacturerRepository $manufacturerRepository,
         private readonly LanguageRepository $languageRepository,
         private readonly CatalogCategoryRepository $catalogCategoryRepository,
-        private readonly CategoryRepository $categoryRepository
+        private readonly CategoryRepository $categoryRepository,
     ){}
 
     /**
@@ -45,18 +46,18 @@ class CatalogService
 
         $this->catalogRepository->add($catalog, true);
 
-        foreach ($categories_ids as $categories_id) {
-            $category = $this->categoryRepository->find($categories_id);
+        foreach ($categories_ids as $category_id) {
+            $category = $this->categoryRepository->find($category_id);
 
             if (!$category) {
-                throw new CategoryNotFoundByIdException($categories_id);
+                throw new CategoryNotFoundByIdException($category_id);
             }
 
             $catalogCategory = (new CatalogCategory())
                 ->setCatalog($catalog)
                 ->setCategory($category);
 
-            $this->catalogCategoryRepository->add($catalogCategory);
+            $this->catalogCategoryRepository->add($catalogCategory, true);
         }
 
         return $catalog->getId();

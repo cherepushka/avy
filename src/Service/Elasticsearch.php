@@ -164,7 +164,7 @@ class Elasticsearch
         string $filename,
         int $filesize,
         string $elastic_content,
-        int $series
+        array $series
     ): Elasticsearch_Response|Promise
     {
         return $this->client->create([
@@ -172,7 +172,6 @@ class Elasticsearch
             'index' => 'catalogs',
             'body' => [
                 'suggest-completion' => $elastic_content,
-//                'suggest-hints' => $elastic_content,
                 'suggest-text-content' => $elastic_content,
                 'file-name' => $filename,
                 'file-size' => $filesize,
