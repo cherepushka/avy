@@ -63,10 +63,27 @@ class ImageBuilder
 
 	    $this->imagick->setImageCompressionQuality(95); // Объявляется перед записью файла.
 	    $this->imagick->resizeImage(
-            $this->imagick->getImageWidth()/1.25,
-            $this->imagick->getImageHeight()/1.25,
+            $this->imagick->getImageWidth() / 1.25,
+            $this->imagick->getImageHeight() / 1.25,
             null,
             0
         ); // Объявляется после чтения файла.
 	}
+
+    /**
+     * Deleting images with directory
+     *
+     * @param string[] $imgArray - array of absolute paths of images
+     * @return void
+     */
+    public function deleteGeneratedImagesWithDir(array $imgArray): void
+    {
+        $tmpDir = dirname($imgArray[0]);
+
+        foreach ($imgArray as $imagePath) {
+            unlink($imagePath);
+        }
+
+        unlink($tmpDir);
+    }
 }

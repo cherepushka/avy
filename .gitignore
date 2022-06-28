@@ -12,6 +12,7 @@
 public/js
 /vendor/
 /var/
+/.credentials
 
 /node_modules/
 /public/build/**

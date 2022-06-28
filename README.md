@@ -47,3 +47,4 @@ Mariadb.
 6. `php bin/console doctrine:fixtures:load`
 7. `php bin/console php bin/console MigrateTreeFromJson ./.dev-data/category-tree.json`  
     \- загрузка тестовых данных о дереве категорий
+8. `mkdir ./.credentials` - данные для авторизации в API

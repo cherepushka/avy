@@ -17,20 +17,20 @@ Encore
     .setManifestKeyPrefix('build')
 
     .copyFiles({
-        from: './assets/img',
+        from: './resources/assets/img',
         to: '../img/[path][name].[ext]',
         pattern: /\.(png|jpg|jpeg|svg)$/
     })
     .copyFiles({
-        from: './assets/css',
+        from: './resources/assets/css',
         to: '../css/[path][name].[ext]',
     })
     .copyFiles({
-        from: './assets/fonts',
+        from: './resources/assets/fonts',
         to: '../fonts/[path][name].[ext]',
     })
     .copyFiles({
-        from: './assets/js/vendor',
+        from: './resources/js/vendor',
         to: '../js/[path][name].[ext]',
     })
 
@@ -40,7 +40,7 @@ Encore
      * Each entry will result in one JavaScript file (e.g. app.js)
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
-    .addEntry('app', './assets/js/app.js')
+    .addEntry('app', './resources/js/app.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -62,9 +62,9 @@ Encore
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
 
-    .configureBabel((config) => {
-        config.plugins.push('@babel/plugin-proposal-class-properties');
-    })
+    // .configureBabel((config) => {
+    //     config.plugins.push('@babel/plugin-proposal-class-properties');
+    // })
 
     .configureDefinePlugin(options => {
         const env = dotenv.config();
@@ -79,10 +79,10 @@ Encore
     })
 
     // enables @babel/preset-env polyfills
-    .configureBabelPresetEnv((config) => {
-        config.useBuiltIns = 'usage';
-        config.corejs = 3;
-    })
+    // .configureBabelPresetEnv((config) => {
+    //     config.useBuiltIns = 'usage';
+    //     config.corejs = 3;
+    // })
 
     // enables Sass/SCSS support
     //.enableSassLoader()

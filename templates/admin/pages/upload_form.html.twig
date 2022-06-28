@@ -1,10 +1,24 @@
 {% extends 'layouts/admin/base.html.twig' %}
 
 {% block body %}
+    {% if app.session.flashBag.has('success_messages') %}
+        <div class="alert alert-success" role="alert">
+            {% for message in app.session.flashBag.get('success_messages') %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if app.session.flashBag.has('error_messages') %}
+        <div class="alert alert-danger" role="alert">
+            {% for message in app.session.flashBag.get('error_messages') %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
     <div>
         <form action='{{ path('admin_document_upload') }}' method='POST' enctype="multipart/form-data">
             <div>
-                <input class='form-control' type='file' name='documents[]' accept="application/pdf" max="">
+                <input class='form-control' type='file' name='document' accept="application/pdf" max="">
             </div>
             <div style='width: 100%; text-align:center;'>
                 <button class='btn btn-secondary' type='submit'>Загрузить</button>

@@ -7,8 +7,8 @@ parameters:
     app.upload_directory_path: '%kernel.project_dir%/var/uploads'
 
     app.ocr_project_id: '%env(resolve:OCR_PROJECT_ID)%'
+    app.ocr_google_credentials_path: '%env(resolve:OCR_GOOGLE_CREDENTIALS_PATH)%'
     app.ocr_yandex_token: '%env(resolve:OCR_YANDEX_TOKEN)%'
-    app.ocr_google_token: '%env(resolve:OCR_GOOGLE_TOKEN)%'
 
     app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'
     app.elasticsearch.host: '%env(resolve:ELASTICSEARCH_HOST)%'
@@ -50,8 +50,7 @@ services:
 
     App\Service\OCR\GoogleOcrVision:
         arguments:
-            $ocr_project_id: '%app.ocr_project_id%'
-            $ocr_token: '%app.ocr_google_token%'
+            $credentials_path: '%app.ocr_google_credentials_path%'
 
     App\EventListener\AllowAllCorsRequest:
         tags:

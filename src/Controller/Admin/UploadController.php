@@ -8,14 +8,15 @@ use App\Service\OCR\OcrVisionInterface;
 use App\Service\Pdf\ImageBuilder;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
-use App\Service\OCR\OCRVision;
 use App\Service\Pdf\CatalogFileService;
+use App\Service\Pdf\TextParser;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Exception;
 use App\Service\Elasticsearch;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,6 +25,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class UploadController extends AbstractController
 {
+
+    public function __construct()
+    {
+
+    }
 
     #[Route('/catalogs/upload', name: 'admin_document_upload_form', methods: ['GET'])]
     public function upload_form(): Response
@@ -40,30 +46,25 @@ class UploadController extends AbstractController
         CatalogFileService  $fileHandler,
         ManufacturerService $manufacturerService,
         LanguageService     $languageService,
+        TextParser          $textParser,
         CategoryTree        $categoryTree,
-        ImageBuilder        $imageBuilder,
-        OcrVisionInterface  $OCR
     ): JsonResponse|Response
     {
-        $documents = [];
+        ini_set('max_execution_time', 100);
+        $document = $request->files->get('document');
 
-        /** @var UploadedFile $document */
-        foreach ($request->files->get('documents') as $document) {
-            $new_document = [];
-            $filepath = $fileHandler->saveUploadedFile($document);
+        $new_document = [];
+        $filepath = $fileHandler->saveUploadedFile($document);
 
-            $imageArray = $imageBuilder->generateImagickImages($filepath);
-            $new_document['text'] = $OCR->findImageAnnotations($imageArray);
-            $new_document['filename'] = (new File($filepath))->getBasename();
-            $new_document['origin_filename'] = $document->getClientOriginalName();
-            $documents[] = $new_document;
-        }
+        $new_document['text'] = $textParser->parseFromFile($filepath);
+        $new_document['filename'] = (new File($filepath))->getBasename();
+        $new_document['origin_filename'] = $document->getClientOriginalName();
 
         $manufacturers = $manufacturerService->getAll();
         $languages = $languageService->getAll();
 
         return $this->render('admin/pages/upload_confirm_form.html.twig', [
-            'documents'     => $documents,
+            'document'     => $new_document,
             'manufacturers' => $manufacturers,
             'languages'     => $languages,
             'category_tree' => $categoryTree->getRemoteTree()
@@ -79,39 +80,42 @@ class UploadController extends AbstractController
         Elasticsearch       $elasticsearch,
         CatalogService      $catalogService,
         CatalogFileService  $catalogFile
-    ): Response
+    ): RedirectResponse
     {
         //TODO сделать добавление в базу миграцией
 
-        $files_data = $request->request->all();
+        $file_data = $request->request->all();
+        $categories_ids = explode(',', $file_data['category_ids']);
 
-        foreach ($files_data as $file_data) {
-            $categories_ids = explode(',', $file_data['category_ids']);
-
-            $catalogID = $catalogService->insertCatalog(
-                $file_data['filename'],
-                $file_data['origin_filename'],
-                $file_data['manufacturer'],
-                $categories_ids,
-                $file_data['lang']
-            );
-
-            $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
-
-            try {
-                $elasticsearch->uploadDocument(
-                    $catalogID,
-                    $file_data['filename'],
-                    filesize($catalog_path),
-                    $file_data['text'],
-                    $categories_ids
-                );
-            } catch (ElasticsearchException) {
-                unlink($catalog_path);
-                return new JsonResponse(['file' => $catalog_path, 'message' => 'upload error.']);
-            }
+        if (empty($categories_ids)) {
+            $this->addFlash('error_messages', 'Все каталоги были успешно загружены');
+            return $this->redirectToRoute('admin_document_confirm_upload');
         }
 
+        $catalogID = $catalogService->insertCatalog(
+            $file_data['filename'],
+            $file_data['origin_filename'],
+            $file_data['manufacturer'],
+            $categories_ids,
+            $file_data['lang']
+        );
+
+        $catalog_path = $catalogFile->getCatalogPath($file_data['filename']);
+
+        try {
+            $elasticsearch->uploadDocument(
+                $catalogID,
+                $file_data['filename'],
+                filesize($catalog_path),
+                $file_data['text'],
+                $categories_ids
+            );
+        } catch (ElasticsearchException) {
+            $this->addFlash('error_messages', 'Произшла ошибка при загрузке');
+            return $this->redirectToRoute('admin_document_confirm_upload');
+        }
+
+        $this->addFlash('success_messages', 'Все каталоги были успешно загружены');
         return $this->redirectToRoute('admin_document_upload_form');
     }
 
