@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Service\CatalogService;
 use App\Service\CategoryTree;
+use App\Service\OCR\OcrVisionInterface;
 use App\Service\Pdf\ImageBuilder;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
@@ -41,11 +42,10 @@ class UploadController extends AbstractController
         LanguageService     $languageService,
         CategoryTree        $categoryTree,
         ImageBuilder        $imageBuilder,
-        OCRVision           $OcrWrapper
+        OcrVisionInterface  $OCR
     ): JsonResponse|Response
     {
         $documents = [];
-        $OCR = $OcrWrapper->getOcr();
 
         /** @var UploadedFile $document */
         foreach ($request->files->get('documents') as $document) {

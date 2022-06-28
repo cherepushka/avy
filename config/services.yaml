@@ -6,7 +6,6 @@ parameters:
     #directory for storing uploaded files
     app.upload_directory_path: '%kernel.project_dir%/var/uploads'
 
-    app.ocr_type: '%env(resolve:OCR_TYPE)%'
     app.ocr_project_id: '%env(resolve:OCR_PROJECT_ID)%'
     app.ocr_yandex_token: '%env(resolve:OCR_YANDEX_TOKEN)%'
     app.ocr_google_token: '%env(resolve:OCR_GOOGLE_TOKEN)%'
@@ -38,6 +37,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\GoogleOcrVision'
+
     App\Service\Elasticsearch:
         arguments:
             $elasticsearch_connection_type: '%app.elasticsearch.connection_type%'
@@ -47,12 +48,10 @@ services:
             $elasticsearch_cloud_id: '%app.elasticsearch.cloud_id%'
             $elasticsearch_api_key: '%app.elasticsearch.api_key%'
 
-    App\Service\OCR\OCRVision:
+    App\Service\OCR\GoogleOcrVision:
         arguments:
-            $ocr_type: '%app.ocr_type%'
             $ocr_project_id: '%app.ocr_project_id%'
-            $ocr_yandex_token: '%app.ocr_yandex_token%'
-            $ocr_google_token: '%app.ocr_google_token%'
+            $ocr_token: '%app.ocr_google_token%'
 
     App\EventListener\AllowAllCorsRequest:
         tags:
