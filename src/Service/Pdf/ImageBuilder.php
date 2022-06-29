@@ -84,6 +84,6 @@ class ImageBuilder
             unlink($imagePath);
         }
 
-        unlink($tmpDir);
+        rmdir($tmpDir);
     }
 }

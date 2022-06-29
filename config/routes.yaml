@@ -4,13 +4,13 @@ controllers:
 
 #TODO поправить пути
 admin_controllers:
-    resource: /var/www/html/avy/src/Controller/Admin/
+    resource: c:/work/avy/src/Controller/Admin/
     prefix: "/admin"
 
 a-flow_controllers:
-    resource: /var/www/html/avy/src/Controller/Domains/A_flow/
+    resource: c:/work/avy/src/Controller/Domains/A_flow/
     host: "a-flow.%main_domain%"
 
 hy-lock_controllers:
-    resource: /var/www/html/avy/src/Controller/Domains/Hy_lock/
+    resource: c:/work/avy/src/Controller/Domains/Hy_lock/
     host: "hy-lock.%main_domain%"
