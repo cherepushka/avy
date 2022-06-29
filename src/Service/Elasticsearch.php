@@ -35,7 +35,7 @@ class Elasticsearch
         string $elasticsearch_api_key
     ) {
         $Elasticsearch_client = ClientBuilder::create();
-        $Elasticsearch_client->setHttpClient(new GuzzleClient());
+        $Elasticsearch_client->setHttpClient(new GuzzleClient(['verify' => false]));
 
         switch ($elasticsearch_connection_type){
             case 'PASSWORD':
@@ -84,6 +84,14 @@ class Elasticsearch
                     ]
                 ]
             ]
+        ])->asArray();
+    }
+
+    public function elastic_index_request(): array
+    {
+        return $this->client->search([
+            'index' => 'catalogs',
+            'body' => []
         ])->asArray();
     }
 

@@ -119,4 +119,9 @@ class UploadController extends AbstractController
         return $this->redirectToRoute('admin_document_upload_form');
     }
 
+    #[Route('/check/elastic/configuration/', name: 'admin_elastic_configuration')]
+    public function check_elastic_connection(Elasticsearch $elasticsearch): JsonResponse
+    {
+        return new JsonResponse(var_dump($elasticsearch));
+    }
 }

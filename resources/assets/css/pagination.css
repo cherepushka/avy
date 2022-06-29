@@ -1,0 +1,22 @@
+.pag-to-start, .pag-to-end {
+	transition: 1s;
+	fill: rgba(0, 0, 0, .8);
+}
+
+.pag-passive {
+	fill: rgba(220, 220, 220, .8);
+}
+
+.pag-to-start:hover, .pag-to-end:hover {
+	transition: .5s;
+	fill: rgba(0, 0, 0, .1);
+}
+
+.pag-node {
+	color: rgba(0, 0, 0, .8)!important;
+	border: 1px solid rgba(0, 0, 0, .0)!important;
+}
+
+.page-link {
+	
+}
