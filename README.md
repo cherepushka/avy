@@ -45,6 +45,6 @@ Mariadb.
 4. `npm run dev` или `npm run watch`
 5. `php bin/console doctrine:migrations:migrate`
 6. `php bin/console doctrine:fixtures:load`
-7. `php bin/console php bin/console MigrateTreeFromJson ./.dev-data/category-tree.json`  
+7. `php bin/console MigrateTreeFromJson ./.dev-data/category-tree.json`  
     \- загрузка тестовых данных о дереве категорий
 8. `mkdir ./.credentials` - данные для авторизации в API
