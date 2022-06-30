@@ -3,13 +3,12 @@
 namespace App\Service;
 
 use App\Entity\Catalog;
-use App\Entity\CatalogCategory;
 use App\Exception\CategoryNotFoundByIdException;
-use App\Repository\CatalogCategoryRepository;
 use App\Repository\CatalogRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LanguageRepository;
 use App\Repository\ManufacturerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NonUniqueResultException;
 
 class CatalogService
@@ -19,7 +18,6 @@ class CatalogService
         private readonly CatalogRepository $catalogRepository,
         private readonly ManufacturerRepository $manufacturerRepository,
         private readonly LanguageRepository $languageRepository,
-        private readonly CatalogCategoryRepository $catalogCategoryRepository,
         private readonly CategoryRepository $categoryRepository,
     ){}
 
@@ -45,6 +43,7 @@ class CatalogService
 
         $this->catalogRepository->add($catalog, true);
 
+        $categories = new ArrayCollection();
         foreach ($categories_ids as $category_id) {
             $category = $this->categoryRepository->find($category_id);
 
@@ -52,12 +51,10 @@ class CatalogService
                 throw new CategoryNotFoundByIdException($category_id);
             }
 
-            $catalogCategory = (new CatalogCategory())
-                ->setCatalog($catalog)
-                ->setCategory($category);
-
-            $this->catalogCategoryRepository->add($catalogCategory, true);
+            $categories->add($category);
         }
+
+        $catalog->setCategories($categories);
 
         return $catalog->getId();
     }

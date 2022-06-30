@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CatalogRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CatalogRepository::class)]
@@ -13,10 +15,10 @@ class Catalog
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[ORM\Column(type: 'string', length: 255, unique: true, nullable: false)]
     private string $filename;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private string $origin_filename;
 
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
@@ -26,6 +28,14 @@ class Catalog
     #[ORM\ManyToOne(targetEntity: Language::class)]
     #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id")]
     private Language $lang;
+
+    #[ORM\ManyToMany(targetEntity: Category::class)]
+    private Collection $categories;
+
+    public function __construct()
+    {
+        $this->categories = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -76,6 +86,18 @@ class Catalog
     public function setLang(Language $lang): self
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function setCategories(Collection $categories): self
+    {
+        $this->categories = $categories;
 
         return $this;
     }

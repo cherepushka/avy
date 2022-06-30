@@ -7,56 +7,59 @@
 
         <form action='{{ path('admin_document_confirm_upload') }}' method='POST' enctype="multipart/form-data">
 
-            <div class="upload-item row">
-                {# react-tree #}
-                <div class="tree-container col-4"></div>
-                {# /react-tree #}
+            {% for document in documents.items %}
+                <div class="upload-item row">
+                    {# react-tree #}
+                    <div class="tree-container col-4"></div>
+                    {# /react-tree #}
 
-                <div class="catalog-upload-inputs col-8">
+                    <div class="catalog-upload-inputs col-8">
 
-                    <div class="form-group">
-                        <label for="">Название файла</label>
+                        <div class="form-group">
+                            <label for="">Название файла</label>
 
-                        <input class="form-control" name="origin_filename" type="text" value="{{ document.origin_filename }}">
+                            <input class="form-control" name="{{ document.filename }}[origin_filename]" type="text" value="{{ document.originFilename }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="">Название производителя</label>
+
+                            <select class="form-control" name="{{ document.filename }}[manufacturer]">
+                                {% for manufacturer in manufacturers.items %}
+                                    <option>{{ manufacturer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="">Языка каталога</label>
+
+                            <select class="form-control" name="{{ document.filename }}[lang]">
+                                {% for lang in languages.items %}
+                                    <option>{{ lang.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Текст файла</label>
+                            <textarea class="form-control" name='{{ document.filename }}[text]' style="width: 100%; min-height: 500px">
+                                {{ document.text }}
+                            </textarea>
+                        </div>
+
+                        <input type="hidden" name="{{ document.filename }}[filename]" value="{{ document.filename }}">
+                        <input type="hidden" name="{{ document.filename }}[category_ids]" value="" class="category_ids_input">
                     </div>
-
-                    <div class="form-group">
-                        <label for="">Название производителя</label>
-
-                        <select class="form-control" name="manufacturer">
-                            {% for manufacturer in manufacturers %}
-                                <option>{{ manufacturer.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="">Языка каталога</label>
-
-                        <select class="form-control" name="lang">
-                            {% for lang in languages %}
-                                <option>{{ lang.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Текст файла</label>
-                        <textarea class="form-control" name='text' style="width: 100%; min-height: 500px">
-                            {{ document.text }}
-                        </textarea>
-                    </div>
-
-                    <input type="hidden" name="filename" value="{{ document.filename }}">
-                    <input type="hidden" name="category_ids" value="" class="category_ids_input">
                 </div>
-            </div>
 
-            <hr class="m-b-2">
+                <hr class="m-b-2">
+            {% endfor %}
 
             <div style='width: 100%; text-align:center;'>
                 <button class='btn btn-secondary' type='submit'>Загрузить</button>
             </div>
+
         </form>
     </div>
 {% endblock %}

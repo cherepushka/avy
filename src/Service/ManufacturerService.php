@@ -15,10 +15,7 @@ class ManufacturerService
         private readonly ManufacturerRepository $manufacturerRepository
     ) {}
 
-    /**
-     * @return ManufacturerList[]
-     */
-    public function getAll(): array
+    public function getAll(): ManufacturerList
     {
         $manufacturers = $this->manufacturerRepository->findAll();
 
@@ -29,7 +26,7 @@ class ManufacturerService
             $manufacturers
         );
 
-        return (new ManufacturerList($items))->getItems();
+        return new ManufacturerList($items);
     }
 
     /**

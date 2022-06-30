@@ -13,8 +13,7 @@ class LanguageService
         private readonly LanguageRepository $languageRepository
     ){}
 
-    /** @return LanguageList[] */
-    public function getAll(): array
+    public function getAll(): LanguageList
     {
         $languages = $this->languageRepository->findAll();
 
@@ -26,7 +25,7 @@ class LanguageService
             $languages
         );
 
-        return (new LanguageList($items))->getItems();
+        return new LanguageList($items);
     }
 
 }

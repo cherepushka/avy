@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +38,16 @@ class CategoryRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /** @return Category[] */
+    public function findAllWithoutChildren(): array
+    {
+        return $this->createQueryBuilder('c1')
+            ->leftJoin(Category::class, 'c2', Expr\Join::WITH, 'c2.parent = c1.id')
+            ->where('c2.id IS NULL')
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**
