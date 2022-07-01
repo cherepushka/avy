@@ -4,6 +4,7 @@ namespace App\Service\Pdf;
 
 use RuntimeException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\Filesystem\Exception\RuntimeException as FileRuntimeException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -63,7 +64,7 @@ class CatalogFileService
         return $this->getTmpCatalogsDir() . DIRECTORY_SEPARATOR . $fileName;
     }
 
-    /** @throws FileNotFoundException $catalogName */
+    /** @throws FileNotFoundException */
     public function getCatalogPath(string $catalogName): string
     {
         $filepath = $this->getCatalogsDir() . DIRECTORY_SEPARATOR . $catalogName;
@@ -75,7 +76,7 @@ class CatalogFileService
         return $filepath;
     }
 
-    /** @throws FileNotFoundException $catalogName */
+    /** @throws FileNotFoundException */
     public function getTmpCatalogPath(string $catalogName): string
     {
         $filepath = $this->getTmpCatalogsDir() . DIRECTORY_SEPARATOR . $catalogName;
@@ -97,6 +98,24 @@ class CatalogFileService
         }
 
         return $this->getCatalogPath($filename);
+    }
+
+    public function removeCatalogFromTmp(string $filename): void
+    {
+        $catalogPath = $this->getTmpCatalogPath($filename);
+
+        if (!unlink($catalogPath)){
+            throw new FileRuntimeException("File in path '$catalogPath' cannot be removed");
+        }
+    }
+
+    public function removeCatalog(string $filename): void
+    {
+        $catalogPath = $this->getCatalogPath($filename);
+
+        if (!unlink($catalogPath)){
+            throw new FileRuntimeException("File in path '$catalogPath' cannot be removed");
+        }
     }
 
 }

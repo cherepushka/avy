@@ -4,9 +4,12 @@ namespace App\Command;
 
 use App\Entity\ParseQueue;
 use App\Repository\ParseQueueRepository;
+use App\Service\CatalogService;
 use App\Service\OCR\OcrVisionInterface;
+use App\Service\ParseQueueService;
 use App\Service\Pdf\CatalogFileService;
 use App\Service\Pdf\ImageBuilder;
+use App\Service\Pdf\TextParser;
 use Exception;
 use ImagickException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -25,8 +28,7 @@ class ParseQueueCommand extends Command
     public function __construct(
         private readonly ParseQueueRepository $parseQueueRepository,
         private readonly CatalogFileService $catalogFileService,
-        private readonly ImageBuilder $imageBuilder,
-        private readonly OcrVisionInterface $OCR,
+        private readonly TextParser $textParser,
     )
     {
         parent::__construct();
@@ -43,8 +45,10 @@ class ParseQueueCommand extends Command
             try {
                 $this->handleCatalog($queueItem);
             } catch (Exception $exception){
-                dump($exception->getMessage());
-                $this->parseQueueRepository->add($queueItem->setStatus(ParseQueue::STATUS_FAILED), true);
+                $queueItem->setStatus(ParseQueue::STATUS_FAILED);
+                $queueItem->setExceptionText($exception->getMessage() . "\n" . $exception->getTraceAsString());
+
+                $this->parseQueueRepository->add($queueItem, true);
                 continue;
             }
 
@@ -57,19 +61,14 @@ class ParseQueueCommand extends Command
     /**
      * @throws ImagickException|FileNotFoundException
      */
-    private function handleCatalog(ParseQueue $queueItem)
+    private function handleCatalog(ParseQueue $queueItem): void
     {
         $queueItem->setStatus(ParseQueue::STATUS_PARSING);
         $this->parseQueueRepository->add($queueItem, true);
 
         $filepath = $this->catalogFileService->getTmpCatalogPath($queueItem->getFilename());
-        $imagesPaths = $this->imageBuilder->generateImagickImages($filepath);
 
-        try {
-            $queueItem->setText($this->OCR->findImageAnnotations($imagesPaths));
-        } finally {
-            $this->imageBuilder->deleteGeneratedImagesWithDir($imagesPaths);
-        }
+        $queueItem->setText($this->textParser->parseFromFile($filepath));
 
         $this->parseQueueRepository->add($queueItem, true);
     }

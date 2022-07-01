@@ -86,4 +86,24 @@ class ImageBuilder
 
         rmdir($tmpDir);
     }
+
+    /**
+     * Return `true` if provided PDF file is unable to open and parse further
+     *
+     * @param string $filepath - absolute path to PDF
+     * @return bool - true - corrupted, false - is OK
+     */
+    public function checkIsPdfCorrupted(string $filepath): bool
+    {
+        try {
+            $this->imagick->readImage($filepath);
+            $isCorrupted = !$this->imagick->valid();
+            $this->imagick->clear();
+
+            return $isCorrupted;
+        } catch (ImagickException){
+            return true;
+        }
+    }
+
 }

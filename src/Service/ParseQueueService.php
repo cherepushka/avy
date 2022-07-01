@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Category;
 use App\Entity\Language;
 use App\Entity\Manufacturer;
 use App\Entity\ParseQueue;

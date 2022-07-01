@@ -20,12 +20,12 @@ class Category
     #[ORM\Column(name: "link", type: "string", length: 255, nullable: false)]
     private string $link;
 
-    #[ORM\OneToMany(mappedBy: "parent", targetEntity: self::class)]
+    #[ORM\OneToMany(mappedBy: "parent", targetEntity: self::class, fetch: "EXTRA_LAZY")]
     private Collection $children;
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: "children")]
+    #[ORM\ManyToOne(targetEntity: self::class, fetch: "EXTRA_LAZY", inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent", referencedColumnName: "id")]
-    private self $parent;
+    private ?self $parent;
 
     public function __construct()
     {
@@ -92,9 +92,9 @@ class Category
         return $this;
     }
 
-    public function getParent(): self
+    public function getParent(): ?self
     {
-        return $this->parent;
+        return $this->parent ?? null;
     }
 
     public function setParent(Category $parent): self

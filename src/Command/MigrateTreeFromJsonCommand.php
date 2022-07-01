@@ -74,7 +74,7 @@ class MigrateTreeFromJsonCommand extends Command
 
         $JSON = file_get_contents($path);
         if (!$JSON){
-            throw new RuntimeException("Error with get body of file");
+            throw new RuntimeException("Error with getting body of file");
         }
 
         return json_decode($JSON, true);

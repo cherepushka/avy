@@ -30,6 +30,7 @@ class CatalogService
         string  $manufacturer_name,
         array   $categories_ids,
         string  $language_name,
+        int     $byteSize
     ): int
     {
         $manufacturer = $this->manufacturerRepository->findOneByName($manufacturer_name);
@@ -38,8 +39,9 @@ class CatalogService
         $catalog = (new Catalog())
             ->setFilename($filename)
             ->setOriginFilename($origin_filename)
-            ->setManufacturerId($manufacturer)
-            ->setLang($language);
+            ->setManufacturer($manufacturer)
+            ->setLang($language)
+            ->setByteSize($byteSize);
 
         $this->catalogRepository->add($catalog, true);
 
@@ -57,6 +59,11 @@ class CatalogService
         $catalog->setCategories($categories);
 
         return $catalog->getId();
+    }
+
+    public function removeCatalog()
+    {
+
     }
 
 }

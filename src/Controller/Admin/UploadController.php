@@ -81,25 +81,27 @@ class UploadController extends AbstractController
             $categories_ids = explode(',', $file_data['category_ids']);
 
             if (empty($categories_ids)) {
-                $this->addFlash('error_messages', 'Все каталоги были успешно загружены');
+                $this->addFlash('error_messages', 'Нужно указать хотя бы 1 категорию');
                 return $this->redirectToRoute('admin_document_confirm_upload');
             }
+
+            $catalog_path = $catalogFile->getTmpCatalogPath($file_data['filename']);;
+            $byte_size = filesize($catalog_path);
 
             $catalogID = $catalogService->insertCatalog(
                 $file_data['filename'],
                 $file_data['origin_filename'],
                 $file_data['manufacturer'],
                 $categories_ids,
-                $file_data['lang']
+                $file_data['lang'],
+                $byte_size
             );
-
-            $catalog_path = $catalogFile->getTmpCatalogPath($file_data['filename']);;
 
             try {
                 $elasticsearch->uploadDocument(
                     $catalogID,
                     $file_data['filename'],
-                    filesize($catalog_path),
+                    $byte_size,
                     $file_data['text'],
                     $categories_ids
                 );
