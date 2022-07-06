@@ -35,8 +35,8 @@ class Elasticsearch
         string $elasticsearch_api_key
     ) {
         $Elasticsearch_client = ClientBuilder::create();
-        $Elasticsearch_client->setHttpClient(new GuzzleClient(['verify' => false]));
-
+        $Elasticsearch_client->setHttpClient(new GuzzleClient());
+        
         switch ($elasticsearch_connection_type){
             case 'PASSWORD':
                 $Elasticsearch_client

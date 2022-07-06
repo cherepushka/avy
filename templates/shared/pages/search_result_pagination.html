@@ -1,30 +1,45 @@
 <div class="container-sm p-5">
 	<div>
-		<nav aria-label="Page navigation example">
-			<ul class="pagination justify-content-center pagination-lg">
+		<nav class="bg-dark" aria-label="Page navigation example">
+			<ul class="pagination justify-content-center pagination-lg bg-light ">
+
 				<li class="page-item">
-					<a class="page-link pag-node" href="#" aria-label="Previous">
-						<img class="pag-passive" src="/img/pag-left.svg">
-						<img class="pag-passive" src="/img/pag-left.svg">
+					<a class="page-link pag-node pag-to-start {% if (current_page <= 1)%} {{ "page-link-disabled" }} {% endif %}" href="{{ path('app_search_result') }}/{{ 1 }}?search_text={{ search_text }}" aria-label="Previous">
+						<svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
+						<svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
+					</a>
+				</li>
+				<li class="page-item" >
+					<a class="page-link pag-node pag-to-start {% if (current_page <= 1)%} {{ "page-link-disabled" }} {% endif %}" href="{{ path('app_search_result') }}/{{ current_page - 1 }}?search_text={{ search_text }}" aria-label="Previous">
+						<svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
+					</a>
+				</li>
+				{% if (current_page > 3) %}
+					{% for i in current_page - 2..pages %}
+						{% if (loop.index < 6) %}
+							<li class="page-item{% if (i == current_page) %} {{"page-item-active"}} {% endif %}">
+								<a class="page-link pag-node" href="{{ path('app_search_result') }}/{{ i }}?search_text={{ search_text }}">{{ i }}</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+				{% else %}
+					{% for i in 1..pages %}
+						{% if (loop.index < 6) %}
+							<li class="page-item{% if (i == current_page) %} {{"page-item-active"}} {% endif %}">
+								<a class="page-link pag-node" href="{{ path('app_search_result') }}/{{ i }}?search_text={{ search_text }}">{{ i }}</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+				<li class="page-item">
+					<a class="page-link pag-node pag-to-end {% if (current_page >= pages)%} {{ "page-link-disabled" }} {% endif %}" href="{{ path('app_search_result') }}/{{ current_page + 1 }}?search_text={{ search_text }}" aria-label="Previous">
+						<svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
 					</a>
 				</li>
 				<li class="page-item">
-					<a class="page-link pag-node" href="#" aria-label="Previous">
-						<img src="/img/pag-left.svg">
-					</a>
-				</li>
-				<li class="page-item"><a class="page-link pag-node" href="#">1</a></li>
-				<li class="page-item"><a class="page-link pag-node" href="#">2</a></li>
-				<li class="page-item"><a class="page-link pag-node" href="#">3</a></li>
-				<li class="page-item">
-					<a class="page-link pag-node" href="#" aria-label="Previous">
-						<img src="/img/pag-right.svg">
-					</a>
-				</li>
-				<li class="page-item">
-					<a class="page-link pag-node" href="#" aria-label="Previous">
-						<img class="pag-to-start" src="/img/pag-right.svg">
-						<img class="pag-to-start" src="/img/pag-right.svg">
+					<a class="page-link pag-node pag-to-end {% if (current_page >= pages)%} {{ "page-link-disabled" }} {% endif %}" href="{{ path('app_search_result') }}/{{ pages }}?search_text={{ search_text }}" aria-label="Previous">
+						<svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
+						<svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
 					</a>
 				</li>
 			</ul>

@@ -29,6 +29,29 @@ class SearchController extends AbstractController
         $catalogs = $this->searchService->searchDefault($search_text);
 
         return $this->render('shared/pages/search_results.html.twig', [
+            'current_page' => 1,
+            'pages' => 20,
+            'search_text' => $search_text,
+            'catalog_items' => $catalogs->getItems(),
+        ]);
+    }
+
+    #[Route('/search/result/{page}', name: 'app_search_result_pages', requirements: ['page' => '\d+'], methods: ['GET'])]
+    public function pages(Request $request, int $page): Response
+    {
+        if ($page < 1)
+            $page = 1;
+        elseif ($page > 20)
+            $page = 20;
+
+        $search_text = trim($request->query->get('search_text'));
+
+        $catalogs = $this->searchService->searchDefault($search_text);
+
+        return $this->render('shared/pages/search_results.html.twig', [
+            'current_page' => $page,
+            'pages' => 20,
+            'search_text' => $search_text,
             'catalog_items' => $catalogs->getItems(),
         ]);
     }
