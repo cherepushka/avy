@@ -27,6 +27,9 @@ class Catalog
     #[ORM\Column(type: 'integer', length: 100, nullable: false)]
     private int $byte_size;
 
+    #[ORM\Column(type: 'text')]
+    private string $text;
+
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
     #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id")]
     private Manufacturer $manufacturer;
@@ -86,6 +89,18 @@ class Catalog
     public function setByteSize(int $byte_size): self
     {
         $this->byte_size = $byte_size;
+
+        return $this;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function setText(string $text): self
+    {
+        $this->text = $text;
 
         return $this;
     }

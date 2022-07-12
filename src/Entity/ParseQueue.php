@@ -35,6 +35,9 @@ class ParseQueue
     #[ORM\Column(type: 'text', nullable: true)]
     private string $text;
 
+    #[ORM\Column(type: 'integer', length: 100, nullable: false)]
+    private int $byte_size;
+
     #[ORM\Column(type: 'string', nullable: false, columnDefinition: "ENUM('new', 'parsing', 'success', 'failed', 'duplicated')")]
     private string $status;
 
@@ -97,6 +100,18 @@ class ParseQueue
     public function setText(string $text): self
     {
         $this->text = $text;
+
+        return $this;
+    }
+
+    public function getByteSize(): int
+    {
+        return $this->byte_size;
+    }
+
+    public function setByteSize(int $byte_size): self
+    {
+        $this->byte_size = $byte_size;
 
         return $this;
     }

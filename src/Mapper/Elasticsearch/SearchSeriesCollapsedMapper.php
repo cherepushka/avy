@@ -2,6 +2,7 @@
 
 namespace App\Mapper\Elasticsearch;
 
+use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Model\Elasticsearch\SearchResultItem;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -12,9 +13,10 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
     /**
      * @throws NonUniqueResultException
      */
-    public function map(array $elastic_response): array
+    public function map(array $elastic_response, int $page_size, int $page): SearchResultList
     {
         $items = [];
+        $total = $elastic_response['hits']['total']['value'];
 
         foreach ($elastic_response['hits']['hits'] as $series){
             $item = [];
@@ -42,7 +44,7 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
             $items[$series_id] = $item;
         }
 
-        return $items;
+        return new SearchResultList($items, $page_size, $total, $page);
     }
 
 }

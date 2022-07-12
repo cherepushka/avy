@@ -27,6 +27,9 @@ class Category
     #[ORM\JoinColumn(name: "parent", referencedColumnName: "id")]
     private ?self $parent;
 
+    #[ORM\Column(name: 'productsExist', type: 'boolean', options: ["default" => false])]
+    private bool $productsExist;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
@@ -100,6 +103,18 @@ class Category
     public function setParent(Category $parent): self
     {
         $this->parent = $parent;
+
+        return $this;
+    }
+
+    public function isProductsExist(): bool
+    {
+        return $this->productsExist;
+    }
+
+    public function setProductsExist(bool $productsExist): self
+    {
+        $this->productsExist = $productsExist;
 
         return $this;
     }

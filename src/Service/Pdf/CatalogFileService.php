@@ -100,7 +100,7 @@ class CatalogFileService
         return $this->getCatalogPath($filename);
     }
 
-    public function removeCatalogFromTmp(string $filename): void
+    public function removeTmpCatalog(string $filename): void
     {
         $catalogPath = $this->getTmpCatalogPath($filename);
 
@@ -116,6 +116,27 @@ class CatalogFileService
         if (!unlink($catalogPath)){
             throw new FileRuntimeException("File in path '$catalogPath' cannot be removed");
         }
+    }
+
+    public function getTmpCatalogByteSize(string $filename): int
+    {
+        $filepath = $this->getTmpCatalogPath($filename);
+
+        return filesize($filepath);
+    }
+
+    public function getTmpCatalogRawContent(string $filename): string
+    {
+        $filepath = $this->getTmpCatalogPath($filename);
+
+        return file_get_contents($filepath);
+    }
+
+    public function getCatalogRawContent(string $filename): string
+    {
+        $filepath = $this->getCatalogPath($filename);
+
+        return file_get_contents($filepath);
     }
 
 }

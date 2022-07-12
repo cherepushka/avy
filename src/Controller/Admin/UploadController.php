@@ -94,7 +94,8 @@ class UploadController extends AbstractController
                 $file_data['manufacturer'],
                 $categories_ids,
                 $file_data['lang'],
-                $byte_size
+                $byte_size,
+                $file_data['text']
             );
 
             try {
@@ -103,7 +104,8 @@ class UploadController extends AbstractController
                     $file_data['filename'],
                     $byte_size,
                     $file_data['text'],
-                    $categories_ids
+                    $categories_ids,
+                    $file_data['lang']
                 );
 
                 $this->parseQueueService->dequeueFile($file_data['filename']);

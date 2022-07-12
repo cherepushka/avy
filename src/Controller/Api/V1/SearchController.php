@@ -2,13 +2,9 @@
 
 namespace App\Controller\Api\V1;
 
-use App\Service\Elasticsearch;
 use App\Service\SearchService;
 use Doctrine\ORM\NonUniqueResultException;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,20 +32,22 @@ class SearchController extends AbstractController
         return $this->json($items);
     }
 
-    /**
-     * @throws ElasticsearchException|NonUniqueResultException
-     */
+    /** @throws ElasticsearchException|NonUniqueResultException */
     #[Route('/search/by-series', name: '_search', methods: ['POST'])]
     public function searchSeriesGrouping(Request $request): JsonResponse
     {
-        if (empty($request->toArray()) || !isset($request->toArray()['search'])){
+        $request_arr = $request->toArray();
+
+        if (empty($request_arr) || !isset($request_arr['search']) || !isset($request_arr['series'])){
             return $this->json([
                 'items' => []
             ]);
         }
 
-        $search_text = $request->toArray()['search'];
-        $items = $this->searchService->searchSeriesCollapsed($search_text);
+        $search_text = $request_arr['search'];
+        $series = explode(',', $request_arr['series']);
+        $page = isset($request_arr['page']) && is_int($request_arr['page']) ? $request_arr['page'] : 1;
+        $items = $this->searchService->searchSeriesCollapsed($search_text, $series, $page);
 
         return $this->json($items);
     }

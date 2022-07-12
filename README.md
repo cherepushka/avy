@@ -9,32 +9,10 @@
 
 <hr>
 
-## Внешнее Docker окружение
+## Docker окружение
 Для этого проекта есть внешнее Docker окружение  
 с установленным PHP, Apache сервером и Tesseract.  
 ([Инструкция по установке](https://github.com/cherepushka/avy-dev-kit))
-
-<hr>
-
-### Внутреннее Docker кружение
-
-Если вы используете свой веб сервер, то вы можете  
-обойтись без внешнего Docker окружения.  
-Достаточно запустить docker композицию внутри  
-проекта, включающаю в себя Elasticsearch, Kibana и  
-Mariadb.
-
-#### Запуск
-
-- `docker-compose up -d`
-
-### Elasticsearch
-адрес по умолчанию: `http://localhost:9200`.
-Данные для аутентификации не требуются
-
-### Kibana
-адрес по умолчанию: `http://localhost:5601`.  
-Данные для аутентификации не требуются
 
 <hr>
 
@@ -45,6 +23,8 @@ Mariadb.
 4. `npm run dev` или `npm run watch`
 5. `php bin/console doctrine:migrations:migrate`
 6. `php bin/console doctrine:fixtures:load`
-7. `php bin/console MigrateTreeFromJson ./.dev-data/category-tree.json`  
+7. `php bin/console migrate:TreeFromJson ./.dev-data/category-tree.json`  
     \- загрузка тестовых данных о дереве категорий
-8. `mkdir ./.credentials` - данные для авторизации в API
+8. `php bin/console migrate:productsWithExistingSeries` -  
+    Загрузка информации о сериях с существующими продуктами
+9. `mkdir ./.credentials` - данные для авторизации в API

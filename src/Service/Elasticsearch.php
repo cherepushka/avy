@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Category;
 use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
@@ -18,7 +19,8 @@ class Elasticsearch
 
     const PRE_TAG = '<highlight>';
     const POST_TAG = '</highlight>';
-    const INNER_HITS_SIZE = 5;
+    const STD_INNER_HITS_SIZE = 5;
+    const STD_LANG = 'rus';
     const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series'];
 
     private Client $client;
@@ -92,15 +94,26 @@ class Elasticsearch
      *
      * @throws ElasticsearchException
      */
-    public function searchCollapseBySeries(string $text, int $inner_hits_size = null): array
+    public function searchCollapseBySeries(string $text, array $series_ids, int $series_size, int $from): array
     {
         return $this->client->search([
             'index' => 'catalogs',
             'body' => [
                 '_source' => false,
+                'from' => $from,
+                'size' => $series_size,
                 'query' => [
-                    'match' => [
-                        "suggest-text-content" => $text
+                    'bool' => [
+                        'filter' => [
+                            'terms' => [
+                                'series' => $series_ids
+                            ]
+                        ],
+                        'must' => [
+                            'match' => [
+                                "suggest-text-content" => $text
+                            ]
+                        ]
                     ]
                 ],
                 'collapse' => [
@@ -109,7 +122,7 @@ class Elasticsearch
                         '_source' => false,
                         'fields' => self::STD_SEARCH_FIELDS,
                         'name' => 'file-name',
-                        'size' => $inner_hits_size ?? self::INNER_HITS_SIZE,
+                        'size' => self::STD_INNER_HITS_SIZE,
                         'highlight' => [
                             'fields' => [
                                 'suggest-text-content' => [
@@ -120,6 +133,9 @@ class Elasticsearch
                         ]
                     ],
                     'max_concurrent_group_searches' => 3
+                ],
+                'sort' => [
+                    'exists-products' => 'desc'
                 ]
             ]
         ])->asArray();
@@ -157,6 +173,14 @@ class Elasticsearch
     }
 
     /**
+     * @param int $id
+     * @param string $filename
+     * @param int $filesize
+     * @param string $elastic_content
+     * @param int[] $categories - ids of categories
+     * @param string $lang - lang alias
+     * @param Category[] $series - Categories without child Categories
+     *
      * @throws ElasticsearchException
      */
     public function uploadDocument(
@@ -164,20 +188,28 @@ class Elasticsearch
         string $filename,
         int $filesize,
         string $elastic_content,
+        array $categories,
+        string $lang,
         array $series
-    ): Elasticsearch_Response|Promise
+    ): void
     {
-        return $this->client->create([
-            'id' => $id,
-            'index' => 'catalogs',
-            'body' => [
-                'suggest-completion' => $elastic_content,
-                'suggest-text-content' => $elastic_content,
-                'file-name' => $filename,
-                'file-size' => $filesize,
-                'series' => $series
-            ]
-        ]);
+        foreach($series as $ser) {
+
+            $this->client->create([
+                'id' => uniqid(),
+                'index' => 'catalogs',
+                'body' => [
+                    'suggest-completion' => $elastic_content,
+                    'suggest-text-content' => $elastic_content,
+                    'file-name' => $filename,
+                    'file-size' => $filesize,
+                    'file-lang' => $lang,
+                    'categories' => $categories,
+                    'exists-products' => $ser->isProductsExist(),
+                    'series' => $ser->getId(),
+                ]
+            ]);
+        }
     }
 
 }

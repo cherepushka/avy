@@ -75,7 +75,7 @@ class ParsePdfFromFluidLineCommand extends Command
             try {
                 $this->handleCategoryPdfs($category);
             } catch (Throwable $e){
-                // TODO бработать исключения
+                dump($e->getMessage());
             }
         }
 
@@ -138,11 +138,6 @@ class ParsePdfFromFluidLineCommand extends Command
         $tmpCatalogPath = stream_get_meta_data($tmpCatalog)['uri'];
 
         $categories = new ArrayCollection($this->categoryRepository->findAllParentsList($category_id));
-
-        if ($this->imageBuilder->checkIsPdfCorrupted($tmpCatalogPath)){
-            fclose($tmpCatalog);
-            throw new RuntimeException('Downloaded PDF file is corrupted');
-        }
 
         $file = new UploadedFile($tmpCatalogPath, basename($match), "application/pdf", null, true);
 

@@ -64,6 +64,19 @@ class ParseQueueRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param int $byte_size
+     * @return ParseQueue[]
+     */
+    public function findAllByByteSize(int $byte_size): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.byte_size = :val')
+            ->setParameter('val', $byte_size)
+            ->getQuery()
+            ->getResult();
+    }
     
 //    public function findOneBySomeField($value): ?ParseQueue
 //    {

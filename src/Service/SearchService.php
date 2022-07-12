@@ -7,10 +7,7 @@ use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Mapper\Elasticsearch\SearchDefaultMapper;
 use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
 use Doctrine\ORM\NonUniqueResultException;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
 
 class SearchService
 {
@@ -35,21 +32,30 @@ class SearchService
     /**
      * @throws ElasticsearchException|NonUniqueResultException
      */
-    public function searchDefault(string $text): SearchResultList
+    public function searchDefault(string $text, int $page = 1): SearchResultList
     {
         $elastic_response = $this->elasticsearch->search($text);
 
-        return $this->defaultResultMapper->map($elastic_response);
+        return $this->defaultResultMapper->map($elastic_response, $page);
     }
 
     /**
+     * @param string $text - text for search
+     * @param int[] $series - array of series for filtering
+     * 
      * @throws ElasticsearchException|NonUniqueResultException
      */
-    public function searchSeriesCollapsed(string $text): array
+    public function searchSeriesCollapsed(
+        string $text,
+        array $series,
+        int $page = 1
+    ): SearchResultList
     {
-        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text);
+        $series_size = 3;
+        $from = ($page - 1) * $series_size;
 
-        return $this->searchSeriesCollapsedMapper->map($elastic_response);
+        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
+        return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 
 }

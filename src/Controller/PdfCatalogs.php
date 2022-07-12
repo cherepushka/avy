@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\Pdf\CatalogFile;
+use App\Service\Pdf\CatalogFileService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +15,7 @@ class PdfCatalogs extends AbstractController
     #[Route('/catalogs/pdf/show/{name}', name: 'app_catalogs_pdf_show', methods: ['GET'])]
     public function show(
         Request     $request,
-        CatalogFile $fileHandler
+        CatalogFileService $fileHandler
     ): BinaryFileResponse
     {
         $catalogName = $request->attributes->get('name');

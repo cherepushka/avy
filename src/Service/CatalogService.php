@@ -30,7 +30,8 @@ class CatalogService
         string  $manufacturer_name,
         array   $categories_ids,
         string  $language_name,
-        int     $byteSize
+        int     $byteSize,
+        string  $text
     ): int
     {
         $manufacturer = $this->manufacturerRepository->findOneByName($manufacturer_name);
@@ -41,7 +42,8 @@ class CatalogService
             ->setOriginFilename($origin_filename)
             ->setManufacturer($manufacturer)
             ->setLang($language)
-            ->setByteSize($byteSize);
+            ->setByteSize($byteSize)
+            ->setText($text);
 
         $this->catalogRepository->add($catalog, true);
 

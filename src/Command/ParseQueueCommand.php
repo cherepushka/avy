@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\ParseQueue;
+use App\Exception\FileCorruptedException;
 use App\Repository\ParseQueueRepository;
 use App\Service\CatalogService;
 use App\Service\OCR\OcrVisionInterface;
@@ -51,15 +52,13 @@ class ParseQueueCommand extends Command
                 $this->parseQueueRepository->add($queueItem, true);
                 continue;
             }
-
-            $this->parseQueueRepository->add($queueItem->setStatus(ParseQueue::STATUS_SUCCESS), true);
         }
 
         return Command::SUCCESS;
     }
 
     /**
-     * @throws ImagickException|FileNotFoundException
+     * @throws ImagickException|FileNotFoundException|FileCorruptedException
      */
     private function handleCatalog(ParseQueue $queueItem): void
     {
@@ -69,6 +68,7 @@ class ParseQueueCommand extends Command
         $filepath = $this->catalogFileService->getTmpCatalogPath($queueItem->getFilename());
 
         $queueItem->setText($this->textParser->parseFromFile($filepath));
+        $queueItem->setStatus(ParseQueue::STATUS_SUCCESS);
 
         $this->parseQueueRepository->add($queueItem, true);
     }

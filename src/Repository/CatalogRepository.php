@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Catalog;
+use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -40,21 +42,6 @@ class CatalogRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Catalog[] Returns an array of Catalog objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
     /**
      * @throws NonUniqueResultException
      */
@@ -65,5 +52,45 @@ class CatalogRepository extends ServiceEntityRepository
             ->setParameter('val', $filename)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findAllByOriginFilename(string $filename): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.origin_filename = :val')
+            ->setParameter('val', $filename)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllSeries(int $catalog_id)
+    {
+        $rsm = new ResultSetMappingBuilder($this->_em);
+        $rsm->addRootEntityFromClassMetadata(Category::class, 'cat');
+
+        $query = $this->_em->createNativeQuery('
+            SELECT cat.* FROM catalog_category cc
+                LEFT JOIN category cat ON cc.category_id = cat.id
+                LEFT JOIN category cat2 ON cat.id = cat2.parent 
+            WHERE cc.catalog_id = ?
+            AND cat2.id IS NULL
+        ', $rsm);
+
+        $query->setParameter(1, $catalog_id);
+
+        return $query->getResult();
+    }
+
+    /**
+     * @param int $byte_size
+     * @return Catalog[]
+     */
+    public function findAllByByteSize(int $byte_size): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.byte_size = :val')
+            ->setParameter('val', $byte_size)
+            ->getQuery()
+            ->getResult();
     }
 }
