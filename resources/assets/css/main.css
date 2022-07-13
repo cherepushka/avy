@@ -1,3 +1,5 @@
+@import url('pagination.css');
+
 @font-face {
     font-family: "Inter"; 
     src: url("/fonts/Inter/static/Inter-Regular.ttf") format("truetype");

@@ -24,12 +24,14 @@ class SearchController extends AbstractController
     #[Route('/search/result', name: 'app_search_result', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        $current_page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
         $search_text = trim($request->query->get('search_text'));
 
-        $catalogs = $this->searchService->searchDefault($search_text);
+        $catalogs = $this->searchService->searchDefault($search_text, $current_page);
 
         return $this->render('shared/pages/search_results.html.twig', [
             'catalog_items' => $catalogs->getItems(),
+            'max_pages' => $catalogs->getMaxPage()
         ]);
     }
 }
