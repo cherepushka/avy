@@ -39,7 +39,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\GoogleOcrVision'
+    App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\ImageOcrVision'
 
     App\Service\Elasticsearch:
         arguments:
@@ -50,7 +50,7 @@ services:
             $elasticsearch_cloud_id: '%app.elasticsearch.cloud_id%'
             $elasticsearch_api_key: '%app.elasticsearch.api_key%'
 
-    App\Service\OCR\GoogleOcrVision:
+    App\Service\OCR\Google\ImageOcrVision:
         arguments:
             $credentials_path: '%app.ocr_google_credentials_path%'
 

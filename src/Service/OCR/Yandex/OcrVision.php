@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Service\OCR;
+namespace App\Service\OCR\Yandex;
 
-class YandexOcrVision implements OcrVisionInterface
+use App\Service\OCR\OcrVisionInterface;
+
+class OcrVision implements OcrVisionInterface
 {
 
     private string $url = "https://vision.api.cloud.yandex.net/vision/v1/batchAnalyze";
