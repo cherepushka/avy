@@ -54,6 +54,10 @@ services:
         arguments:
             $credentials_path: '%app.ocr_google_credentials_path%'
 
+    App\Service\OCR\Google\DocumentOcrVision:
+        arguments:
+            $credentials_path: '%app.ocr_google_credentials_path%'
+
     App\EventListener\AllowAllCorsRequest:
         tags:
             - { name: kernel.event_listener, event: kernel.response }

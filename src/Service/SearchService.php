@@ -34,9 +34,12 @@ class SearchService
      */
     public function searchDefault(string $text, int $page = 1): SearchResultList
     {
-        $elastic_response = $this->elasticsearch->search($text);
+        $page_size = 10;
+        $from = ($page - 1) * $page_size;
 
-        return $this->defaultResultMapper->map($elastic_response, $page);
+        $elastic_response = $this->elasticsearch->search($text, $from);
+
+        return $this->defaultResultMapper->map($elastic_response, $page_size, $page);
     }
 
     /**
@@ -55,6 +58,7 @@ class SearchService
         $from = ($page - 1) * $series_size;
 
         $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
+        dd($elastic_response);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 

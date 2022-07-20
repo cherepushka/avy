@@ -13,7 +13,7 @@ class SearchDefaultMapper extends AbstractResponseMapper
     /**
      * @throws NonUniqueResultException
      */
-    public function map(array $elastic_response, int $page): SearchResultList
+    public function map(array $elastic_response, int $page_size, int $page): SearchResultList
     {
         $total = $elastic_response['hits']['total']['value'];
 
@@ -32,7 +32,7 @@ class SearchDefaultMapper extends AbstractResponseMapper
                 ->setLangAlias($catalog->getLang()->getAlias());
         }
 
-        return new SearchResultList($items, 10, $total, $page);
+        return new SearchResultList($items, $page_size, $total, $page);
     }
 
 }

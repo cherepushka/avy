@@ -7,22 +7,31 @@
                     <a class="page-link pag-node pag-to-start {% if (app.request.get('page') <= 1) %} {{ "page-link-disabled" }} {% endif %}"
                        href="{{ path('app_search_result') }}/?page=1&search_text={{ app.request.get('search_text') }}" aria-label="Previous"
                     >
-                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
-                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
+                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/>
+                        </svg>
+                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/>
+                        </svg>
                     </a>
                 </li>
                 <li class="page-item" >
                     <a class="page-link pag-node pag-to-start {% if (app.request.get('page') <= 1)%} {{ "page-link-disabled" }} {% endif %}"
                        href="{{ path('app_search_result') }}/?page={{ app.request.get('page') - 1 }}&search_text={{ app.request.get('search_text') }}" aria-label="Previous"
                     >
-                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg"> <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/> </svg>
+                        <svg width="13" height="23" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.42855 11.4593C7.93482 7.63127 10.401 3.88907 12.9473 0H7.35588L0 11.4593L7.43356 23H13L5.42855 11.4593Z"/>
+                        </svg>
                     </a>
                 </li>
+
                 {% if (app.request.get('page') > 3) %}
-                    {% for i in app.request.get('page') - 2..max_pages %}
+                    {% for i in (app.request.get('page') - 2)..max_pages %}
                         {% if (loop.index < 6) %}
                             <li class="page-item{% if (i == app.request.get('page')) %} {{"page-item-active"}} {% endif %}">
-                                <a class="page-link pag-node" href="{{ path('app_search_result') }}/?page={{ i }}&search_text={{ app.request.get('search_text') }}">{{ i }}</a>
+                                <a class="page-link pag-node" href="{{ path('app_search_result') }}/?page={{ i }}&search_text={{ app.request.get('search_text') }}">
+                                    {{ i }}
+                                </a>
                             </li>
                         {% endif %}
                     {% endfor %}
@@ -30,24 +39,33 @@
                     {% for i in 1..max_pages %}
                         {% if (loop.index < 6) %}
                             <li class="page-item{% if (i == app.request.get('page')) %} {{"page-item-active"}} {% endif %}">
-                                <a class="page-link pag-node" href="{{ path('app_search_result') }}/?page={{ i }}&search_text={{ app.request.get('search_text') }}">{{ i }}</a>
+                                <a class="page-link pag-node" href="{{ path('app_search_result') }}/?page={{ i }}&search_text={{ app.request.get('search_text') }}">
+                                    {{ i }}
+                                </a>
                             </li>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
+
                 <li class="page-item">
                     <a class="page-link pag-node pag-to-end {% if (app.request.get('page') >= max_pages) %} {{ "page-link-disabled" }} {% endif %}"
                        href="{{ path('app_search_result') }}/?page={{ app.request.get('page') + 1 }}&search_text={{ app.request.get('search_text') }}" aria-label="Previous"
                     >
-                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
+                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" />
+                        </svg>
                     </a>
                 </li>
                 <li class="page-item">
                     <a class="page-link pag-node pag-to-end {% if (app.request.get('page') >= max_pages) %} {{ "page-link-disabled" }} {% endif %}"
                        href="{{ path('app_search_result') }}/?page={{ max_pages }}&search_text={{ app.request.get('search_text') }}" aria-label="Previous"
                     >
-                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
-                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg"> <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" /> </svg>
+                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" />
+                        </svg>
+                        <svg width="13" height="23" viewBox="0 0 12 23"  xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.99633 11.4571L0.053226 0H5.20965C7.42681 3.74597 9.69026 7.56575 12 11.4593L5.14021 23H0L6.99633 11.4571Z" />
+                        </svg>
                     </a>
                 </li>
             </ul>

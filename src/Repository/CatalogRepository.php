@@ -63,7 +63,11 @@ class CatalogRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllSeries(int $catalog_id)
+    /**
+     * @param int $catalog_id
+     * @return Category[]
+     */
+    public function findAllSeries(int $catalog_id): array
     {
         $rsm = new ResultSetMappingBuilder($this->_em);
         $rsm->addRootEntityFromClassMetadata(Category::class, 'cat');

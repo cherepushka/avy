@@ -39,7 +39,7 @@ class SearchResultList
             return;
         }
 
-        $this->maxPage = (int)floor($this->totalHits / $this->pageSize);
+        $this->maxPage = (int)ceil($this->totalHits / $this->pageSize);
     }
 
     /** @return SearchResultItem[] */

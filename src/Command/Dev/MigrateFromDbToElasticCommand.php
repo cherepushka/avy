@@ -2,6 +2,7 @@
 
 namespace App\Command\Dev;
 
+use App\Entity\Category;
 use App\Repository\CatalogRepository;
 use App\Service\Elasticsearch;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,9 +33,15 @@ class MigrateFromDbToElasticCommand extends Command
         foreach($this->catalogRepository->findAll() as $catalog){
 
             $series = $this->catalogRepository->findAllSeries($catalog->getId());
-            $series_ids = [];
+
+            $category_ids = [];
             foreach($catalog->getCategories() as $category){
-                $series_ids[] = $category->getid();
+                $category_ids[] = $category->getid();
+            }
+
+            $series_ids = [];
+            foreach ($series as $seria){
+                $series_ids[] = $seria->getId();
             }
             
             $this->elasticsearch->uploadDocument(
@@ -42,9 +49,9 @@ class MigrateFromDbToElasticCommand extends Command
                 $catalog->getFilename(),
                 $catalog->getByteSize(),
                 $catalog->getText(),
-                $series_ids,
                 $catalog->getLang()->getAlias(),
-                $series
+                $category_ids,
+                $series_ids
             );
         }
        

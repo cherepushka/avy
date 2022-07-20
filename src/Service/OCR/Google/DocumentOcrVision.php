@@ -2,46 +2,67 @@
 
 namespace App\Service\OCR\Google;
 
+use App\Entity\Catalog;
 use App\Model\File\GoogleCloud\File;
-use App\Service\OCR\OcrVisionInterface;
+use App\Repository\CatalogRepository;
+use App\Service\OCR\Google\Filters\ContentFilter;
+use App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService;
+use Exception;
+use Google\ApiCore\ApiException;
+use Google\ApiCore\ValidationException;
+use Google\Cloud\Storage\StorageClient;
+use Google\Cloud\Vision\V1\AnnotateFileResponse;
+use Google\Cloud\Vision\V1\AsyncAnnotateFileRequest;
 use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type;
+use Google\Cloud\Vision\V1\GcsDestination;
+use Google\Cloud\Vision\V1\GcsSource;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\InputConfig;
+use Google\Cloud\Vision\V1\OutputConfig;
 
-class DocumentOcrVision implements OcrVisionInterface
+class DocumentOcrVision
 {
 
     private ImageAnnotatorClient $visionClient;
+    private StorageClient $storageClient;
+    private OcrResultStorageService $ocrResultStorageService;
+    private readonly ContentFilter $contentFilter;
 
-    public function __construct(string $credentials_path)
+    /**
+     * @throws ValidationException
+     */
+    public function __construct(
+        string                             $credentials_path,
+        OcrResultStorageService            $ocrResultStorageService,
+        ContentFilter                      $contentFilter,
+        private readonly CatalogRepository $catalogRepository,
+    )
     {
+        $this->ocrResultStorageService = $ocrResultStorageService;
+        $this->contentFilter = $contentFilter;
+
+        $this->storageClient = new StorageClient([
+            'keyFilePath' => $credentials_path
+        ]);
+
         $this->visionClient = new ImageAnnotatorClient([
             'credentials' => $credentials_path
         ]);
     }
 
-    public function detectText(File $file)
+    /**
+     * @throws ApiException
+     * @throws ValidationException
+     * @throws Exception
+     */
+    public function detectText(File $file): string
     {
-        # select ocr feature
-        $feature = (new Feature())
-            ->setType(Type::DOCUMENT_TEXT_DETECTION);
+        $resultStorageDir = $this->ocrResultStorageService->getStoragePath() . DIRECTORY_SEPARATOR . $file->getName() . DIRECTORY_SEPARATOR;
 
-        # set $path (file to OCR) as source
-        $gcsSource = (new GcsSource())
-            ->setUri($path);
-        # supported mime_types are: 'application/pdf' and 'image/tiff'
-        $mimeType = 'application/pdf';
-        $inputConfig = (new InputConfig())
-            ->setGcsSource($gcsSource)
-            ->setMimeType($mimeType);
-
-        # set $output as destination
-        $gcsDestination = (new GcsDestination())
-            ->setUri($output);
-        # how many pages should be grouped into each json output file.
-        $batchSize = 2;
-        $outputConfig = (new OutputConfig())
-            ->setGcsDestination($gcsDestination)
-            ->setBatchSize($batchSize);
+        $feature = (new Feature())->setType(Type::DOCUMENT_TEXT_DETECTION);
+        $inputConfig = $this->generateInputConf($file->getPath());
+        $outputConfig = $this->generateOutputConf($resultStorageDir);
 
         # prepare request using configs set above
         $request = (new AsyncAnnotateFileRequest())
@@ -51,50 +72,95 @@ class DocumentOcrVision implements OcrVisionInterface
         $requests = [$request];
 
         # make request
-        $imageAnnotator = new ImageAnnotatorClient();
-        $operation = $imageAnnotator->asyncBatchAnnotateFiles($requests);
-        print('Waiting for operation to finish.' . PHP_EOL);
+        $operation = $this->visionClient->asyncBatchAnnotateFiles($requests);
         $operation->pollUntilComplete();
 
-        # once the request has completed and the output has been
-        # written to GCS, we can list all the output files.
-        preg_match('/^gs:\/\/([a-zA-Z0-9\._\-]+)\/?(\S+)?$/', $output, $match);
-        $bucketName = $match[1];
-        $prefix = isset($match[2]) ? $match[2] : '';
-
-        $storage = new StorageClient();
-        $bucket = $storage->bucket($bucketName);
-        $options = ['prefix' => $prefix];
-        $objects = $bucket->objects($options);
-
-        # save first object for sample below
-        $objects->next();
-        $firstObject = $objects->current();
-
-        # list objects with the given prefix.
-        print('Output files:' . PHP_EOL);
-        foreach ($objects as $object) {
-            print($object->name() . PHP_EOL);
-        }
-
-        # process the first output file from GCS.
-        # since we specified batch_size=2, the first response contains
-        # the first two pages of the input file.
-        $jsonString = $firstObject->downloadAsString();
-        $firstBatch = new AnnotateFileResponse();
-        $firstBatch->mergeFromJsonString($jsonString);
-
-        # get annotation and print text
-        foreach ($firstBatch->getResponses() as $response) {
-            $annotation = $response->getFullTextAnnotation();
-            print($annotation->getText());
-        }
-
-        $imageAnnotator->close();
+        return $this->handleResult($this->ocrResultStorageService->getStorageDir() .DIRECTORY_SEPARATOR . $file->getName() . DIRECTORY_SEPARATOR);
     }
 
-    public function findImageAnnotations(array $imgArray): string
+    /**
+     * @throws ApiException
+     * @throws ValidationException
+     * @throws Exception
+     */
+    public function handleResultText(): void
     {
-        // TODO: Implement findImageAnnotations() method.
+        $bucket = $this->storageClient->bucket($this->ocrResultStorageService->getStorageBucket());
+        $objectsIterator = $bucket->objects([
+            'prefix' => 'tmp-catalogs'
+        ]);
+
+        //skipping folder name
+        $objectsIterator->current();
+        $objectsIterator->next();
+
+        while($objectsIterator->valid()){
+            $object = $objectsIterator->current();
+            $name = basename($object->name());
+
+            /** @var Catalog $catalog */
+            $catalog = $this->catalogRepository->findOneBy(['filename' => $name]);
+
+            dump($name);
+
+            $text = $this->handleResult("ocr-parse-results/$name");
+            $catalog->setText($text);
+            $this->catalogRepository->add($catalog, true);
+
+            $objectsIterator->next();
+        }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function handleResult(string $gsResultsDir): string
+    {
+        $bucket = $this->storageClient->bucket($this->ocrResultStorageService->getStorageBucket());
+        $objects = $bucket->objects([
+            'prefix' => $gsResultsDir
+        ]);
+
+        $text = '';
+
+        foreach ($objects as $object) {
+
+            $jsonString = $object->downloadAsString();
+            $file_response = new AnnotateFileResponse();
+            $file_response->mergeFromJsonString($jsonString);
+
+            $this->contentFilter->setResponse($file_response);
+            $text .= $this->contentFilter->getFilteredText();
+        }
+
+        return $text;
+    }
+
+    private function generateInputConf(string $inputFilePath): InputConfig
+    {
+        // set $path (file to OCR) as source
+        $gcsSource = (new GcsSource())
+            ->setUri($inputFilePath);
+
+        $mimeType = 'application/pdf';
+
+        return (new InputConfig())
+            ->setGcsSource($gcsSource)
+            ->setMimeType($mimeType);
+    }
+
+    private function generateOutputConf(string $resultStorageDir): OutputConfig
+    {
+        // how many pages should be grouped into each json output file.
+        $batchSize = 1;
+
+        // set $output as destination
+        $gcsDestination = (new GcsDestination())
+            ->setUri($resultStorageDir);
+
+        return (new OutputConfig())
+            ->setGcsDestination($gcsDestination)
+            ->setBatchSize($batchSize);
+    }
+
 }

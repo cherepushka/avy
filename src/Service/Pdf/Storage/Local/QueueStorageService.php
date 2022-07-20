@@ -2,7 +2,6 @@
 
 namespace App\Service\Pdf\Storage\Local;
 
-use App\Service\Pdf\Storage\QueueCatalogsStorageService;
 use RuntimeException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Filesystem\Exception\RuntimeException as FileRuntimeException;
@@ -11,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class QueueStorageService implements QueueCatalogsStorageService
+class QueueStorageService
 {
 
     private readonly string $tmp_catalogs_dir;
