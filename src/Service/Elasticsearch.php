@@ -99,9 +99,10 @@ class Elasticsearch
     {
         return $this->client->search([
             'index' => 'catalogs',
-            'size' => 0,
             'body' => [
                 '_source' => false,
+                'from' => $from,
+                'size' => $series_size,
                 'query' => [
                     'bool' => [
                         'filter' => [
@@ -116,32 +117,26 @@ class Elasticsearch
                         ]
                     ]
                 ],
-                "aggs" => [
-                    "series_grouping" => [
-                        "terms" => [
-                            "field" => "series",
-                        ],
-                        "aggs" => [
-                            "items" => [
-                                "top_hits" => [
-                                    "size" => self::STD_INNER_HITS_SIZE,
-                                    "fields" => self::STD_SEARCH_FIELDS,
-                                    "_source" => false,
-                                    'highlight' => [
-                                         'fields' => [
-                                            'suggest-text-content' => [
-                                                'pre_tags' => self::PRE_TAG,
-                                                'post_tags' => self::POST_TAG
-                                            ]
-                                        ]
-                                    ],
-                                    'sort' => [
-                                        'exists-products' => 'desc'
-                                    ],
+                'collapse' => [
+                    'field' => 'series',
+                    'inner_hits' => [
+                        '_source' => false,
+                        'fields' => self::STD_SEARCH_FIELDS,
+                        'name' => 'file-name',
+                        'size' => self::STD_INNER_HITS_SIZE,
+                        'highlight' => [
+                            'fields' => [
+                                'suggest-text-content' => [
+                                    'pre_tags' => self::PRE_TAG,
+                                    'post_tags' => self::POST_TAG
                                 ]
                             ]
                         ]
-                    ]
+                    ],
+                    'max_concurrent_group_searches' => 3
+                ],
+                'sort' => [
+                    'exists-products' => 'desc'
                 ]
             ]
         ])->asArray();
@@ -179,40 +174,42 @@ class Elasticsearch
     }
 
     /**
-     * @param int $id
      * @param string $filename
      * @param int $filesize
      * @param string $elastic_content
-     * @param int[] $categories - ids of categories
      * @param string $lang - lang alias
+     * @param int[] $category_ids - ids of categories
      * @param Category[] $series - Categories without child Categories
      *
      * @throws ElasticsearchException
      */
     public function uploadDocument(
-        int $id,
         string $filename,
         int $filesize,
         string $elastic_content,
         string $lang,
         array $category_ids,
-        array $series_ids
+        array $series
     ): void
     {
-        $this->client->create([
-            'id' => $id,
-            'index' => 'catalogs',
-            'body' => [
-                'suggest-completion' => $elastic_content,
-                'suggest-text-content' => $elastic_content,
-                'file-name' => $filename,
-                'file-size' => $filesize,
-                'file-lang' => $lang,
-                'exists-products' => true,
-                'categories' => $category_ids,
-                'series' => $series_ids,
-            ]
-        ]);
+        foreach ($series as $seria) {
+
+            $this->client->create([
+                'id' => uniqid(),
+                'index' => 'catalogs',
+                'body' => [
+                    'suggest-completion' => $elastic_content,
+                    'suggest-text-content' => $elastic_content,
+                    'file-name' => $filename,
+                    'file-size' => $filesize,
+                    'file-lang' => $lang,
+                    'exists-products' => $seria->isProductsExist(),
+                    'categories' => $category_ids,
+                    'series' => $seria->getId(),
+                ]
+            ]);
+        }
+
     }
 
 }

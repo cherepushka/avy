@@ -2,12 +2,19 @@
 
 namespace App\Service\Pdf\Storage\GoogleCloud;
 
-class OcrResultStorageService
+use App\Service\Pdf\Storage\OcrResultStorageServiceInterface;
+
+class OcrResultStorageService implements OcrResultStorageServiceInterface
 {
 
     private string $storageBucket = 'avy-elastic-ocr';
     private string $storageDir = 'ocr-parse-results';
     private string $storagePath = 'gs://avy-elastic-ocr/ocr-parse-results';
+
+    public function __construct(string $credentials_path)
+    {
+
+    }
 
     public function getStoragePath(): string
     {

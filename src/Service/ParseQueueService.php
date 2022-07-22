@@ -6,13 +6,14 @@ use App\Entity\Language;
 use App\Entity\Manufacturer;
 use App\Entity\ParseQueue;
 use App\Exception\FileAlreadyLoadedException;
+use App\Model\File\CatalogFile;
 use App\Model\ParseQueueItem;
 use App\Model\ParseQueueList;
 use App\Repository\CatalogRepository;
 use App\Repository\ParseQueueRepository;
 use App\Service\Pdf\CatalogFileService;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ParseQueueService
@@ -21,7 +22,8 @@ class ParseQueueService
     public function __construct(
         private readonly CatalogFileService $catalogFileService,
         private readonly ParseQueueRepository $queueRepository,
-        private readonly CatalogRepository $catalogRepository
+        private readonly CatalogRepository $catalogRepository,
+        private readonly StorageServiceFacade $storageService,
     ){}
 
     /**
@@ -29,19 +31,18 @@ class ParseQueueService
      */
     public function enqueueFile(UploadedFile $file, Manufacturer $manufacturer = null, Language $lang = null, ArrayCollection $category_ids = null): void
     {
-        $catalogPath = $this->catalogFileService->saveUploadedFileToTmp($file);
-        $filename = (new File($catalogPath))->getBasename();
+        $file = $this->storageService->saveUploadedCatalog($file);
 
-        if ($this->isTmpDocumentAlreadyLoaded($filename)){
-            $this->catalogFileService->removeTmpCatalog($filename);
-            throw new FileAlreadyLoadedException($filename);
+        if ($this->isTmpDocumentAlreadyLoaded($file)){
+            $this->storageService->deleteCatalog($file->getName());
+            throw new FileAlreadyLoadedException($file->getOriginName());
         }
 
         $new_queue_item = (new ParseQueue())
-            ->setFilename($filename)
+            ->setFilename($file->getName())
             ->setStatus(ParseQueue::STATUS_NEW)
-            ->setOriginFilename($file->getClientOriginalName())
-            ->setByteSize($this->catalogFileService->getTmpCatalogByteSize($filename));
+            ->setOriginFilename($file->getOriginName())
+            ->setByteSize($file->getByteSize());
 
         if ($manufacturer !== null && $lang !== null && $category_ids !== null){
             $new_queue_item->setCategories($category_ids)
@@ -83,19 +84,20 @@ class ParseQueueService
     /**
      * Checking if document is already in queue or was uploaded
      */
-    private function isTmpDocumentAlreadyLoaded(string $filepath): bool
+    private function isTmpDocumentAlreadyLoaded(CatalogFile $file): bool
     {
-        $byte_size = $this->catalogFileService->getTmpCatalogByteSize($filepath);
-        $raw_content = $this->catalogFileService->getTmpCatalogRawContent($filepath);
+        $byte_size = $file->getByteSize();
+        $raw_content = $this->storageService->getRawContentFromCatalogFile($file->getName());
 
         foreach ($this->catalogRepository->findAllByByteSize($byte_size) as $item){
-            if ($this->catalogFileService->getCatalogRawContent($item->getFilename()) === $raw_content){
+
+            if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content){
                 return true;
             }
         }
 
         foreach ($this->queueRepository->findAllByByteSize($byte_size) as $item){
-            if ($this->catalogFileService->getTmpCatalogRawContent($item->getFilename()) === $raw_content){
+            if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content){
                 return true;
             }
         }

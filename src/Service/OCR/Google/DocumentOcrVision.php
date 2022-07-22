@@ -3,10 +3,14 @@
 namespace App\Service\OCR\Google;
 
 use App\Entity\Catalog;
+use App\Model\File\CatalogFile;
 use App\Model\File\GoogleCloud\File;
 use App\Repository\CatalogRepository;
 use App\Service\OCR\Google\Filters\ContentFilter;
+use App\Service\OCR\OcrVisionInterface;
+use App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService;
 use App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use Exception;
 use Google\ApiCore\ApiException;
 use Google\ApiCore\ValidationException;
@@ -21,7 +25,7 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\InputConfig;
 use Google\Cloud\Vision\V1\OutputConfig;
 
-class DocumentOcrVision
+class DocumentOcrVision implements OcrVisionInterface
 {
 
     private ImageAnnotatorClient $visionClient;
@@ -29,18 +33,25 @@ class DocumentOcrVision
     private OcrResultStorageService $ocrResultStorageService;
     private readonly ContentFilter $contentFilter;
 
+    private StorageServiceFacade $storageServiceFacade;
+    private CatalogStorageService $gcCatalogStorageService;
+
     /**
      * @throws ValidationException
      */
     public function __construct(
         string                             $credentials_path,
+        StorageServiceFacade               $storageServiceFacade,
+        CatalogStorageService              $gcCatalogStorageService,
         OcrResultStorageService            $ocrResultStorageService,
         ContentFilter                      $contentFilter,
-        private readonly CatalogRepository $catalogRepository,
     )
     {
         $this->ocrResultStorageService = $ocrResultStorageService;
         $this->contentFilter = $contentFilter;
+
+        $this->storageServiceFacade = $storageServiceFacade;
+        $this->gcCatalogStorageService = $gcCatalogStorageService;
 
         $this->storageClient = new StorageClient([
             'keyFilePath' => $credentials_path
@@ -49,6 +60,22 @@ class DocumentOcrVision
         $this->visionClient = new ImageAnnotatorClient([
             'credentials' => $credentials_path
         ]);
+    }
+
+    public function catalogGetTextSync(CatalogFile $file): string
+    {
+        //Catalog must be stored on GoogleStorage for this type of OCR handling
+        if (!$this->gcCatalogStorageService->exists($file->getName())){
+
+        }
+
+        $text = '';
+
+//        $feature = (new Feature())->setType(Type::DOCUMENT_TEXT_DETECTION);
+//        $inputConfig = $this->generateInputConf($file->getPath());
+//        $outputConfig = $this->generateOutputConf($resultStorageDir);
+
+        return $text;
     }
 
     /**
@@ -76,39 +103,6 @@ class DocumentOcrVision
         $operation->pollUntilComplete();
 
         return $this->handleResult($this->ocrResultStorageService->getStorageDir() .DIRECTORY_SEPARATOR . $file->getName() . DIRECTORY_SEPARATOR);
-    }
-
-    /**
-     * @throws ApiException
-     * @throws ValidationException
-     * @throws Exception
-     */
-    public function handleResultText(): void
-    {
-        $bucket = $this->storageClient->bucket($this->ocrResultStorageService->getStorageBucket());
-        $objectsIterator = $bucket->objects([
-            'prefix' => 'tmp-catalogs'
-        ]);
-
-        //skipping folder name
-        $objectsIterator->current();
-        $objectsIterator->next();
-
-        while($objectsIterator->valid()){
-            $object = $objectsIterator->current();
-            $name = basename($object->name());
-
-            /** @var Catalog $catalog */
-            $catalog = $this->catalogRepository->findOneBy(['filename' => $name]);
-
-            dump($name);
-
-            $text = $this->handleResult("ocr-parse-results/$name");
-            $catalog->setText($text);
-            $this->catalogRepository->add($catalog, true);
-
-            $objectsIterator->next();
-        }
     }
 
     /**

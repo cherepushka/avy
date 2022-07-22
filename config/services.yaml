@@ -50,6 +50,14 @@ services:
             $elasticsearch_cloud_id: '%app.elasticsearch.cloud_id%'
             $elasticsearch_api_key: '%app.elasticsearch.api_key%'
 
+    App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService:
+        arguments:
+            $credentials_path: '%app.ocr_google_credentials_path%'
+
+    App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService:
+        arguments:
+            $credentials_path: '%app.ocr_google_credentials_path%'
+
     App\Service\OCR\Google\ImageOcrVision:
         arguments:
             $credentials_path: '%app.ocr_google_credentials_path%'

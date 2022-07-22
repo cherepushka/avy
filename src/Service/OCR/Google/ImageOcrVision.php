@@ -8,7 +8,7 @@ use Google\ApiCore\ValidationException;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 
-class ImageOcrVision implements OcrVisionInterface
+class ImageOcrVision
 {
 
     private ImageAnnotatorClient $visionClient;
