@@ -25,6 +25,9 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
             foreach ($series['inner_hits']['file-name']['hits']['hits'] as $inner_item) {
                 $inner_fields = $inner_item['fields'];
                 $catalog = $this->catalogRepository->findOneByFilename($inner_fields['file-name'][0]);
+                $suggest_text = isset($inner_item['fields']['suggest-text'][0]) && $inner_item['fields']['suggest-text'][0] !== ""
+                    ? $inner_item['fields']['suggest-text'][0]
+                    : implode("\n", $inner_item['highlight']['text-content']);
 
                 $hit = (new SearchResultItem())
                     ->setSeries($series_id)
@@ -34,9 +37,7 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
                         'name' => $catalog->getFilename()
                     ], UrlGeneratorInterface::ABSOLUTE_URL))
                     ->setOriginName($catalog->getOriginFilename())
-                    ->setSuggestText(
-                        implode("\n", $inner_item['highlight']['suggest-text-content'])
-                    );
+                    ->setSuggestText($suggest_text);
 
                 $item[] = $hit;
             }

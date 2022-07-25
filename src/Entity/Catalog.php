@@ -30,6 +30,9 @@ class Catalog
     #[ORM\Column(type: 'text')]
     private string $text;
 
+    #[ORM\Column(type: 'text')]
+    private string $suggest_text;
+
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
     #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id")]
     private Manufacturer $manufacturer;
@@ -101,6 +104,18 @@ class Catalog
     public function setText(string $text): self
     {
         $this->text = $text;
+
+        return $this;
+    }
+
+    public function getSuggestText(): string
+    {
+        return $this->suggest_text;
+    }
+
+    public function setSuggestText(string $suggest_text): self
+    {
+        $this->suggest_text = $suggest_text;
 
         return $this;
     }

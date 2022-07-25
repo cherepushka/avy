@@ -31,7 +31,8 @@ class CatalogService
         array   $categories_ids,
         string  $language_name,
         int     $byteSize,
-        string  $text
+        string  $text,
+        string  $suggest_text,
     ): int
     {
         $manufacturer = $this->manufacturerRepository->findOneByName($manufacturer_name);

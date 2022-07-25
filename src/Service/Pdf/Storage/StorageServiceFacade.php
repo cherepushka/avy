@@ -14,7 +14,6 @@ class StorageServiceFacade
 
     public function __construct(
         private readonly CatalogStorageServiceInterface $catalogStorageService,
-        private readonly OcrResultStorageServiceInterface $ocrResultStorageService,
         private readonly SluggerInterface $slugger
     ){}
 
@@ -69,6 +68,10 @@ class StorageServiceFacade
         return $tmpFile;
     }
 
+    /**
+     * @param resource $tmpFile
+     * @return string - absolute path to file
+     */
     public function getPathToTmpFile($tmpFile): string
     {
         $tmpFileMetadata = stream_get_meta_data($tmpFile);

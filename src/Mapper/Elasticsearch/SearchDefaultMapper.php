@@ -22,8 +22,12 @@ class SearchDefaultMapper extends AbstractResponseMapper
             $fields = $hit['fields'];
             $catalog = $this->catalogRepository->findOneByFilename($fields['file-name'][0]);
 
+            $suggest_text = !empty($hit['fields']['suggest-text'][0]) && $hit['fields']['suggest-text'][0] !== ""
+                ? $hit['fields']['suggest-text'][0]
+                : implode("\n", $hit['highlight']['text-content']);
+
             $items[] = (new SearchResultItem())
-                ->setSuggestText(implode("\n", $hit['highlight']['suggest-text-content']))
+                ->setSuggestText($suggest_text)
                 ->setOriginName($catalog->getOriginFilename())
                 ->setDownloadLink($this->router->generate('app_catalogs_pdf_show', [
                     'name' => $catalog->getFilename()

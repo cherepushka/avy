@@ -8,6 +8,7 @@ use App\Service\LanguageService;
 use App\Service\ManufacturerService;
 use App\Service\ParseQueueService;
 use App\Service\Pdf\CatalogFileService;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use App\Service\Elasticsearch;
@@ -68,10 +69,9 @@ class UploadController extends AbstractController
      */
     #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
     public function confirm_upload_document(
-        Request             $request,
-        Elasticsearch       $elasticsearch,
-        CatalogService      $catalogService,
-        CatalogFileService  $catalogFile
+        Request                 $request,
+        Elasticsearch           $elasticsearch,
+        CatalogService          $catalogService,
     ): RedirectResponse
     {
         //TODO сделать добавление в базу миграцией
@@ -85,8 +85,7 @@ class UploadController extends AbstractController
                 return $this->redirectToRoute('admin_document_confirm_upload');
             }
 
-            $catalog_path = $catalogFile->getTmpCatalogPath($file_data['filename']);;
-            $byte_size = filesize($catalog_path);
+            $byte_size = $file_data['byte_size'];
 
             $catalogID = $catalogService->insertCatalog(
                 $file_data['filename'],
@@ -95,7 +94,8 @@ class UploadController extends AbstractController
                 $categories_ids,
                 $file_data['lang'],
                 $byte_size,
-                $file_data['text']
+                $file_data['text'],
+                $file_data['suggest_text']
             );
 
             try {
@@ -104,6 +104,7 @@ class UploadController extends AbstractController
                     $file_data['filename'],
                     $byte_size,
                     $file_data['text'],
+                    $file_data['suggest_text'],
                     $categories_ids,
                     $file_data['lang']
                 );

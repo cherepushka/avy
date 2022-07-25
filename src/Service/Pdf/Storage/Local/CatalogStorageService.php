@@ -23,7 +23,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function uploadFromLocal(string $filepath, string $filename): string
     {
-        $newCatalogPath = $this->getPathToCatalog($filename);
+        $newCatalogPath = $this->getFullPathToCatalog($filename);
 
         if (copy($filepath, $newCatalogPath) === false){
             throw new RuntimeException("Unable to save file from '$filepath' to '$newCatalogPath'");
@@ -34,7 +34,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function delete(string $filename): void
     {
-        $catalogPath = $this->getPathToCatalog($filename);
+        $catalogPath = $this->getFullPathToCatalog($filename);
 
         if (!unlink($catalogPath)){
             throw new RuntimeException("File in path '$catalogPath' cannot be removed");
@@ -43,22 +43,23 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function exists(string $filename): bool
     {
-        return is_file($this->getPathToCatalog($filename));
+        return is_file($this->getFullPathToCatalog($filename));
     }
 
     public function getRawContentFromFile(string $filename): string
     {
-        return file_get_contents($this->getPathToCatalog($filename));
+        return file_get_contents($this->getFullPathToCatalog($filename));
     }
 
     public function downloadToFile(string $filename, string $pathToSave): void
     {
-        $catalogPath = $this->getPathToCatalog($filename);
+        $catalogPath = $this->getFullPathToCatalog($filename);
         file_put_contents($pathToSave, file_get_contents($catalogPath));
     }
 
-    private function getPathToCatalog(string $filename): string
+    public function getFullPathToCatalog(string $catalogName): string
     {
-        return $this->catalogs_dir . DIRECTORY_SEPARATOR . $filename;
+        return $this->catalogs_dir . DIRECTORY_SEPARATOR . $catalogName;
     }
+
 }

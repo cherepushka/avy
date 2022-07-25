@@ -42,7 +42,7 @@ services:
 
     App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\DocumentOcrVision'
 
-    App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\Local\CatalogStorageService'
+    App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService'
     App\Service\Pdf\Storage\OcrResultStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService'
 
     App\Service\Elasticsearch:

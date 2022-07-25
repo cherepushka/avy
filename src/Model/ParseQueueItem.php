@@ -6,14 +6,11 @@ class ParseQueueItem
 {
 
     private int $id;
-
     private string $text;
-
     private string $filename;
-
     private string $origin_filename;
-
     private string $status;
+    private int $byte_size;
 
     public function getId(): int
     {
@@ -70,6 +67,18 @@ class ParseQueueItem
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getByteSize(): int
+    {
+        return $this->byte_size;
+    }
+
+    public function setByteSize(int $byte_size): self
+    {
+        $this->byte_size = $byte_size;
 
         return $this;
     }

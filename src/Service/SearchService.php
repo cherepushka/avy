@@ -58,7 +58,6 @@ class SearchService
         $from = ($page - 1) * $series_size;
 
         $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
-        dd($elastic_response);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 

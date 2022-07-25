@@ -11,7 +11,6 @@ use App\Model\ParseQueueItem;
 use App\Model\ParseQueueList;
 use App\Repository\CatalogRepository;
 use App\Repository\ParseQueueRepository;
-use App\Service\Pdf\CatalogFileService;
 use App\Service\Pdf\Storage\StorageServiceFacade;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -59,6 +58,24 @@ class ParseQueueService
         $this->queueRepository->remove($queueItem, true);
 
         return $this->storageService->getCatalogFullPath($filename);
+    }
+
+    public function getAllParsed(): ParseQueueList
+    {
+        $catalogs = $this->queueRepository->findAllSuccess();
+
+        $catalogs = array_map(
+            fn($catalog) => (new ParseQueueItem())
+                ->setId($catalog->getId())
+                ->setFilename($catalog->getFilename())
+                ->setOriginFilename($catalog->getOriginFilename())
+                ->setText($catalog->getText())
+                ->setStatus($catalog->getStatus())
+                ->setByteSize($catalog->getByteSize()),
+            $catalogs
+        );
+
+        return new ParseQueueList($catalogs);
     }
 
     /**

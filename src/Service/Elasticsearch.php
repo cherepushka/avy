@@ -21,7 +21,7 @@ class Elasticsearch
     const POST_TAG = '</highlight>';
     const STD_INNER_HITS_SIZE = 5;
     const STD_LANG = 'rus';
-    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series'];
+    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series', 'suggest-text'];
 
     private Client $client;
 
@@ -75,12 +75,12 @@ class Elasticsearch
                 'fields' => self::STD_SEARCH_FIELDS,
                 'query' => [
                     'match' => [
-                        "suggest-text-content" => $text
+                        "text-content" => $text
                     ]
                 ],
                 'highlight' => [
                     'fields' => [
-                        'suggest-text-content' => [
+                        'text-content' => [
                             'pre_tags' => self::PRE_TAG,
                             'post_tags' => self::POST_TAG
                         ]
@@ -112,7 +112,7 @@ class Elasticsearch
                         ],
                         'must' => [
                             'match' => [
-                                "suggest-text-content" => $text
+                                "text-content" => $text
                             ]
                         ]
                     ]
@@ -126,7 +126,7 @@ class Elasticsearch
                         'size' => self::STD_INNER_HITS_SIZE,
                         'highlight' => [
                             'fields' => [
-                                'suggest-text-content' => [
+                                'text-content' => [
                                     'pre_tags' => self::PRE_TAG,
                                     'post_tags' => self::POST_TAG
                                 ]
@@ -161,7 +161,7 @@ class Elasticsearch
                     "highlight-suggest" => [
                         "prefix" => $text,
                         "completion" => [
-                            "field" => "suggest-completion",
+                            "field" => "text-content.suggest-completion",
 //                            "highlight" => [
 //                                "pre_tag" => self::PRE_TAG,
 //                                "post_tag" => self::POST_TAG
@@ -187,6 +187,7 @@ class Elasticsearch
         string $filename,
         int $filesize,
         string $elastic_content,
+        string $suggest_text,
         string $lang,
         array $category_ids,
         array $series
@@ -198,8 +199,8 @@ class Elasticsearch
                 'id' => uniqid(),
                 'index' => 'catalogs',
                 'body' => [
-                    'suggest-completion' => $elastic_content,
-                    'suggest-text-content' => $elastic_content,
+                    'text-content' => $elastic_content,
+                    'suggest-text' => $suggest_text,
                     'file-name' => $filename,
                     'file-size' => $filesize,
                     'file-lang' => $lang,

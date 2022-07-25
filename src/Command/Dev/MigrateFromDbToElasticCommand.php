@@ -43,6 +43,7 @@ class MigrateFromDbToElasticCommand extends Command
                 $catalog->getFilename(),
                 $catalog->getByteSize(),
                 $catalog->getText(),
+                $catalog->getSuggestText(),
                 $catalog->getLang()->getAlias(),
                 $category_ids,
                 $series

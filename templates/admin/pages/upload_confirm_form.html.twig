@@ -42,6 +42,12 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Текст для поисковых подсказок:</label>
+                            <textarea class="form-control" name='{{ document.filename }}[suggest_text]' style="width: 100%; min-height: 500px">
+                            </textarea>
+                        </div>
+
+                        <div class="form-group">
                             <label>Текст файла</label>
                             <textarea class="form-control" name='{{ document.filename }}[text]' style="width: 100%; min-height: 500px">
                                 {{ document.text }}
@@ -50,6 +56,7 @@
 
                         <input type="hidden" name="{{ document.filename }}[filename]" value="{{ document.filename }}">
                         <input type="hidden" name="{{ document.filename }}[category_ids]" value="" class="category_ids_input">
+                        <input type="hidden" name="{{ document.filename }}[byte_size]" value="" class="category_ids_input">
                     </div>
                 </div>
 

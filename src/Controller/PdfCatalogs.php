@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Service\Pdf\CatalogFileService;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -15,19 +15,21 @@ class PdfCatalogs extends AbstractController
     #[Route('/catalogs/pdf/show/{name}', name: 'app_catalogs_pdf_show', methods: ['GET'])]
     public function show(
         Request     $request,
-        CatalogFileService $fileHandler
-    ): BinaryFileResponse
+        StorageServiceFacade $storageServiceFacade
+    ): Response
     {
         $catalogName = $request->attributes->get('name');
 
-        $filepath = $fileHandler->getCatalogPath($catalogName);
+        $fileContent = $storageServiceFacade->getRawContentFromCatalogFile($catalogName);
 
-        $response = new BinaryFileResponse($filepath);
+        $response = new Response($fileContent);
         $response->headers->set('Content-Type', 'application/pdf');
-        $response->setContentDisposition(
-            ResponseHeaderBag::DISPOSITION_INLINE,
+
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $catalogName
         );
+        $response->headers->set('Content-Disposition', $disposition);
 
         return $response;
     }
