@@ -4,12 +4,14 @@ namespace App\Command;
 
 use App\Entity\ParseQueue;
 use App\Exception\FileCorruptedException;
+use App\Model\File\CatalogFile;
 use App\Repository\ParseQueueRepository;
 use App\Service\CatalogService;
 use App\Service\OCR\OcrVisionInterface;
 use App\Service\ParseQueueService;
 use App\Service\Pdf\CatalogFileService;
 use App\Service\Pdf\ImageBuilder;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use App\Service\Pdf\TextParser;
 use Exception;
 use ImagickException;
@@ -27,9 +29,9 @@ class ParseQueueCommand extends Command
 {
 
     public function __construct(
+        private readonly OcrVisionInterface $ocrVision,
         private readonly ParseQueueRepository $parseQueueRepository,
-        private readonly CatalogFileService $catalogFileService,
-        private readonly TextParser $textParser,
+        private readonly StorageServiceFacade $storageService,
     )
     {
         parent::__construct();
@@ -58,16 +60,23 @@ class ParseQueueCommand extends Command
     }
 
     /**
-     * @throws ImagickException|FileNotFoundException|FileCorruptedException
+     * @throws FileNotFoundException
      */
     private function handleCatalog(ParseQueue $queueItem): void
     {
         $queueItem->setStatus(ParseQueue::STATUS_PARSING);
         $this->parseQueueRepository->add($queueItem, true);
 
-        $filepath = $this->catalogFileService->getTmpCatalogPath($queueItem->getFilename());
+        $catalogPath = $this->storageService->getCatalogFullPath($queueItem->getFilename());
 
-        $queueItem->setText($this->textParser->parseFromFile($filepath));
+        $catalogFile = (new CatalogFile())
+            ->setFullPath($catalogPath)
+            ->setOriginName($queueItem->getOriginFilename())
+            ->setName($queueItem->getFilename())
+            ->setExtension('pdf')
+            ->setByteSize($queueItem->getByteSize());
+
+        $queueItem->setText($this->ocrVision->catalogGetTextSync($catalogFile));
         $queueItem->setStatus(ParseQueue::STATUS_SUCCESS);
 
         $this->parseQueueRepository->add($queueItem, true);

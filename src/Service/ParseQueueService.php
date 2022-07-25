@@ -20,7 +20,6 @@ class ParseQueueService
 {
 
     public function __construct(
-        private readonly CatalogFileService $catalogFileService,
         private readonly ParseQueueRepository $queueRepository,
         private readonly CatalogRepository $catalogRepository,
         private readonly StorageServiceFacade $storageService,
@@ -29,11 +28,11 @@ class ParseQueueService
     /**
      * @throws FileAlreadyLoadedException
      */
-    public function enqueueFile(UploadedFile $file, Manufacturer $manufacturer = null, Language $lang = null, ArrayCollection $category_ids = null): void
+    public function enqueueFile(UploadedFile $uploadedFile, Manufacturer $manufacturer = null, Language $lang = null, ArrayCollection $category_ids = null): void
     {
-        $file = $this->storageService->saveUploadedCatalog($file);
+        $file = $this->storageService->saveUploadedCatalog($uploadedFile);
 
-        if ($this->isTmpDocumentAlreadyLoaded($file)){
+        if ($this->isDocumentAlreadyLoaded($file)){
             $this->storageService->deleteCatalog($file->getName());
             throw new FileAlreadyLoadedException($file->getOriginName());
         }
@@ -57,34 +56,15 @@ class ParseQueueService
     {
         $queueItem = $this->queueRepository->findOneBy(['filename' => $filename]);
 
-        $catalogPath = $this->catalogFileService->moveFromTmpToCatalogs($filename);
-
         $this->queueRepository->remove($queueItem, true);
 
-        return $catalogPath;
-    }
-
-    public function getAllParsed(): ParseQueueList
-    {
-        $catalogs = $this->queueRepository->findAllSuccess();
-
-        $catalogs = array_map(
-            fn($catalog) => (new ParseQueueItem())
-                ->setId($catalog->getId())
-                ->setFilename($catalog->getFilename())
-                ->setOriginFilename($catalog->getOriginFilename())
-                ->setText($catalog->getText())
-                ->setStatus($catalog->getStatus()),
-            $catalogs
-        );
-
-        return new ParseQueueList($catalogs);
+        return $this->storageService->getCatalogFullPath($filename);
     }
 
     /**
      * Checking if document is already in queue or was uploaded
      */
-    private function isTmpDocumentAlreadyLoaded(CatalogFile $file): bool
+    private function isDocumentAlreadyLoaded(CatalogFile $file): bool
     {
         $byte_size = $file->getByteSize();
         $raw_content = $this->storageService->getRawContentFromCatalogFile($file->getName());

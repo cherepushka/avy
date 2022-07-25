@@ -2,7 +2,7 @@
 
 namespace App\Model\File;
 
-class CatalogTmpFile
+class CatalogLocalTmpFile
 {
 
     private string $fullPath;

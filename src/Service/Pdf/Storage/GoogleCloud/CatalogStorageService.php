@@ -2,12 +2,9 @@
 
 namespace App\Service\Pdf\Storage\GoogleCloud;
 
-use App\Model\File\CatalogFile;
-use App\Model\File\CatalogTmpFile;
 use App\Service\Pdf\Storage\CatalogStorageServiceInterface;
 use Google\Cloud\Storage\Bucket;
 use Google\Cloud\Storage\StorageClient;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CatalogStorageService implements CatalogStorageServiceInterface
 {
@@ -19,7 +16,6 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function __construct(
         string $credentials_path,
-        private readonly SluggerInterface $slugger,
     )
     {
         $this->storageClient = new StorageClient([
@@ -29,50 +25,50 @@ class CatalogStorageService implements CatalogStorageServiceInterface
         $this->bucket = $this->storageClient->bucket($this->bucketName);
     }
 
-    public function save(CatalogTmpFile $file): CatalogFile
+    public function uploadFromLocal(string $filepath, string $filename): string
     {
-        $trimmedExtFileName = pathinfo($file->getOriginName(), PATHINFO_FILENAME);
-        $safeFilename = $this->slugger->slug($trimmedExtFileName);
-        $fileName = sprintf('%s-%s.%s', $safeFilename, uniqid(), $file->getExtension());
-
-        $catalogFile = (new CatalogFile())
-            ->setName($fileName)
-            ->setOriginName($file->getOriginName())
-            ->setFullPath(sprintf('gs://%s/%s/%s', $this->bucketName, $this->catalogsDir, $fileName))
-            ->setExtension($file->getExtension())
-            ->setByteSize($file->getByteSize());
-
-        $this->bucket->upload(fopen($file->getFullPath(), 'r'), [
-            'name' => $this->getPathToCatalog($fileName)
+        $this->bucket->upload(fopen($filepath, 'r'), [
+            'name' => $this->getBucketPathToCatalog($filename)
         ]);
 
-        return $catalogFile;
+        return $this->getFullPathToCatalog($filename);
     }
 
     public function delete(string $filename): void
     {
-        $storageObject = $this->bucket->object($this->getPathToCatalog($filename));
+        $storageObject = $this->bucket->object($this->getBucketPathToCatalog($filename));
 
         $storageObject->delete();
     }
 
     public function exists(string $filename): bool
     {
-        $storageObject = $this->bucket->object($this->getPathToCatalog($filename));
+        $storageObject = $this->bucket->object($this->getBucketPathToCatalog($filename));
 
         return $storageObject->exists();
     }
 
     public function getRawContentFromFile(string $filename): string
     {
-        $storageObject = $this->bucket->object($this->getPathToCatalog($filename));
+        $storageObject = $this->bucket->object($this->getBucketPathToCatalog($filename));
 
         return $storageObject->downloadAsString();
     }
 
-    private function getPathToCatalog(string $filename): string
+    public function downloadToFile(string $filename, string $pathToSave): void
+    {
+        $storageObject = $this->bucket->object($this->getBucketPathToCatalog($filename));
+        $storageObject->downloadToFile($pathToSave);
+    }
+
+    private function getBucketPathToCatalog(string $filename): string
     {
         return sprintf('%s/%s', $this->catalogsDir, $filename);
+    }
+
+    public function getFullPathToCatalog(string $catalogName): string
+    {
+        return sprintf('gs://%s/%s/%s', $this->bucketName, $this->catalogsDir, $catalogName);
     }
 
 }

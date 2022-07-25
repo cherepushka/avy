@@ -39,7 +39,11 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\ImageOcrVision'
+
+    App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\DocumentOcrVision'
+
+    App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\Local\CatalogStorageService'
+    App\Service\Pdf\Storage\OcrResultStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService'
 
     App\Service\Elasticsearch:
         arguments:
