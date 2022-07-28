@@ -98,7 +98,7 @@ class Elasticsearch
     public function searchCollapseBySeries(string $text, array $series_ids, int $series_size, int $from): array
     {
         return $this->client->search([
-            'index' => 'catalogs',
+            'index' => $this->indeciesNameOfSeries($series_ids),
             'body' => [
                 '_source' => false,
                 'from' => $from,
@@ -137,6 +137,13 @@ class Elasticsearch
                 ],
                 'sort' => [
                     'exists-products' => 'desc'
+                ],
+                "aggs" => [
+                    "total" => [
+                        "cardinality" => [
+                            "field" => "series"
+                        ]
+                    ]
                 ]
             ]
         ])->asArray();
@@ -193,11 +200,32 @@ class Elasticsearch
         array $series
     ): void
     {
+
+        $series_ids = [];
+        foreach ($series as $seria){
+            $series_ids[] = $seria->getId();
+        }
+
+        $this->client->create([
+            'id' => uniqid(),
+            'index' => 'catalogs',
+            'body' => [
+                'text-content' => $elastic_content,
+                'suggest-text' => $suggest_text,
+                'file-name' => $filename,
+                'file-size' => $filesize,
+                'file-lang' => $lang,
+                'exists-products' => true,
+                'categories' => $category_ids,
+                'series' => $series_ids,
+            ]
+        ]);
+
         foreach ($series as $seria) {
 
             $this->client->create([
                 'id' => uniqid(),
-                'index' => 'catalogs',
+                'index' => 'catalogs-seria-' . $seria->getId(),
                 'body' => [
                     'text-content' => $elastic_content,
                     'suggest-text' => $suggest_text,
@@ -210,7 +238,16 @@ class Elasticsearch
                 ]
             ]);
         }
+    }
 
+    private function indeciesNameOfSeries(array $series_ids): string
+    {
+        $indecies = '';
+
+        foreach ($series_ids as $id) {
+            $indecies .= "catalogs-seria-$id,";
+        }
+        return rtrim($indecies, ',');
     }
 
 }

@@ -2,11 +2,10 @@ controllers:
     resource: ../src/Controller/
     type: attribute
 
-#TODO поправить пути
 admin_controllers:
-    resource: /var/www/html/avy/src/Controller/Admin/
+    resource: /var/www/html/src/Controller/Admin/
     prefix: "/admin"
 
 a-flow_controllers:
-    resource: /var/www/html/avy/src/Controller/Domains/A_flow/
+    resource: /var/www/html/src/Controller/Domains/A_flow/
     host: "a-flow.%main_domain%"

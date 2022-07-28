@@ -16,7 +16,7 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
     public function map(array $elastic_response, int $page_size, int $page): SearchResultList
     {
         $items = [];
-        $total = $elastic_response['hits']['total']['value'];
+        $total = $elastic_response['aggregations']['total']['value'];
 
         foreach ($elastic_response['hits']['hits'] as $series){
             $item = [];
@@ -25,9 +25,6 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
             foreach ($series['inner_hits']['file-name']['hits']['hits'] as $inner_item) {
                 $inner_fields = $inner_item['fields'];
                 $catalog = $this->catalogRepository->findOneByFilename($inner_fields['file-name'][0]);
-                $suggest_text = isset($inner_item['fields']['suggest-text'][0]) && $inner_item['fields']['suggest-text'][0] !== ""
-                    ? $inner_item['fields']['suggest-text'][0]
-                    : implode("\n", $inner_item['highlight']['text-content']);
 
                 $hit = (new SearchResultItem())
                     ->setSeries($series_id)
@@ -37,7 +34,7 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
                         'name' => $catalog->getFilename()
                     ], UrlGeneratorInterface::ABSOLUTE_URL))
                     ->setOriginName($catalog->getOriginFilename())
-                    ->setSuggestText($suggest_text);
+                    ->setSuggestText(implode("\n", $inner_item['highlight']['text-content']));
 
                 $item[] = $hit;
             }
