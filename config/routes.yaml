@@ -5,7 +5,3 @@ controllers:
 admin_controllers:
     resource: /var/www/html/src/Controller/Admin/
     prefix: "/admin"
-
-a-flow_controllers:
-    resource: /var/www/html/src/Controller/Domains/A_flow/
-    host: "a-flow.%main_domain%"

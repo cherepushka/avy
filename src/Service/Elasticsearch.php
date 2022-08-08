@@ -59,6 +59,7 @@ class Elasticsearch
 
     /**
      * @param string $text
+     * @param int $from
      * @return array
      *
      * @throws ClientResponseException
@@ -104,17 +105,8 @@ class Elasticsearch
                 'from' => $from,
                 'size' => $series_size,
                 'query' => [
-                    'bool' => [
-                        'filter' => [
-                            'terms' => [
-                                'series' => $series_ids
-                            ]
-                        ],
-                        'must' => [
-                            'match' => [
-                                "text-content" => $text
-                            ]
-                        ]
+                    'match' => [
+                        "text-content" => $text
                     ]
                 ],
                 'collapse' => [
@@ -155,24 +147,30 @@ class Elasticsearch
      * @param string $text
      * @return array
      *
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
+     * @throws ElasticsearchException
      */
     public function suggestsDefault(string $text): array
     {
         return $this->client->search([
             'index' => 'catalogs',
             'body' => [
-                "suggest" => [
-                    "highlight-suggest" => [
-                        "prefix" => $text,
-                        "completion" => [
-                            "field" => "text-content.suggest-completion",
-//                            "highlight" => [
-//                                "pre_tag" => self::PRE_TAG,
-//                                "post_tag" => self::POST_TAG
-//                            ]
+                "_source" => false,
+                "query" => [
+                    "multi_match" => [
+                        "query" => $text,
+                        "type" => "bool_prefix",
+                        "fields" => [
+                            "text-content.suggest-completion",
+                            "text-content.suggest-completion._index_prefix",
+                            "text-content.trigram"
+                        ]
+                    ]
+                ],
+                "highlight" => [
+                    "fields" => [
+                        "text-content.trigram" => [
+                            "number_of_fragments" => 1,
+                            "fragment_size" => 100
                         ]
                     ]
                 ]
@@ -184,6 +182,7 @@ class Elasticsearch
      * @param string $filename
      * @param int $filesize
      * @param string $elastic_content
+     * @param string $suggest_text
      * @param string $lang - lang alias
      * @param int[] $category_ids - ids of categories
      * @param Category[] $series - Categories without child Categories
@@ -202,8 +201,11 @@ class Elasticsearch
     {
 
         $series_ids = [];
+        $global_is_product = false;
         foreach ($series as $seria){
+
             $series_ids[] = $seria->getId();
+            $global_is_product = $seria->isProductsExist() ? true : $global_is_product;
         }
 
         $this->client->create([
@@ -215,7 +217,7 @@ class Elasticsearch
                 'file-name' => $filename,
                 'file-size' => $filesize,
                 'file-lang' => $lang,
-                'exists-products' => true,
+                'exists-products' => $global_is_product,
                 'categories' => $category_ids,
                 'series' => $series_ids,
             ]
@@ -232,7 +234,7 @@ class Elasticsearch
                     'file-name' => $filename,
                     'file-size' => $filesize,
                     'file-lang' => $lang,
-                    'exists-products' => $seria->isProductsExist(),
+                    'exists-products' => $global_is_product,
                     'categories' => $category_ids,
                     'series' => $seria->getId(),
                 ]

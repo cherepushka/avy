@@ -11,9 +11,10 @@ class SearchDefaultSuggestsMapper extends AbstractResponseMapper
     public function map(array $elastic_response): array
     {
         $items = [];
-        foreach ($elastic_response['suggest']['highlight-suggest'] as $item) {
-            foreach ($item['options'] as $option) {
-                $items[] = $option['text'];
+
+        foreach ($elastic_response['hits']['hits'] as $hit) {
+            foreach ($hit['highlight']['text-content.trigram'] as $suggest) {
+                $items[] = $suggest;
             }
         }
         return $items;

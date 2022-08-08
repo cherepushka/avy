@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\Category;
 use App\Mapper\Elasticsearch\SearchDefaultSuggestsMapper;
 use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Mapper\Elasticsearch\SearchDefaultMapper;
 use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
+use App\Repository\CategoryRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 
@@ -13,6 +15,7 @@ class SearchService
 {
 
     public function __construct(
+        private readonly CategoryRepository             $categoryRepository,
         private readonly Elasticsearch                  $elasticsearch,
         private readonly SearchDefaultMapper            $defaultResultMapper,
         private readonly SearchSeriesCollapsedMapper    $searchSeriesCollapsedMapper,
@@ -57,7 +60,12 @@ class SearchService
         $series_size = 3;
         $from = ($page - 1) * $series_size;
 
-        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
+        $category_ids = array_map(
+            fn(Category $category) => $category->getId(),
+            $this->categoryRepository->findOnlyFinalCats($series)
+        );
+
+        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $category_ids, $series_size, $from);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 
