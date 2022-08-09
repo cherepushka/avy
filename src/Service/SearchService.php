@@ -65,7 +65,11 @@ class SearchService
             $this->categoryRepository->findOnlyFinalCats($series)
         );
 
-        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $category_ids, $series_size, $from);
+        if(empty($category_ids)){
+            return new SearchResultList([], 0, 0, 1);
+        }
+
+        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 

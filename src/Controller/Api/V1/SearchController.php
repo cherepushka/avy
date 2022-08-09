@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api\V1;
 
+use App\Service\Elasticsearch;
 use App\Service\SearchService;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
@@ -16,6 +17,7 @@ class SearchController extends AbstractController
 
     public function __construct(
         private readonly SearchService $searchService,
+        private readonly Elasticsearch $elasticsearch,
     ){}
 
     /** @throws ElasticsearchException */

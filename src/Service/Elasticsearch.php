@@ -100,6 +100,7 @@ class Elasticsearch
     {
         return $this->client->search([
             'index' => $this->indeciesNameOfSeries($series_ids),
+            'ignore_unavailable' => true,
             'body' => [
                 '_source' => false,
                 'from' => $from,
