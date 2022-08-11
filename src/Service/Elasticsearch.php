@@ -10,7 +10,6 @@ use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
-use Elastic\Elasticsearch\Response\Elasticsearch as Elasticsearch_Response;
 use GuzzleHttp\Client as GuzzleClient;
 use Http\Promise\Promise;
 
@@ -66,7 +65,7 @@ class Elasticsearch
      * @throws MissingParameterException
      * @throws ServerResponseException
      */
-    public function search(string $text, int $from = 0): array
+    public function searchGlobal(string $text, int $from = 0): array
     {
         return $this->client->search([
             'index' => 'catalogs',
@@ -75,15 +74,20 @@ class Elasticsearch
                 'from' => $from,
                 'fields' => self::STD_SEARCH_FIELDS,
                 'query' => [
-                    'match' => [
-                        "text-content" => $text
+                    "multi_match" => [
+                        "query" => $text,
+                        "fields" => ["categories-full-text^1.5", "text-content.trigram"]
                     ]
                 ],
                 'highlight' => [
                     'fields' => [
-                        'text-content' => [
-                            'pre_tags' => self::PRE_TAG,
-                            'post_tags' => self::POST_TAG
+                        "text-content.trigram" => [
+                            "pre_tags" => self::PRE_TAG,
+                            "post_tags" => self::POST_TAG
+                        ],
+                        "categories-full-text" => [
+                            "pre_tags" => self::PRE_TAG,
+                            "post_tags" => self::POST_TAG
                         ]
                     ],
                 ]
@@ -98,6 +102,9 @@ class Elasticsearch
      */
     public function searchCollapseBySeries(string $text, array $series_ids, int $series_size, int $from): array
     {
+        $fields = self::STD_SEARCH_FIELDS;
+        $fields[] = 'categories-full-text';
+
         return $this->client->search([
             'index' => $this->indeciesNameOfSeries($series_ids),
             'ignore_unavailable' => true,
@@ -106,22 +113,27 @@ class Elasticsearch
                 'from' => $from,
                 'size' => $series_size,
                 'query' => [
-                    'match' => [
-                        "text-content" => $text
+                    "multi_match" => [
+                        "query" => $text,
+                        "fields" => ["categories-full-text^1.5", "text-content.trigram"]
                     ]
                 ],
                 'collapse' => [
                     'field' => 'series',
                     'inner_hits' => [
                         '_source' => false,
-                        'fields' => self::STD_SEARCH_FIELDS,
+                        'fields' => $fields,
                         'name' => 'file-name',
                         'size' => self::STD_INNER_HITS_SIZE,
                         'highlight' => [
                             'fields' => [
-                                'text-content' => [
+                                'text-content.trigram' => [
                                     'pre_tags' => self::PRE_TAG,
                                     'post_tags' => self::POST_TAG
+                                ],
+                                "categories-full-text" => [
+                                    "pre_tags" => self::PRE_TAG,
+                                    "post_tags" => self::POST_TAG
                                 ]
                             ]
                         ]
@@ -150,7 +162,7 @@ class Elasticsearch
      *
      * @throws ElasticsearchException
      */
-    public function suggestsDefault(string $text): array
+    public function suggestsGlobal(string $text): array
     {
         return $this->client->search([
             'index' => 'catalogs',
@@ -186,7 +198,8 @@ class Elasticsearch
      * @param string $suggest_text
      * @param string $lang - lang alias
      * @param int[] $category_ids - ids of categories
-     * @param Category[] $series - Categories without child Categories
+     * @param Category[] $final_cats - Categories without child Categories (final categories)
+     * @param string $categories_text - titles of all categories, imploded to string
      *
      * @throws ElasticsearchException
      */
@@ -197,13 +210,13 @@ class Elasticsearch
         string $suggest_text,
         string $lang,
         array $category_ids,
-        array $series
+        array $final_cats,
+        array $categories_text,
     ): void
     {
-
         $series_ids = [];
         $global_is_product = false;
-        foreach ($series as $seria){
+        foreach ($final_cats as $seria){
 
             $series_ids[] = $seria->getId();
             $global_is_product = $seria->isProductsExist() ? true : $global_is_product;
@@ -215,6 +228,7 @@ class Elasticsearch
             'body' => [
                 'text-content' => $elastic_content,
                 'suggest-text' => $suggest_text,
+                'categories-full-text' => $categories_text,
                 'file-name' => $filename,
                 'file-size' => $filesize,
                 'file-lang' => $lang,
@@ -224,7 +238,7 @@ class Elasticsearch
             ]
         ]);
 
-        foreach ($series as $seria) {
+        foreach ($final_cats as $seria) {
 
             $this->client->create([
                 'id' => uniqid(),
@@ -232,6 +246,7 @@ class Elasticsearch
                 'body' => [
                     'text-content' => $elastic_content,
                     'suggest-text' => $suggest_text,
+                    'categories-full-text' => $categories_text,
                     'file-name' => $filename,
                     'file-size' => $filesize,
                     'file-lang' => $lang,

@@ -75,33 +75,6 @@ class CategoryRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    /**
-     * @param array<int> $category_ids
-     * @return array<Category>
-     */
-    public function findOnlyFinalCats(array $category_ids): array
-    {
-        $IN_STATEMENT = '';
-        foreach ($category_ids as $category_id) {
-            $IN_STATEMENT .= "$category_id,";
-        }
-        $IN_STATEMENT = rtrim($IN_STATEMENT, ',');
-
-        $rsm = new ResultSetMappingBuilder($this->_em);
-        $rsm->addRootEntityFromClassMetadata(Category::class, 'c1.*');
-
-        $query = $this->_em->createNativeQuery("
-            SELECT c1.* FROM category c1
-            LEFT JOIN category c2 ON c1.id = c2.parent
-            WHERE 
-                c1.id IN ($IN_STATEMENT)
-                AND
-                c2.id IS NULL
-        ", $rsm);
-
-        return $query->getResult();
-    }
-
 //    /**
 //     * @return CategoryTree[] Returns an array of CategoryTree objects
 //     */

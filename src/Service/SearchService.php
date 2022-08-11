@@ -27,7 +27,7 @@ class SearchService
      */
     public function suggestsDefault(string $text): array
     {
-        $elastic_response = $this->elasticsearch->suggestsDefault($text);
+        $elastic_response = $this->elasticsearch->suggestsGlobal($text);
 
         return $this->searchDefaultSuggestsMapper->map($elastic_response);
     }
@@ -40,7 +40,7 @@ class SearchService
         $page_size = 10;
         $from = ($page - 1) * $page_size;
 
-        $elastic_response = $this->elasticsearch->search($text, $from);
+        $elastic_response = $this->elasticsearch->searchGlobal($text, $from);
 
         return $this->defaultResultMapper->map($elastic_response, $page_size, $page);
     }
@@ -59,15 +59,6 @@ class SearchService
     {
         $series_size = 3;
         $from = ($page - 1) * $series_size;
-
-        $category_ids = array_map(
-            fn(Category $category) => $category->getId(),
-            $this->categoryRepository->findOnlyFinalCats($series)
-        );
-
-        if(empty($category_ids)){
-            return new SearchResultList([], 0, 0, 1);
-        }
 
         $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
