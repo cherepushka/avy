@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Category;
 use App\Mapper\Elasticsearch\SearchDefaultSuggestsMapper;
 use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Mapper\Elasticsearch\SearchDefaultMapper;
@@ -10,8 +9,9 @@ use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
+use App\Service\Elasticsearch;
 
-class SearchService
+class SearchServiceFacade
 {
 
     public function __construct(

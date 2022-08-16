@@ -11,7 +11,6 @@ use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use GuzzleHttp\Client as GuzzleClient;
-use Http\Promise\Promise;
 
 class Elasticsearch
 {
@@ -258,6 +257,18 @@ class Elasticsearch
         }
     }
 
+    public function uploadProdustSuggest(string $text, string $type)
+    {
+        $this->client->create([
+            'id' => uniqid(),
+            'index' => 'product-suggests',
+            'body' => [
+                'value' => $text,
+                'type' => $type,
+            ]
+        ]);
+    }
+
     private function indeciesNameOfSeries(array $series_ids): string
     {
         $indecies = '';
@@ -267,5 +278,4 @@ class Elasticsearch
         }
         return rtrim($indecies, ',');
     }
-
 }
