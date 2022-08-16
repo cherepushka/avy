@@ -11,7 +11,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use App\Service\Elasticsearch;
 
-class SearchServiceFacade
+class SearchService
 {
 
     public function __construct(
@@ -62,6 +62,32 @@ class SearchServiceFacade
 
         $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
+    }
+
+    public function productSuggests(string $text)
+    {
+        $text_words = explode(" ", $text);
+        foreach ($text_words as $key => $word){
+            $text_words[$key] = $word . '^' . $key + 1;
+        }
+
+        $text_words = array_reverse($text_words);
+        $text = implode(' ', $text_words);
+        
+        $elastic_response = $this->elasticsearch->productHints($text);
+        
+        $result = [];
+        foreach($elastic_response['hits']['hits'] as $hit){
+            $inner_hits = [];
+
+            foreach($hit['inner_hits']['value']['hits']['hits'] as $inner_hit){
+                $inner_hits[] = $inner_hit['fields']['value'][0];
+            }
+
+            $result[ $hit['fields']['type'][0] ] = $inner_hits;
+        }
+
+        return $result;
     }
 
 }

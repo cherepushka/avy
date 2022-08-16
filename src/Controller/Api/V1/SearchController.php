@@ -54,4 +54,17 @@ class SearchController extends AbstractController
         return $this->json($items);
     }
 
+    #[Route('/search/product-suggests', name: '_product_suggests', methods: ['POST'])]
+    public function productSuggests(Request $request): JsonResponse
+    {
+        $request_arr = $request->toArray();
+
+        if (empty($request_arr) || !isset($request_arr['search'])){
+            return $this->json([]);
+        }
+
+        $items = $this->searchService->productSuggests($request_arr['search']);
+        return $this->json($items);
+    }
+
 }

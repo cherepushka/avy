@@ -257,6 +257,37 @@ class Elasticsearch
         }
     }
 
+    public function productHints(string $text): array
+    {
+        return $this->client->search([
+            'index' => 'product-suggests',
+            'body' => [
+                "_source" => false,
+                "query" => [
+                    "query_string" => [
+                        "query" => $text,
+                        "fields" => [
+                            "value",
+                            "value._search-as-you-type._2gram",
+                            "value._search-as-you-type._3gram",
+                            "value._concatenated-prefix"
+                        ]
+                    ]
+                ],
+                "collapse" => [
+                    "field" => "type",
+                    "inner_hits" => [
+                        "_source"  => false,
+                        "fields" => ["value"],
+                        "name" => "value",
+                        "size" => 2
+                    ],
+                    "max_concurrent_group_searches" => 4
+                ]
+            ]
+        ])->asArray();
+    }
+
     public function uploadProdustSuggest(string $text, string $type)
     {
         $this->client->create([
