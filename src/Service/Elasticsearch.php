@@ -75,12 +75,16 @@ class Elasticsearch
                 'query' => [
                     "multi_match" => [
                         "query" => $text,
-                        "fields" => ["categories-full-text^1.5", "text-content.trigram"]
+                        "fields" => [
+                            "categories-full-text^1.5",
+                            "text-content",
+                            "text-content.tengram"
+                        ]
                     ]
                 ],
                 'highlight' => [
                     'fields' => [
-                        "text-content.trigram" => [
+                        "text-content" => [
                             "pre_tags" => self::PRE_TAG,
                             "post_tags" => self::POST_TAG
                         ],
@@ -114,7 +118,11 @@ class Elasticsearch
                 'query' => [
                     "multi_match" => [
                         "query" => $text,
-                        "fields" => ["categories-full-text^1.5", "text-content.trigram"]
+                        "fields" => [
+                            "categories-full-text^1.5",
+                            "text-content",
+                            "text-content.tengram"
+                        ]
                     ]
                 ],
                 'collapse' => [
@@ -126,7 +134,7 @@ class Elasticsearch
                         'size' => self::STD_INNER_HITS_SIZE,
                         'highlight' => [
                             'fields' => [
-                                'text-content.trigram' => [
+                                'text-content' => [
                                     'pre_tags' => self::PRE_TAG,
                                     'post_tags' => self::POST_TAG
                                 ],

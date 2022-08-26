@@ -27,8 +27,8 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
                 $inner_fields = $inner_item['fields'];
                 $catalog = $this->catalogRepository->findOneByFilename($inner_fields['file-name'][0]);
 
-                $suggeusetText = isset($inner_item['highlight']['text-content.trigram'])
-                    ? implode("\n", $inner_item['highlight']['text-content.trigram'])
+                $suggeusetText = isset($inner_item['highlight']['text-content'])
+                    ? implode("\n", $inner_item['highlight']['text-content'])
                     : '';
 
                 $hit = (new SearchResultItem())

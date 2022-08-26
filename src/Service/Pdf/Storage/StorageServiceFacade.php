@@ -3,8 +3,6 @@
 namespace App\Service\Pdf\Storage;
 
 use App\Model\File\CatalogFile;
-use App\Model\File\CatalogLocalTmpFile;
-use App\Model\File\CatalogTmpFile;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;

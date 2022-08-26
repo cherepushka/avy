@@ -18,6 +18,11 @@ parameters:
     app.elasticsearch.cloud_id: '%env(resolve:ELASTICSEARCH_CLOUD_ID)%'
     app.elasticsearch.api_key: '%env(resolve:ELASTICSEARCH_API_KEY)%'
 
+    exceptions:
+        App\Exception\CategoryNotFoundByIdException: {code: 404}
+        App\Exception\FileAlreadyLoadedException: {code: 400}
+        App\Exception\FileCorruptedException: {code: 400}
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -70,6 +75,13 @@ services:
         arguments:
             $credentials_path: '%app.ocr_google_credentials_path%'
 
+    App\Service\ExceptionHandler\ExceptionMappingResolver:
+        arguments: ['%exceptions%']
+
     App\EventListener\AllowAllCorsRequest:
         tags:
             - { name: kernel.event_listener, event: kernel.response }
+    
+    App\EventListener\ApiExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, priority: 10 }

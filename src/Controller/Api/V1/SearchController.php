@@ -6,6 +6,7 @@ use App\Service\Elasticsearch;
 use App\Service\SearchService;
 use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
