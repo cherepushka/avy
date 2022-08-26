@@ -67,7 +67,7 @@ class Elasticsearch
     public function searchGlobal(string $text, int $from = 0): array
     {
         return $this->client->search([
-            'index' => 'catalogs',
+            'index' => 'catalogs_alias',
             'body' => [
                 '_source' => false,
                 'from' => $from,
@@ -109,19 +109,32 @@ class Elasticsearch
         $fields[] = 'categories-full-text';
 
         return $this->client->search([
-            'index' => $this->indeciesNameOfSeries($series_ids),
+            'index' => 'catalogs-seria-_alias',
             'ignore_unavailable' => true,
             'body' => [
                 '_source' => false,
                 'from' => $from,
                 'size' => $series_size,
                 'query' => [
-                    "multi_match" => [
-                        "query" => $text,
-                        "fields" => [
-                            "categories-full-text^1.5",
-                            "text-content",
-                            "text-content.tengram"
+                    'bool' => [
+                        "filter" => [
+                            "terms" => [
+                                "series" => $series_ids
+                            ]
+                        ],
+                        "must"=> [
+                            [
+                                "multi_match" => [
+                                    "query" => $text,
+                                    "fields" => [
+                                        "categories-full-text^1.5",
+                                        "text-content",
+                                        "text-content._tengram",
+                                        "text-content._search-as-you-type._2gram",
+                                        "text-content._search-as-you-type._3gram"
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
                 ],
@@ -172,7 +185,7 @@ class Elasticsearch
     public function suggestsGlobal(string $text): array
     {
         return $this->client->search([
-            'index' => 'catalogs',
+            'index' => 'catalogs_alias',
             'body' => [
                 "_source" => false,
                 "query" => [
@@ -306,15 +319,5 @@ class Elasticsearch
                 'type' => $type,
             ]
         ]);
-    }
-
-    private function indeciesNameOfSeries(array $series_ids): string
-    {
-        $indecies = '';
-
-        foreach ($series_ids as $id) {
-            $indecies .= "catalogs-seria-$id,";
-        }
-        return rtrim($indecies, ',');
     }
 }
