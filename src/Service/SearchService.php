@@ -66,6 +66,10 @@ class SearchService
 
     public function productSuggests(string $text)
     {
+        // Add slashes to Elastic reserved query characters
+        // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
+        $text = addcslashes($text, '+-=&|><!(){}[]^"~*?:\/');
+
         $text_words = explode(" ", $text);
         foreach ($text_words as $key => $word){
             $text_words[$key] = $word . '^' . $key + 1;

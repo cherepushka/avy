@@ -9,9 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/v1', name: 'app_api')]
 class SeriesController extends AbstractController{
 
-    public function __construct(
-
-    ){}
+    public function __construct(){}
 
     #[Route('/series/upload-existing', name: '_series_upload-existing', methods: ['PUT'])]
     public function uploadSeries(Request $request)

@@ -11,6 +11,7 @@ parameters:
     app.ocr_google_credentials_path: '%env(resolve:OCR_GOOGLE_CREDENTIALS_PATH)%'
     app.ocr_yandex_token: '%env(resolve:OCR_YANDEX_TOKEN)%'
 
+    app.elasticsearch.index_prefix: '%env(resolve:ELASTICSEARCH_INDEX_PREFIX)%'
     app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'
     app.elasticsearch.host: '%env(resolve:ELASTICSEARCH_HOST)%'
     app.elasticsearch.user: '%env(resolve:ELASTICSEARCH_USER)%'
@@ -52,6 +53,7 @@ services:
 
     App\Service\Elasticsearch:
         arguments:
+            $elasticsearch_index_prefix: '%app.elasticsearch.index_prefix%'
             $elasticsearch_connection_type: '%app.elasticsearch.connection_type%'
             $elasticsearch_host: '%app.elasticsearch.host%'
             $elasticsearch_user: '%app.elasticsearch.user%'

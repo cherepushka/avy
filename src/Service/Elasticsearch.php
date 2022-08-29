@@ -22,11 +22,13 @@ class Elasticsearch
     const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series', 'suggest-text'];
 
     private Client $client;
+    private string $index_prefix = '';
 
     /**
      * @throws AuthenticationException
      */
     public function __construct(
+        string $elasticsearch_index_prefix,
         string $elasticsearch_connection_type,
         string $elasticsearch_host,
         string $elasticsearch_user,
@@ -34,6 +36,8 @@ class Elasticsearch
         string $elasticsearch_cloud_id,
         string $elasticsearch_api_key
     ) {
+        $this->index_prefix = $elasticsearch_index_prefix;
+
         $Elasticsearch_client = ClientBuilder::create();
         $Elasticsearch_client->setHttpClient(new GuzzleClient());
 
@@ -130,8 +134,6 @@ class Elasticsearch
                                         "categories-full-text^1.5",
                                         "text-content",
                                         "text-content._tengram",
-                                        "text-content._search-as-you-type._2gram",
-                                        "text-content._search-as-you-type._3gram"
                                     ]
                                 ]
                             ]
@@ -244,7 +246,7 @@ class Elasticsearch
 
         $this->client->create([
             'id' => uniqid(),
-            'index' => 'catalogs',
+            'index' => $this->index_prefix . 'catalogs',
             'body' => [
                 'text-content' => $elastic_content,
                 'suggest-text' => $suggest_text,
@@ -262,7 +264,7 @@ class Elasticsearch
 
             $this->client->create([
                 'id' => uniqid(),
-                'index' => 'catalogs-seria-' . $seria->getId(),
+                'index' => $this->index_prefix . 'catalogs-seria-' . $seria->getId(),
                 'body' => [
                     'text-content' => $elastic_content,
                     'suggest-text' => $suggest_text,
@@ -281,7 +283,7 @@ class Elasticsearch
     public function productHints(string $text): array
     {
         return $this->client->search([
-            'index' => 'product-suggests',
+            'index' => 'product-suggests_alias',
             'body' => [
                 "_source" => false,
                 "query" => [
@@ -313,7 +315,7 @@ class Elasticsearch
     {
         $this->client->create([
             'id' => uniqid(),
-            'index' => 'product-suggests',
+            'index' => $this->index_prefix . 'product-suggests',
             'body' => [
                 'value' => $text,
                 'type' => $type,
