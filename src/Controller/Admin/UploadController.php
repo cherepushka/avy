@@ -6,58 +6,31 @@ use App\Service\CatalogService;
 use App\Service\CategoryTree;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
-use App\Service\ParseQueueService;
-use App\Service\Pdf\CatalogFileService;
-use App\Service\Pdf\Storage\StorageServiceFacade;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
 use App\Service\Elasticsearch;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use App\Http\Request\AdminCatalogUpload as AdminCatalogUploadForm;
+use App\Repository\CategoryRepository;
+use Symfony\Component\Form\FormError;
 use Throwable;
 
 class UploadController extends AbstractController
 {
 
-    public function __construct(
-        private readonly ParseQueueService $parseQueueService
-    ){}
+    public function __construct(){}
 
-    #[Route('/catalogs/upload', name: 'admin_document_upload_form', methods: ['GET'])]
-    public function upload_form(): Response
-    {
-        return $this->render('admin/pages/upload_form.html.twig');
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Route('/catalogs/upload', name: 'admin_document_upload', methods: ['POST'])]
-    public function upload_document(
-        Request             $request,
-    ): JsonResponse|Response
-    {
-        $document = $request->files->get('document');
-
-        $this->parseQueueService->enqueueFile($document);
-
-        $this->addFlash('success_messages', 'Файл успешно добавлен в очередь на загрузку');
-        return $this->redirectToRoute('admin_document_upload_form');
-    }
-
-    #[Route('/catalogs/parsed', 'admin_parsed_documents_list', methods: ['GET'])]
-    public function parsed_documents_list(
+    #[Route('/catalogs/upload', 'admin_document_upload_form', methods: ['GET'])]
+    public function upload_form(
         ManufacturerService $manufacturerService,
         LanguageService     $languageService,
         CategoryTree        $categoryTree,
     ): Response
     {
-        return $this->render('admin/pages/upload_confirm_form.html.twig', [
-            'documents'     => $this->parseQueueService->getAllParsed(),
+        return $this->render('admin/pages/upload_form.html.twig', [
             'manufacturers' => $manufacturerService->getAll(),
             'languages'     => $languageService->getAll(),
             'category_tree' => $categoryTree->getRemoteTree()
@@ -69,54 +42,63 @@ class UploadController extends AbstractController
      */
     #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
     public function confirm_upload_document(
-        Request                 $request,
-        Elasticsearch           $elasticsearch,
-        CatalogService          $catalogService,
+        Request $request,
+        Elasticsearch $elasticsearch,
+        CatalogService $catalogService,
+        CategoryRepository $categoryRepository
     ): RedirectResponse
     {
-        //TODO сделать добавление в базу миграцией
-        $files_data = $request->request->all();
+        $formEntity = new AdminCatalogUploadForm\Entity();
+        $form = $this->createForm(AdminCatalogUploadForm\FormType::class, $formEntity, ['csrf_protection' => false]);
+        $form->submit([
+            'lang' => $request->get('lang'),
+            'text' => $request->get('text'),
+            'originFilename' => $request->get('originFilename'),
+            'manufacturer' => $request->get('manufacturer'),
+            'originFilename' => $request->get('originFilename'),
+            'categoryIds' => $request->get('categoryIds'),
+            'file' => $request->files->get('file'),
+        ]);
 
-        foreach ($files_data as $file_data) {
-            $categories_ids = explode(',', $file_data['category_ids']);
+        if ($form->isSubmitted() && $form->isValid()) {
 
-            if (empty($categories_ids)) {
-                $this->addFlash('error_messages', 'Нужно указать хотя бы 1 категорию');
+            try{
+            //TODO сделать добавление в базу миграцией
+                
+                $catalogService->insertCatalog(
+                    $formEntity->getFile(),
+                    $formEntity->getOriginFilename(),
+                    $formEntity->getManufacturer(),
+                    $formEntity->getCategoryIds(),
+                    $formEntity->getLang(),
+                    $formEntity->getText()
+                );
+
+                $final_cats = $categoryRepository->findWithoutChildren($formEntity->getCategoryIds());
+                $catalog_cats = $categoryRepository->findBy(['id' => $formEntity->getCategoryIds()]);
+
+                $elasticsearch->uploadDocument(
+                    $formEntity->getFile()->getFilename(),
+                    $formEntity->getFile()->getSize(),
+                    $formEntity->getText(),
+                    $catalog_cats,
+                    $final_cats,
+                );
+
+            } catch (Throwable $e) {
+                $this->addFlash('error_messages', 'Произшла ошибка при загрузке: ' . $e->getMessage());
                 return $this->redirectToRoute('admin_document_confirm_upload');
             }
 
-            $byte_size = $file_data['byte_size'];
+            $this->addFlash('success_messages', 'Все каталоги были успешно загружены');
 
-            $catalogID = $catalogService->insertCatalog(
-                $file_data['filename'],
-                $file_data['origin_filename'],
-                $file_data['manufacturer'],
-                $categories_ids,
-                $file_data['lang'],
-                $byte_size,
-                $file_data['text'],
-                $file_data['suggest_text']
-            );
+        } else {
 
-            try {
-                $elasticsearch->uploadDocument(
-                    $catalogID,
-                    $file_data['filename'],
-                    $byte_size,
-                    $file_data['text'],
-                    $file_data['suggest_text'],
-                    $categories_ids,
-                    $file_data['lang']
-                );
-
-                $this->parseQueueService->dequeueFile($file_data['filename']);
-            } catch (Throwable) {
-                $this->addFlash('error_messages', 'Произшла ошибка при загрузке');
-                return $this->redirectToRoute('admin_document_confirm_upload');
+            foreach($form->getErrors(true) as $errorMessage){
+                $this->addFlash('error_messages', $errorMessage->getMessage());
             }
         }
 
-        $this->addFlash('success_messages', 'Все каталоги были успешно загружены');
         return $this->redirectToRoute('admin_document_upload_form');
     }
 

@@ -7,9 +7,8 @@ parameters:
     app.upload_directory_path: '%kernel.project_dir%/var/uploads'
     app.tmp_directory_path: '%kernel.project_dir%/var/tmp'
 
-    app.ocr_project_id: '%env(resolve:OCR_PROJECT_ID)%'
     app.ocr_google_credentials_path: '%env(resolve:OCR_GOOGLE_CREDENTIALS_PATH)%'
-    app.ocr_yandex_token: '%env(resolve:OCR_YANDEX_TOKEN)%'
+    app.storage_google_credentials_path: '%env(resolve:STORAGE_GOOGLE_CREDENTIAL_PATH)%'
 
     app.elasticsearch.index_prefix: '%env(resolve:ELASTICSEARCH_INDEX_PREFIX)%'
     app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'
@@ -47,7 +46,6 @@ services:
     # please note that last definitions always *replace* previous ones
 
     App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\DocumentOcrVision'
-
     App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService'
     App\Service\Pdf\Storage\OcrResultStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService'
 
@@ -63,15 +61,11 @@ services:
 
     App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService:
         arguments:
-            $credentials_path: '%app.ocr_google_credentials_path%'
+            $credentials_path: '%app.storage_google_credentials_path%'
 
     App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService:
         arguments:
-            $credentials_path: '%app.ocr_google_credentials_path%'
-
-    App\Service\OCR\Google\ImageOcrVision:
-        arguments:
-            $credentials_path: '%app.ocr_google_credentials_path%'
+            $credentials_path: '%app.storage_google_credentials_path%'
 
     App\Service\OCR\Google\DocumentOcrVision:
         arguments:
@@ -87,3 +81,7 @@ services:
     App\EventListener\ApiExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception, priority: 10 }
+
+    App\Http\ArgumentResolver\RequestJsonData:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 50 }

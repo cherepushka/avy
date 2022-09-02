@@ -21,20 +21,6 @@ class SearchController extends AbstractController
         private readonly Elasticsearch $elasticsearch,
     ){}
 
-    /** @throws ElasticsearchException */
-    #[Route('/search/highlight', name: '_search_highlight', methods: ['POST'])]
-    public function highlights(Request $request): JsonResponse
-    {
-        if (empty($request->toArray())){
-            return $this->json([]);
-        }
-        $search_text = $request->toArray()['search'];
-
-        $items = $this->searchService->suggestsDefault($search_text);
-
-        return $this->json($items);
-    }
-
     /** @throws ElasticsearchException|NonUniqueResultException */
     #[Route('/search/by-series', name: '_search', methods: ['POST'])]
     public function searchSeriesGrouping(Request $request): JsonResponse

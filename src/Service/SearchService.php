@@ -23,16 +23,6 @@ class SearchService
     ){}
 
     /**
-     * @throws ElasticsearchException
-     */
-    public function suggestsDefault(string $text): array
-    {
-        $elastic_response = $this->elasticsearch->suggestsGlobal($text);
-
-        return $this->searchDefaultSuggestsMapper->map($elastic_response);
-    }
-
-    /**
      * @throws ElasticsearchException|NonUniqueResultException
      */
     public function searchDefault(string $text, int $page = 1): SearchResultList
@@ -84,7 +74,7 @@ class SearchService
         foreach($elastic_response['hits']['hits'] as $hit){
             $inner_hits = [];
 
-            foreach($hit['inner_hits']['value']['hits']['hits'] as $inner_hit){
+            foreach($hit['inner_hits']['value']['hits']['hits'] as $inner_hit) {
                 $inner_hits[] = $inner_hit['fields']['value'][0];
             }
 

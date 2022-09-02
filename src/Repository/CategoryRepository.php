@@ -52,6 +52,20 @@ class CategoryRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * $param [int]array $ids
+     */
+    public function findWithoutChildren(array $ids): array
+    {
+        return $this->createQueryBuilder('c1')
+            ->leftJoin(Category::class, 'c2', Expr\Join::WITH, 'c2.parent = c1.id')
+            ->where('c2.id IS NULL')
+            ->andWhere('c1.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findAllParentsList(int $id): array
     {
         $rsm = new ResultSetMappingBuilder($this->_em);
@@ -75,28 +89,4 @@ class CategoryRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-//    /**
-//     * @return CategoryTree[] Returns an array of CategoryTree objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?CategoryTree
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

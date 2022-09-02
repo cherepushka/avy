@@ -32,25 +32,12 @@ class MigrateFromDbToElasticCommand extends Command
     {
         foreach($this->catalogRepository->findAll() as $catalog){
 
-            $series = $this->catalogRepository->findAllSeries($catalog->getId());
-
-            $category_ids = [];
-            $categories_text = [];
-            foreach($catalog->getCategories() as $category){
-                $category_ids[] = $category->getid();
-
-                $categories_text[] = $category->getTitle();
-            }
-
             $this->elasticsearch->uploadDocument(
                 $catalog->getFilename(),
                 $catalog->getByteSize(),
                 $catalog->getText(),
-                $catalog->getSuggestText(),
-                $catalog->getLang()->getAlias(),
-                $category_ids,
-                $series,
-                $categories_text,
+                $catalog->getCategories()->toArray(),
+                $this->catalogRepository->findAllSeries($catalog->getId()),
             );
         }
        

@@ -18,8 +18,7 @@ class Elasticsearch
     const PRE_TAG = '<highlight>';
     const POST_TAG = '</highlight>';
     const STD_INNER_HITS_SIZE = 5;
-    const STD_LANG = 'rus';
-    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series', 'suggest-text'];
+    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series'];
 
     private Client $client;
     private string $index_prefix = '';
@@ -177,85 +176,46 @@ class Elasticsearch
     }
 
     /**
-     * Fetching search suggests in `catalogs` index
-     *
-     * @param string $text
-     * @return array
-     *
-     * @throws ElasticsearchException
-     */
-    public function suggestsGlobal(string $text): array
-    {
-        return $this->client->search([
-            'index' => 'catalogs_alias',
-            'body' => [
-                "_source" => false,
-                "query" => [
-                    "multi_match" => [
-                        "query" => $text,
-                        "type" => "bool_prefix",
-                        "fields" => [
-                            "text-content.suggest-completion",
-                            "text-content.suggest-completion._index_prefix",
-                            "text-content.trigram"
-                        ]
-                    ]
-                ],
-                "highlight" => [
-                    "fields" => [
-                        "text-content.trigram" => [
-                            "number_of_fragments" => 1,
-                            "fragment_size" => 100
-                        ]
-                    ]
-                ]
-            ]
-        ])->asArray();
-    }
-
-    /**
      * @param string $filename
-     * @param int $filesize
-     * @param string $elastic_content
-     * @param string $suggest_text
-     * @param string $lang - lang alias
-     * @param int[] $category_ids - ids of categories
+     * @param int $filesize - byte size of file
+     * @param string $catalog_text
+     * @param Category[] $categories - ids of categories
      * @param Category[] $final_cats - Categories without child Categories (final categories)
-     * @param string $categories_text - titles of all categories, imploded to string
      *
      * @throws ElasticsearchException
      */
     public function uploadDocument(
         string $filename,
         int $filesize,
-        string $elastic_content,
-        string $suggest_text,
-        string $lang,
-        array $category_ids,
+        string $catalog_text,
+        array $categories,
         array $final_cats,
-        array $categories_text,
     ): void
     {
         $series_ids = [];
         $global_is_product = false;
         foreach ($final_cats as $seria){
-
             $series_ids[] = $seria->getId();
             $global_is_product = $seria->isProductsExist() ? true : $global_is_product;
+        }
+
+        $categories_ids = [];
+        $categories_titles = [];
+        foreach($categories as $category) {
+            $categories_ids[] = $category->getId();
+            $categories_titles[] = $category->getTitle();
         }
 
         $this->client->create([
             'id' => uniqid(),
             'index' => $this->index_prefix . 'catalogs',
             'body' => [
-                'text-content' => $elastic_content,
-                'suggest-text' => $suggest_text,
-                'categories-full-text' => $categories_text,
+                'text-content' => $catalog_text,
+                'categories-full-text' => $categories_titles,
                 'file-name' => $filename,
                 'file-size' => $filesize,
-                'file-lang' => $lang,
                 'exists-products' => $global_is_product,
-                'categories' => $category_ids,
+                'categories' => $categories_ids,
                 'series' => $series_ids,
             ]
         ]);
@@ -266,14 +226,12 @@ class Elasticsearch
                 'id' => uniqid(),
                 'index' => $this->index_prefix . 'catalogs-seria-' . $seria->getId(),
                 'body' => [
-                    'text-content' => $elastic_content,
-                    'suggest-text' => $suggest_text,
-                    'categories-full-text' => $categories_text,
+                    'text-content' => $catalog_text,
+                    'categories-full-text' => $categories_titles,
                     'file-name' => $filename,
                     'file-size' => $filesize,
-                    'file-lang' => $lang,
                     'exists-products' => $global_is_product,
-                    'categories' => $category_ids,
+                    'categories' => $categories_ids,
                     'series' => $seria->getId(),
                 ]
             ]);
