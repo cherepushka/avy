@@ -98,6 +98,64 @@ class Elasticsearch
         ])->asArray();
     }
 
+    public function searchCollapseBySeriesEmptySeries(string $text, int $series_size, int $from): array
+    {
+        $fields = self::STD_SEARCH_FIELDS;
+        $fields[] = 'categories-full-text';
+
+        return $this->client->search([
+            'index' => 'catalogs-seria-_alias',
+            'ignore_unavailable' => true,
+            'body' => [
+                '_source' => false,
+                'from' => $from,
+                'size' => $series_size,
+                'query' => [
+                    "multi_match" => [
+                        "query" => $text,
+                        "fields" => [
+                            "categories-full-text^1.5",
+                            "text-content",
+                            "text-content._tengram",
+                        ]
+                    ]
+                ],
+                'collapse' => [
+                    'field' => 'series',
+                    'inner_hits' => [
+                        '_source' => false,
+                        'fields' => $fields,
+                        'name' => 'file-name',
+                        'size' => self::STD_INNER_HITS_SIZE,
+                        'highlight' => [
+                            'fields' => [
+                                'text-content' => [
+                                    'pre_tags' => self::PRE_TAG,
+                                    'post_tags' => self::POST_TAG
+                                ],
+                                "categories-full-text" => [
+                                    "pre_tags" => self::PRE_TAG,
+                                    "post_tags" => self::POST_TAG
+                                ]
+                            ]
+                        ]
+                    ],
+                    'max_concurrent_group_searches' => 3
+                ],
+                'sort' => [
+                    'exists-products' => 'desc'
+                ],
+                "aggs" => [
+                    "total" => [
+                        "cardinality" => [
+                            "field" => "series"
+                        ]
+                    ]
+                ]
+            ]
+        ])->asArray();
+    }
+
     /**
      * Search in 'catalogs' index and collapsing result on 'series' field
      *

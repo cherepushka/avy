@@ -18,9 +18,10 @@ parameters:
     app.elasticsearch.api_key: '%env(resolve:ELASTICSEARCH_API_KEY)%'
 
     exceptions:
-        App\Exception\CategoryNotFoundByIdException: {code: 404}
-        App\Exception\FileAlreadyLoadedException: {code: 400}
-        App\Exception\FileCorruptedException: {code: 400}
+        App\Exception\CategoryNotFoundByIdException: { code: 404 }
+        App\Exception\FileAlreadyLoadedException: { code: 400 }
+        App\Exception\FileCorruptedException: { code: 400 }
+        App\Exception\ValidationException: { code: 500, hidden: false }
 
 services:
     # default configuration for services in *this* file

@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Service\Elasticsearch;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,6 +17,7 @@ class TestAddProductSuggestionsCommand extends Command
 {
 
     public function __construct(
+        private readonly string $projectDir,
         private readonly Elasticsearch $elasticsearch
     )
     {
@@ -24,15 +26,16 @@ class TestAddProductSuggestionsCommand extends Command
 
     protected function configure(): void
     {
-      
     }
 
+    /**
+     * @throws ElasticsearchException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        foreach(glob($_SERVER['PWD'] . '/.dev-data/hints/*') as $filepath){
+        foreach(glob($this->projectDir . '/.dev-data/hints/*') as $filepath){
 
             $type = pathinfo($filepath)['filename'];
-
             $csv_stream = fopen($filepath, 'r');
 
             while(($row = fgetcsv($csv_stream, 0, "\n")) !== false){
@@ -40,7 +43,6 @@ class TestAddProductSuggestionsCommand extends Command
                 $value = $row[0];
                 $this->elasticsearch->uploadProdustSuggest($value, $type);
             }
-
             fclose($csv_stream);
         }
 

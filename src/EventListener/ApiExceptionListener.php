@@ -19,12 +19,11 @@ use Throwable;
 class ApiExceptionListener
 {
     public function __construct(
-        private ExceptionMappingResolver $resolver,
-        private LoggerInterface $logger,
-        private SerializerInterface $serializer,
-        private bool $isDebug = false)
-    {
-    }
+        private readonly ExceptionMappingResolver $resolver,
+        private readonly LoggerInterface          $logger,
+        private readonly SerializerInterface      $serializer,
+        private readonly bool                     $isDebug = false
+    ){}
 
     public function __invoke(ExceptionEvent $event): void
     {
@@ -45,7 +44,7 @@ class ApiExceptionListener
             ]);
         }
 
-        $message = $mapping->isHidden() && !$this->isDebug
+        $message = $mapping->isHidden()
             ? Response::$statusTexts[$mapping->getCode()]
             : $throwable->getMessage();
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\ArgumentResolver;
 
+use App\Attribute\RequestJson;
 use App\Exception\ValidationException;
-use App\Attribute\RequestBody;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
@@ -22,16 +22,14 @@ class RequestJsonData implements ArgumentValueResolverInterface
 
     public function supports(Request $request, ArgumentMetadata $argument): bool
     {
-        return count($argument->getAttributes(RequestBody::class, ArgumentMetadata::IS_INSTANCEOF)) > 0;
+        return count($argument->getAttributes(RequestJson::class, ArgumentMetadata::IS_INSTANCEOF)) > 0;
     }
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        $json = json_encode($request->request->all());
-        
         try {
             $model = $this->serializer->deserialize(
-                $json,
+                $request->getContent(),
                 $argument->getType(),
                 JsonEncoder::FORMAT
             );
