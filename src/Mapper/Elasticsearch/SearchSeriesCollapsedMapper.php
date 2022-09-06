@@ -10,9 +10,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class SearchSeriesCollapsedMapper extends AbstractResponseMapper
 {
 
-    /**
-     * @throws NonUniqueResultException
-     */
     public function map(array $elastic_response, int $page_size, int $page): SearchResultList
     {
         $items = [];
@@ -25,21 +22,17 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
             foreach ($series['inner_hits']['file-name']['hits']['hits'] as $inner_item) {
 
                 $inner_fields = $inner_item['fields'];
-                $catalog = $this->catalogRepository->findOneByFilename($inner_fields['file-name'][0]);
-
-                $suggeusetText = isset($inner_item['highlight']['text-content'])
-                    ? implode("\n", $inner_item['highlight']['text-content'])
-                    : '';
+                $suggestText = isset($inner_item['highlight']['text-content']) ? implode("\n", $inner_item['highlight']['text-content']) : '';
 
                 $hit = (new SearchResultItem())
                     ->setSeries($series_id)
-                    ->setLangAlias($catalog->getLang()->getAlias())
+                    ->setLangAlias($inner_fields['lang'][0])
                     ->setByteSize($inner_fields['file-size'][0])
                     ->setDownloadLink($this->router->generate('app_catalogs_pdf_show', [
-                        'name' => $catalog->getFilename()
+                        'name' => $inner_fields['file-name'][0]
                     ], UrlGeneratorInterface::ABSOLUTE_URL))
-                    ->setOriginName($catalog->getOriginFilename())
-                    ->setSuggestText($suggeusetText);
+                    ->setOriginName($inner_fields['origin-file-name'][0])
+                    ->setSuggestText($suggestText);
 
                 $item[] = $hit;
             }

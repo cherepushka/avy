@@ -23,7 +23,7 @@ class StorageServiceFacade
 
         $trimmedExtFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($trimmedExtFileName);
-        $fileName = sprintf('%s-%s.%s', $safeFilename, uniqid(), $file->getExtension());
+        $fileName = sprintf('%s-%s.pdf', $safeFilename, uniqid());
 
         $catalogFile = (new CatalogFile())
             ->setOriginName($file->getClientOriginalName())

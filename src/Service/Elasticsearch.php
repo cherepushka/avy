@@ -18,16 +18,14 @@ class Elasticsearch
     const PRE_TAG = '<highlight>';
     const POST_TAG = '</highlight>';
     const STD_INNER_HITS_SIZE = 5;
-    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'series'];
+    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'origin-file-name', 'series', 'lang'];
 
     private Client $client;
-    private string $index_prefix = '';
 
     /**
      * @throws AuthenticationException
      */
     public function __construct(
-        string $elasticsearch_index_prefix,
         string $elasticsearch_connection_type,
         string $elasticsearch_host,
         string $elasticsearch_user,
@@ -35,7 +33,6 @@ class Elasticsearch
         string $elasticsearch_cloud_id,
         string $elasticsearch_api_key
     ) {
-        $this->index_prefix = $elasticsearch_index_prefix;
 
         $Elasticsearch_client = ClientBuilder::create();
         $Elasticsearch_client->setHttpClient(new GuzzleClient());
@@ -177,24 +174,30 @@ class Elasticsearch
 
     /**
      * @param string $filename
-     * @param int $filesize - byte size of file
-     * @param string $catalog_text
+     * @param string $originFilename
+     * @param int $byteSize - byte size of file
+     * @param string $langAlias - language alias of catalog
+     * @param string $catalogText
      * @param Category[] $categories - ids of categories
-     * @param Category[] $final_cats - Categories without child Categories (final categories)
+     * @param Category[] $finalCats
+     * @param string $indexPrefix
      *
      * @throws ElasticsearchException
      */
     public function uploadDocument(
         string $filename,
-        int $filesize,
-        string $catalog_text,
+        string $originFilename,
+        int $byteSize,
+        string $langAlias,
+        string $catalogText,
         array $categories,
-        array $final_cats,
+        array $finalCats,
+        string $indexPrefix = '',
     ): void
     {
         $series_ids = [];
         $global_is_product = false;
-        foreach ($final_cats as $seria){
+        foreach ($finalCats as $seria){
             $series_ids[] = $seria->getId();
             $global_is_product = $seria->isProductsExist() ? true : $global_is_product;
         }
@@ -208,28 +211,32 @@ class Elasticsearch
 
         $this->client->create([
             'id' => uniqid(),
-            'index' => $this->index_prefix . 'catalogs',
+            'index' => $indexPrefix . 'catalogs',
             'body' => [
-                'text-content' => $catalog_text,
+                'text-content' => $catalogText,
                 'categories-full-text' => $categories_titles,
                 'file-name' => $filename,
-                'file-size' => $filesize,
+                'origin-file-name' => $originFilename,
+                'lang' => $langAlias,
+                'file-size' => $byteSize,
                 'exists-products' => $global_is_product,
                 'categories' => $categories_ids,
                 'series' => $series_ids,
             ]
         ]);
 
-        foreach ($final_cats as $seria) {
+        foreach ($finalCats as $seria) {
 
             $this->client->create([
                 'id' => uniqid(),
-                'index' => $this->index_prefix . 'catalogs-seria-' . $seria->getId(),
+                'index' => $indexPrefix . 'catalogs-seria-' . $seria->getId(),
                 'body' => [
-                    'text-content' => $catalog_text,
+                    'text-content' => $catalogText,
                     'categories-full-text' => $categories_titles,
                     'file-name' => $filename,
-                    'file-size' => $filesize,
+                    'origin-file-name' => $originFilename,
+                    'lang' => $langAlias,
+                    'file-size' => $byteSize,
                     'exists-products' => $global_is_product,
                     'categories' => $categories_ids,
                     'series' => $seria->getId(),
@@ -269,11 +276,14 @@ class Elasticsearch
         ])->asArray();
     }
 
-    public function uploadProdustSuggest(string $text, string $type)
+    /**
+     * @throws ElasticsearchException
+     */
+    public function uploadProdustSuggest(string $text, string $type, string $indexPrefix = ''): void
     {
         $this->client->create([
             'id' => uniqid(),
-            'index' => $this->index_prefix . 'product-suggests',
+            'index' => $indexPrefix . 'product-suggests',
             'body' => [
                 'value' => $text,
                 'type' => $type,

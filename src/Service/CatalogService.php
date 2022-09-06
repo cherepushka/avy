@@ -28,6 +28,7 @@ class CatalogService
 
     /**
      * @throws NonUniqueResultException
+     * @throws FileAlreadyLoadedException
      */
     public function insertCatalog(
         UploadedFile    $uploadedFile,
@@ -36,7 +37,7 @@ class CatalogService
         array           $categories_ids,
         string          $language_name,
         string          $text
-    ): int
+    ): Catalog
     {
         $file = $this->storageService->saveUploadedCatalog($uploadedFile);
 
@@ -70,7 +71,7 @@ class CatalogService
         $catalog->setCategories($categories);
         $this->catalogRepository->add($catalog, true);
 
-        return $catalog->getId();
+        return $catalog;
     }
 
     /**

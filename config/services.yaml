@@ -10,7 +10,6 @@ parameters:
     app.ocr_google_credentials_path: '%env(resolve:OCR_GOOGLE_CREDENTIALS_PATH)%'
     app.storage_google_credentials_path: '%env(resolve:STORAGE_GOOGLE_CREDENTIAL_PATH)%'
 
-    app.elasticsearch.index_prefix: '%env(resolve:ELASTICSEARCH_INDEX_PREFIX)%'
     app.elasticsearch.connection_type: '%env(resolve:ELASTICSEARCH_CONNECTION_TYPE)%'
     app.elasticsearch.host: '%env(resolve:ELASTICSEARCH_HOST)%'
     app.elasticsearch.user: '%env(resolve:ELASTICSEARCH_USER)%'
@@ -46,12 +45,11 @@ services:
     # please note that last definitions always *replace* previous ones
 
     App\Service\OCR\OcrVisionInterface: '@App\Service\OCR\Google\DocumentOcrVision'
-    App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\CatalogStorageService'
+    App\Service\Pdf\Storage\CatalogStorageServiceInterface: '@App\Service\Pdf\Storage\Local\CatalogStorageService'
     App\Service\Pdf\Storage\OcrResultStorageServiceInterface: '@App\Service\Pdf\Storage\GoogleCloud\OcrResultStorageService'
 
     App\Service\Elasticsearch:
         arguments:
-            $elasticsearch_index_prefix: '%app.elasticsearch.index_prefix%'
             $elasticsearch_connection_type: '%app.elasticsearch.connection_type%'
             $elasticsearch_host: '%app.elasticsearch.host%'
             $elasticsearch_user: '%app.elasticsearch.user%'

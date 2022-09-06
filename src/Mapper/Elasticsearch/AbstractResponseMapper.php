@@ -9,7 +9,6 @@ abstract class AbstractResponseMapper
 {
 
     public function __construct(
-        protected readonly CatalogRepository $catalogRepository,
         protected readonly UrlGeneratorInterface $router,
     ){}
 

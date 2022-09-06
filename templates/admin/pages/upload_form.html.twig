@@ -34,21 +34,24 @@
                 <div class="catalog-upload-inputs col-8">
 
                     <div class="form-group">
-                        <label for="">Файл каталога</label>
+                        <label for="catalogFile">Файл каталога</label>
 
-                        <input class='form-control' type='file' name='file' accept="application/pdf" max="">
+                        <input id="catalogFile" class='form-control' type='file' name='file' accept="application/pdf" max="">
                     </div>
 
                     <div class="form-group">
-                        <label for="">Название файла</label>
+                        <label for="originFilename">
+                            Название файла (без расширения) <br>
+                            Это имя будет отображаться пользователям
+                        </label>
 
-                        <input class="form-control" name="originFilename" type="text" value="">
+                        <input id="originFilename" class="form-control" name="originFilename" type="text" value="">
                     </div>
 
                     <div class="form-group">
-                        <label for="">Название производителя</label>
+                        <label for="manufacturer">Название производителя</label>
 
-                        <select class="form-control" name="manufacturer">
+                        <select id="manufacturer" class="form-control" name="manufacturer">
                             {% for manufacturer in manufacturers.items %}
                                 <option>{{ manufacturer.name }}</option>
                             {% endfor %}
@@ -56,9 +59,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="">Языка каталога</label>
+                        <label for="lang">Языка каталога</label>
 
-                        <select class="form-control" name="lang">
+                        <select id="lang" class="form-control" name="lang">
                             {% for lang in languages.items %}
                                 <option>{{ lang.name }}</option>
                             {% endfor %}
@@ -66,8 +69,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Текст файла</label>
-                        <textarea class="form-control" name='text' style="width: 100%; min-height: 500px"></textarea>
+                        <label for="catalog-text">Текст файла</label>
+                        <textarea id="catalog-text" class="form-control" name='text' style="width: 100%; min-height: 500px"></textarea>
                     </div>
 
                     <input type="hidden" name="categoryIds" value="" class="category_ids_input">

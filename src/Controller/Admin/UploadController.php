@@ -6,7 +6,6 @@ use App\Service\CatalogService;
 use App\Service\CategoryTree;
 use App\Service\LanguageService;
 use App\Service\ManufacturerService;
-use Doctrine\ORM\NonUniqueResultException;
 use App\Service\Elasticsearch;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use App\Http\Request\AdminCatalogUpload as AdminCatalogUploadForm;
 use App\Repository\CategoryRepository;
-use Symfony\Component\Form\FormError;
 use Throwable;
 
 class UploadController extends AbstractController
@@ -37,17 +35,16 @@ class UploadController extends AbstractController
         ]);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     #[Route('/catalogs/confirm-upload', name: 'admin_document_confirm_upload', methods: ['POST'])]
     public function confirm_upload_document(
         Request $request,
         Elasticsearch $elasticsearch,
         CatalogService $catalogService,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
     ): RedirectResponse
     {
+        ini_set('max_execution_time', 0);
+
         $formEntity = new AdminCatalogUploadForm\Entity();
         $form = $this->createForm(AdminCatalogUploadForm\FormType::class, $formEntity, ['csrf_protection' => false]);
         $form->submit([
@@ -55,50 +52,46 @@ class UploadController extends AbstractController
             'text' => $request->get('text'),
             'originFilename' => $request->get('originFilename'),
             'manufacturer' => $request->get('manufacturer'),
-            'originFilename' => $request->get('originFilename'),
             'categoryIds' => $request->get('categoryIds'),
             'file' => $request->files->get('file'),
         ]);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            try{
-            //TODO сделать добавление в базу миграцией
-                
-                $catalogService->insertCatalog(
-                    $formEntity->getFile(),
-                    $formEntity->getOriginFilename(),
-                    $formEntity->getManufacturer(),
-                    $formEntity->getCategoryIds(),
-                    $formEntity->getLang(),
-                    $formEntity->getText()
-                );
-
-                $final_cats = $categoryRepository->findWithoutChildren($formEntity->getCategoryIds());
-                $catalog_cats = $categoryRepository->findBy(['id' => $formEntity->getCategoryIds()]);
-
-                $elasticsearch->uploadDocument(
-                    $formEntity->getFile()->getFilename(),
-                    $formEntity->getFile()->getSize(),
-                    $formEntity->getText(),
-                    $catalog_cats,
-                    $final_cats,
-                );
-
-            } catch (Throwable $e) {
-                $this->addFlash('error_messages', 'Произшла ошибка при загрузке: ' . $e->getMessage());
-                return $this->redirectToRoute('admin_document_confirm_upload');
-            }
-
-            $this->addFlash('success_messages', 'Все каталоги были успешно загружены');
-
-        } else {
-
+        if (!$form->isSubmitted() || !$form->isValid()) {
             foreach($form->getErrors(true) as $errorMessage){
                 $this->addFlash('error_messages', $errorMessage->getMessage());
             }
+            return $this->redirectToRoute('admin_document_upload_form');
         }
 
+        try{
+            $catalog = $catalogService->insertCatalog(
+                $formEntity->getFile(),
+                $formEntity->getOriginFilename() . '.pdf',
+                $formEntity->getManufacturer(),
+                $formEntity->getCategoryIds(),
+                $formEntity->getLang(),
+                $formEntity->getText()
+            );
+
+            $final_cats = $categoryRepository->findWithoutChildren($formEntity->getCategoryIds());
+            $catalog_cats = $categoryRepository->findBy(['id' => $formEntity->getCategoryIds()]);
+
+            $elasticsearch->uploadDocument(
+                $catalog->getFilename(),
+                $catalog->getOriginFilename(),
+                $catalog->getByteSize(),
+                $catalog->getLang()->getAlias(),
+                $catalog->getText(),
+                $catalog_cats,
+                $final_cats,
+            );
+        } catch (Throwable $e) {
+
+            $this->addFlash('error_messages', 'Произшла ошибка при загрузке: ' . $e->getMessage());
+            return $this->redirectToRoute('admin_document_upload_form');
+        }
+
+        $this->addFlash('success_messages', 'Файл был успешно добавлен в очередь на загрузку');
         return $this->redirectToRoute('admin_document_upload_form');
     }
 

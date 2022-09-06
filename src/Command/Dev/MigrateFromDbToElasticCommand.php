@@ -5,6 +5,7 @@ namespace App\Command\Dev;
 use App\Entity\Category;
 use App\Repository\CatalogRepository;
 use App\Service\Elasticsearch;
+use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,13 +29,18 @@ class MigrateFromDbToElasticCommand extends Command
     protected function configure(): void
     {}
 
+    /**
+     * @throws ElasticsearchException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         foreach($this->catalogRepository->findAll() as $catalog){
 
             $this->elasticsearch->uploadDocument(
                 $catalog->getFilename(),
+                $catalog->getOriginFilename(),
                 $catalog->getByteSize(),
+                $catalog->getLang()->getAlias(),
                 $catalog->getText(),
                 $catalog->getCategories()->toArray(),
                 $this->catalogRepository->findAllSeries($catalog->getId()),

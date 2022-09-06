@@ -2,10 +2,6 @@
 
 namespace App\Service\Pdf\Storage;
 
-use App\Model\File\CatalogFile;
-use App\Model\File\CatalogLocalTmpFile;
-use App\Model\File\CatalogTmpFile;
-
 interface CatalogStorageServiceInterface
 {
 

@@ -15,11 +15,9 @@ class SearchService
 {
 
     public function __construct(
-        private readonly CategoryRepository             $categoryRepository,
         private readonly Elasticsearch                  $elasticsearch,
         private readonly SearchDefaultMapper            $defaultResultMapper,
         private readonly SearchSeriesCollapsedMapper    $searchSeriesCollapsedMapper,
-        private readonly SearchDefaultSuggestsMapper    $searchDefaultSuggestsMapper
     ){}
 
     /**
