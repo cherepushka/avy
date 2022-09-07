@@ -2,16 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\CatalogRepository;
+use App\Repository\FileRepository;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CatalogRepository::class)]
+#[ORM\Entity(repositoryClass: FileRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class Catalog
+class File
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,7 +27,8 @@ class Catalog
     #[ORM\Column(type: 'integer', length: 100, nullable: false)]
     private int $byte_size;
 
-    #[ORM\Column(type: 'text')]
+    //TODO удалить nullable
+    #[ORM\Column(type: 'text', nullable: true)]
     private string $text;
 
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
@@ -37,6 +38,14 @@ class Catalog
     #[ORM\ManyToOne(targetEntity: Language::class)]
     #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id")]
     private Language $lang;
+
+    #[ORM\ManyToOne(targetEntity: FileType::class)]
+    #[ORM\JoinColumn(name: "fileType_id", referencedColumnName: "id")]
+    private FileType $fileType;
+
+    #[ORM\ManyToOne(targetEntity: FileStatus::class)]
+    #[ORM\JoinColumn(name: "fileStatus_id", referencedColumnName: "id")]
+    private FileStatus $fileStatus;
 
     #[ORM\ManyToMany(targetEntity: Category::class)]
     private Collection $categories;
@@ -125,6 +134,30 @@ class Catalog
     public function setLang(Language $lang): self
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getFileType(): FileType
+    {
+        return $this->fileType;
+    }
+
+    public function setFileType(FileType $fileType): self
+    {
+        $this->fileType = $fileType;
+
+        return $this;
+    }
+
+    public function getFileStatus(): FileStatus
+    {
+        return $this->fileStatus;
+    }
+
+    public function setFileStatus(FileStatus $fileStatus): self
+    {
+        $this->fileStatus = $fileStatus;
 
         return $this;
     }

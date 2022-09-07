@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Catalog;
+use App\Entity\File;
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -10,21 +10,21 @@ use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Catalog>
+ * @extends ServiceEntityRepository<File>
  *
- * @method Catalog|null find($id, $lockMode = null, $lockVersion = null)
- * @method Catalog|null findOneBy(array $criteria, array $orderBy = null)
- * @method Catalog[]    findAll()
- * @method Catalog[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method File|null find($id, $lockMode = null, $lockVersion = null)
+ * @method File|null findOneBy(array $criteria, array $orderBy = null)
+ * @method File[]    findAll()
+ * @method File[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CatalogRepository extends ServiceEntityRepository
+class FileRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Catalog::class);
+        parent::__construct($registry, File::class);
     }
 
-    public function add(Catalog $entity, bool $flush = false): void
+    public function add(File $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -33,7 +33,7 @@ class CatalogRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Catalog $entity, bool $flush = false): void
+    public function remove(File $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -45,7 +45,7 @@ class CatalogRepository extends ServiceEntityRepository
     /**
      * @throws NonUniqueResultException
      */
-    public function findOneByFilename(string $filename): ?Catalog
+    public function findOneByFilename(string $filename): ?File
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.filename = :val')
@@ -87,7 +87,7 @@ class CatalogRepository extends ServiceEntityRepository
 
     /**
      * @param int $byte_size
-     * @return Catalog[]
+     * @return File[]
      */
     public function findAllByByteSize(int $byte_size): array
     {
