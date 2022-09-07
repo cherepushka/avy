@@ -116,7 +116,6 @@ class Elasticsearch
                         "fields" => [
                             "categories-full-text^1.5",
                             "text-content",
-                            "text-content._tengram",
                         ]
                     ]
                 ],
@@ -187,7 +186,6 @@ class Elasticsearch
                                     "fields" => [
                                         "categories-full-text^1.5",
                                         "text-content",
-                                        "text-content._tengram",
                                     ]
                                 ]
                             ]
@@ -238,7 +236,7 @@ class Elasticsearch
      * @param string $catalogText
      * @param Category[] $categories - ids of categories
      * @param Category[] $finalCats
-     * @param string $indexPrefix
+     * @param string $indexPrefix - prefix on index in which new catalog will be uploaded
      *
      * @throws ElasticsearchException
      */
@@ -303,6 +301,11 @@ class Elasticsearch
         }
     }
 
+    /**
+     * @param string $text - search text
+     *
+     * @throws ElasticsearchException
+     */
     public function productHints(string $text): array
     {
         return $this->client->search([
@@ -337,7 +340,7 @@ class Elasticsearch
     /**
      * @throws ElasticsearchException
      */
-    public function uploadProdustSuggest(string $text, string $type, string $indexPrefix = ''): void
+    public function uploadProductSuggest(string $text, string $type, string $indexPrefix = ''): void
     {
         $this->client->create([
             'id' => uniqid(),

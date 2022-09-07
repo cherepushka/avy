@@ -41,7 +41,7 @@ class TestAddProductSuggestionsCommand extends Command
             while(($row = fgetcsv($csv_stream, 0, "\n")) !== false){
 
                 $value = $row[0];
-                $this->elasticsearch->uploadProdustSuggest($value, $type);
+                $this->elasticsearch->uploadProductSuggest($value, $type);
             }
             fclose($csv_stream);
         }

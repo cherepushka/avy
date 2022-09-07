@@ -4,7 +4,6 @@ namespace App\Controller\Api\V1;
 
 use App\Attribute\RequestJson;
 use App\Service\SearchService;
-use Doctrine\ORM\NonUniqueResultException;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,21 +19,26 @@ class SearchController extends AbstractController
         private readonly SearchService $searchService,
     ){}
 
-    /** @throws ElasticsearchException|NonUniqueResultException */
-    #[Route('/search/by-series', name: '_search', methods: ['POST'])]
+    /**
+     * @throws ElasticsearchException
+     */
+    #[Route('/search/by-series', name: '_search_by_series', methods: ['POST'])]
     public function searchSeriesGrouping(
         #[RequestJson] SearchBySeries\Entity $requestEntity
     ): JsonResponse
     {
         $search_text = $requestEntity->getSearch();
         $series = $requestEntity->getSeries();
-        $page = isset($request_arr['page']) && is_int($request_arr['page']) ? $request_arr['page'] : 1;
+        $page = $requestEntity->getPage();
 
         return $this->json(
             $this->searchService->searchSeriesCollapsed($search_text, $series, $page)
         );
     }
 
+    /**
+     * @throws ElasticsearchException
+     */
     #[Route('/search/product-suggests', name: '_product_suggests', methods: ['POST'])]
     public function productSuggests(Request $request): JsonResponse
     {

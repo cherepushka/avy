@@ -3,6 +3,7 @@
 namespace App\Http\ArgumentResolver;
 
 use App\Attribute\RequestJson;
+use App\Exception\RequestBodyConvertException;
 use App\Exception\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
@@ -34,7 +35,7 @@ class RequestJsonData implements ArgumentValueResolverInterface
                 JsonEncoder::FORMAT
             );
         } catch (Throwable $throwable) {
-            dd($throwable);
+            throw new RequestBodyConvertException($throwable);
         }
 
         $errors = $this->validator->validate($model);

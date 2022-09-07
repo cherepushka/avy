@@ -21,7 +21,7 @@ class SearchService
     ){}
 
     /**
-     * @throws ElasticsearchException|NonUniqueResultException
+     * @throws ElasticsearchException
      */
     public function searchDefault(string $text, int $page = 1): SearchResultList
     {
@@ -37,22 +37,30 @@ class SearchService
      * @param string $text - text for search
      * @param int[] $series - array of series for filtering
      * 
-     * @throws ElasticsearchException|NonUniqueResultException
+     * @throws ElasticsearchException
      */
     public function searchSeriesCollapsed(
         string $text,
-        array $series,
+        ?array $series,
         int $page = 1
     ): SearchResultList
     {
         $series_size = 3;
         $from = ($page - 1) * $series_size;
 
-        $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
+        if ($series) {
+            $elastic_response = $this->elasticsearch->searchCollapseBySeries($text, $series, $series_size, $from);
+        } else {
+            $elastic_response = $this->elasticsearch->searchCollapseBySeriesEmptySeries($text, $series_size, $from);
+        }
+
         return $this->searchSeriesCollapsedMapper->map($elastic_response, $series_size, $page);
     }
 
-    public function productSuggests(string $text)
+    /**
+     * @throws ElasticsearchException
+     */
+    public function productSuggests(string $text): array
     {
         // Add slashes to Elastic reserved query characters
         // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
