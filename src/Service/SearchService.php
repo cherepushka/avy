@@ -2,14 +2,12 @@
 
 namespace App\Service;
 
-use App\Mapper\Elasticsearch\SearchDefaultSuggestsMapper;
+use App\Mapper\Elasticsearch\ProductSuggestsMapper;
 use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Mapper\Elasticsearch\SearchDefaultMapper;
 use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
-use App\Repository\CategoryRepository;
-use Doctrine\ORM\NonUniqueResultException;
+use App\Model\Elasticsearch\ProductSuggestsList;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
-use App\Service\Elasticsearch;
 
 class SearchService
 {
@@ -18,6 +16,7 @@ class SearchService
         private readonly Elasticsearch                  $elasticsearch,
         private readonly SearchDefaultMapper            $defaultResultMapper,
         private readonly SearchSeriesCollapsedMapper    $searchSeriesCollapsedMapper,
+        private readonly ProductSuggestsMapper          $productSuggestsMapper
     ){}
 
     /**
@@ -60,7 +59,7 @@ class SearchService
     /**
      * @throws ElasticsearchException
      */
-    public function productSuggests(string $text): array
+    public function productSuggests(string $text): ProductSuggestsList
     {
         // Add slashes to Elastic reserved query characters
         // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
@@ -74,20 +73,8 @@ class SearchService
         $text_words = array_reverse($text_words);
         $text = implode(' ', $text_words);
         
-        $elastic_response = $this->elasticsearch->productHints($text);
-        
-        $result = [];
-        foreach($elastic_response['hits']['hits'] as $hit){
-            $inner_hits = [];
-
-            foreach($hit['inner_hits']['value']['hits']['hits'] as $inner_hit) {
-                $inner_hits[] = $inner_hit['fields']['value'][0];
-            }
-
-            $result[ $hit['fields']['type'][0] ] = $inner_hits;
-        }
-
-        return $result;
+        $elastic_response = $this->elasticsearch->productSuggests($text);
+        return $this->productSuggestsMapper->map($elastic_response);
     }
 
 }

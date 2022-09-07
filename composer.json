@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-imagick": "*",
         "ext-mbstring": "*",
+        "ext-fileinfo": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.6",
         "doctrine/doctrine-migrations-bundle": "^3.0",

@@ -3,13 +3,17 @@
 namespace App\Controller\Api\V1;
 
 use App\Attribute\RequestJson;
+use App\Model\Elasticsearch\Default\SearchResultList;
+use App\Model\Elasticsearch\ProductSuggestsList;
 use App\Service\SearchService;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Attributes as OA;
 use App\Http\Request\Api\SearchBySeries as SearchBySeries;
+use App\Http\Request\Api\SearchProductSuggests as SearchProductSuggests;
 
 #[Route('/api/v1', name: 'app_api')]
 class SearchController extends AbstractController
@@ -23,9 +27,17 @@ class SearchController extends AbstractController
      * @throws ElasticsearchException
      */
     #[Route('/search/by-series', name: '_search_by_series', methods: ['POST'])]
-    public function searchSeriesGrouping(
-        #[RequestJson] SearchBySeries\Entity $requestEntity
-    ): JsonResponse
+    #[OA\Response(
+        response: 200,
+        description: 'Возвращает PDF кактлоги, подходящие под текстовый запрос, сгруппированные по сериям',
+        content: new OA\JsonContent(
+            ref: new Model(type: SearchResultList::class)
+        )
+    )]
+    #[OA\RequestBody(content: new OA\JsonContent(
+        ref: new Model(type: SearchBySeries\Entity::class)
+    ))]
+    public function searchSeriesGrouping(#[RequestJson] SearchBySeries\Entity $requestEntity): JsonResponse
     {
         $search_text = $requestEntity->getSearch();
         $series = $requestEntity->getSeries();
@@ -39,17 +51,23 @@ class SearchController extends AbstractController
     /**
      * @throws ElasticsearchException
      */
+
     #[Route('/search/product-suggests', name: '_product_suggests', methods: ['POST'])]
-    public function productSuggests(Request $request): JsonResponse
+    #[OA\Response(
+        response: 200,
+        description: 'Возвращает объект с неизвестным количеством свойств, 
+                где название каждого свойства - название группы подсказок. А значение - массив из самих подсказок',
+        content: new OA\JsonContent(ref: new Model(type: ProductSuggestsList::class))
+    )]
+    #[OA\RequestBody(content: new OA\JsonContent(
+        ref: new Model(type: SearchProductSuggests\Entity::class)
+    ))]
+    public function productSuggests(#[RequestJson] SearchProductSuggests\Entity $requestEntity): JsonResponse
     {
-        $request_arr = $request->toArray();
+        $searchText = $requestEntity->getSearch();
 
-        if (empty($request_arr) || !isset($request_arr['search'])){
-            return $this->json([]);
-        }
-
-        $items = $this->searchService->productSuggests($request_arr['search']);
-        return $this->json($items);
+        $items = $this->searchService->productSuggests($searchText);
+        return $this->json($items->getItems());
     }
 
 }

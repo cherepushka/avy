@@ -306,7 +306,7 @@ class Elasticsearch
      *
      * @throws ElasticsearchException
      */
-    public function productHints(string $text): array
+    public function productSuggests(string $text): array
     {
         return $this->client->search([
             'index' => 'product-suggests_alias',

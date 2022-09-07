@@ -3,11 +3,24 @@
 namespace App\Model\Elasticsearch\Default;
 
 use App\Model\Elasticsearch\SearchResultItem;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 
 class SearchResultList
 {
 
     /** @var SearchResultItem[] $items */
+    #[OA\Property(
+        property: 'items',
+        properties: [new OA\Property(
+            property: 'seriaName',
+            type: 'array',
+            items: new OA\Items(
+                ref: new Model(type: SearchResultItem::class)
+            )
+        )],
+        type: 'object'
+    )]
     private array $items;
 
     private int $totalHits;
