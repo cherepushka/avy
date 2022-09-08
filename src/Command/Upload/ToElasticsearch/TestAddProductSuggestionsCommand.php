@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\Upload\ToElasticsearch;
 
 use App\Service\Elasticsearch;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;

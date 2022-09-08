@@ -22,14 +22,17 @@ class StorageServiceFacade
         }
 
         $trimmedExtFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
         $safeFilename = $this->slugger->slug($trimmedExtFileName);
-        $fileName = sprintf('%s-%s.pdf', $safeFilename, uniqid());
+
+        $fileName = sprintf('%s-%s.%s', $safeFilename, uniqid(), $extension);
 
         $catalogFile = (new CatalogFile())
             ->setOriginName($file->getClientOriginalName())
             ->setByteSize($file->getSize())
-            ->setExtension('pdf')
-            ->setName($fileName);
+            ->setExtension($extension)
+            ->setName($fileName)
+            ->setMimeType($file->getMimeType());
 
         $newFilepath = $this->catalogStorageService->uploadFromLocal($file->getRealPath(), $fileName);
         $catalogFile->setFullPath($newFilepath);

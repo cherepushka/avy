@@ -9,10 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 
-class PdfCatalogs extends AbstractController
+class FileDownload extends AbstractController
 {
 
-    #[Route('/catalogs/pdf/show/{name}', name: 'app_catalogs_pdf_show', methods: ['GET'])]
+    #[Route('/files/download/{name}', name: 'app_files_download', methods: ['GET'])]
     public function show(
         Request     $request,
         StorageServiceFacade $storageServiceFacade
@@ -23,6 +23,7 @@ class PdfCatalogs extends AbstractController
         $fileContent = $storageServiceFacade->getRawContentFromCatalogFile($catalogName);
 
         $response = new Response($fileContent);
+        //TODO отрефакторить это
         $response->headers->set('Content-Type', 'application/pdf');
 
         $disposition = $response->headers->makeDisposition(

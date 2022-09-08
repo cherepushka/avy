@@ -11,7 +11,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     private string $bucketName = 'avy-elastic-ocr';
     private Bucket $bucket;
-    private string $catalogsDir = 'tmp-catalogs';
+    private string $catalogsDir = 'catalogs';
     private readonly StorageClient $storageClient;
 
     public function __construct(

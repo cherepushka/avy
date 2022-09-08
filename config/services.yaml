@@ -4,7 +4,7 @@ parameters:
     main_url: '%env(resolve:APP_MAIN_DOMAIN)%'
 
     #directory for storing uploaded files
-    app.upload_directory_path: '%kernel.project_dir%/var/uploads'
+    app.upload_directory_path: '%kernel.project_dir%/var/files'
     app.tmp_directory_path: '%kernel.project_dir%/var/tmp'
 
     app.ocr_google_credentials_path: '%env(resolve:OCR_GOOGLE_CREDENTIALS_PATH)%'

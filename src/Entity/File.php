@@ -27,25 +27,26 @@ class File
     #[ORM\Column(type: 'integer', length: 100, nullable: false)]
     private int $byte_size;
 
-    //TODO удалить nullable
     #[ORM\Column(type: 'text', nullable: true)]
     private string $text;
 
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
-    #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id")]
+    #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id", nullable: false)]
     private Manufacturer $manufacturer;
 
     #[ORM\ManyToOne(targetEntity: Language::class)]
-    #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id")]
+    #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id", nullable: false)]
     private Language $lang;
 
     #[ORM\ManyToOne(targetEntity: FileType::class)]
-    #[ORM\JoinColumn(name: "fileType_id", referencedColumnName: "id")]
+    #[ORM\JoinColumn(name: "fileType_id", referencedColumnName: "id", nullable: false)]
     private FileType $fileType;
 
-    #[ORM\ManyToOne(targetEntity: FileStatus::class)]
-    #[ORM\JoinColumn(name: "fileStatus_id", referencedColumnName: "id")]
+    #[ORM\Column(type: 'string', enumType: FileStatus::class, options: ['default' => FileStatus::NEW])]
     private FileStatus $fileStatus;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private string $mimeType;
 
     #[ORM\ManyToMany(targetEntity: Category::class)]
     private Collection $categories;
@@ -158,6 +159,18 @@ class File
     public function setFileStatus(FileStatus $fileStatus): self
     {
         $this->fileStatus = $fileStatus;
+
+        return $this;
+    }
+
+    public function getMimeType(): string
+    {
+        return $this->mimeType;
+    }
+
+    public function setMimeType(string $mimeType): self
+    {
+        $this->mimeType = $mimeType;
 
         return $this;
     }

@@ -43,6 +43,7 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
+     * @deprecated
      * @throws NonUniqueResultException
      */
     public function findOneByFilename(string $filename): ?File
@@ -61,6 +62,25 @@ class FileRepository extends ServiceEntityRepository
             ->setParameter('val', $filename)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param int $category_id
+     * @return File[]
+     */
+    public function findAllByCategory(int $category_id): array
+    {
+        $rsm = new ResultSetMappingBuilder($this->_em);
+        $rsm->addRootEntityFromClassMetadata(File::class, 'f');
+
+        $query = $this->_em->createNativeQuery('
+            SELECT * FROM file as f
+            WHERE id IN (SELECT file_id FROM file_category WHERE category_id = :category_id)
+        ', $rsm);
+
+        $query->setParameter('category_id', $category_id);
+
+        return $query->getResult();
     }
 
     /**

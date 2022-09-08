@@ -21,7 +21,7 @@ class SearchDefaultMapper extends AbstractResponseMapper
             $items[] = (new SearchResultItem())
                 ->setSuggestText(implode("\n", $hit['highlight']['text-content']))
                 ->setOriginName($fields['origin-file-name'][0])
-                ->setDownloadLink($this->router->generate('app_catalogs_pdf_show', [
+                ->setDownloadLink($this->router->generate('app_files_download', [
                     'name' => $fields['file-name'][0]
                 ], UrlGeneratorInterface::ABSOLUTE_URL))
                 ->setByteSize($fields['file-size'][0])

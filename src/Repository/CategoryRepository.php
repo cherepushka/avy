@@ -53,7 +53,8 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
-     * $param [int]array $ids
+     * @param int[] $ids
+     * @return Category[]
      */
     public function findWithoutChildren(array $ids): array
     {

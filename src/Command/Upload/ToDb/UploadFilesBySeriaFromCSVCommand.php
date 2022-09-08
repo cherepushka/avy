@@ -1,8 +1,15 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\Upload\ToDb;
 
-use App\Service\CatalogService;
+use App\Entity\Category;
+use App\Exception\FileAlreadyLoadedException;
+use App\Repository\CategoryRepository;
+use App\Repository\FileTypeRepository;
+use App\Repository\LanguageRepository;
+use App\Repository\ManufacturerRepository;
+use App\Service\FileService;
+use Doctrine\ORM\NonUniqueResultException;
 use Generator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -23,7 +30,11 @@ class UploadFilesBySeriaFromCSVCommand extends Command
     private string $fluidLineUrl = 'https://fluid-line.ru/';
 
     public function __construct(
-        private readonly CatalogService $catalogService,
+        private readonly FileService $catalogService,
+        private readonly CategoryRepository $categoryRepository,
+        private readonly ManufacturerRepository $manufacturerRepository,
+        private readonly LanguageRepository $languageRepository,
+        private readonly FileTypeRepository $fileTypeRepository,
         private readonly string $projectDir
     )
     {
@@ -35,6 +46,9 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         $this->addArgument('path', InputArgument::OPTIONAL, 'new catalogs path relative project dir');
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -50,6 +64,9 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     private function handleRow(string $seria, string $html)
     {
         $fileUrls = $this->parseAbsoluteFileUrls($html);
@@ -57,8 +74,16 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         foreach ($fileUrls as $fileUrl){
 
             $originFileName = basename($fileUrl);
-            $tmpFile = $this->saveFileAsTmp($fileUrl);
+
+            $tmpFile = tmpfile();
             $tmpCatalogPath = stream_get_meta_data($tmpFile)['uri'];
+
+            if ($this->uploadFileToTmp($tmpCatalogPath, $fileUrl) === false) {
+                dump("Не удалось загрузить файл по url `$fileUrl`");
+                continue;
+            }
+
+            sleep(1);
 
             $this->upload($tmpCatalogPath, $originFileName, $seria);
         }
@@ -90,30 +115,45 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         return $result;
     }
 
-    /**
-     * @param string $url
-     * @return false|resource
-     */
-    private function saveFileAsTmp(string $url)
+    public function uploadFileToTmp(string $TmpFilePath, string $fileUrl): false|int
     {
-        $temp = tmpfile();
-        $temp_meta = stream_get_meta_data($temp);
-        $temp_path = $temp_meta['uri'];
-
-        file_put_contents($temp_path, file_get_contents($url));
-
-        return $temp;
+        return file_put_contents($TmpFilePath, file_get_contents($fileUrl));
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     private function upload(string $filePath, string $originFileName, string $seria)
     {
         $fileMimeType = mime_content_type($filePath);
         if (false === $fileMimeType) {
             throw new \RuntimeException('Не удалось получить mime-type файла');
         }
+
         $file = new UploadedFile($filePath, $originFileName, $fileMimeType, null, true);
 
-        $this->catalogService->insertCatalog();
+        $categories = $this->categoryRepository->findAllParentsList($seria);
+        $categories_ids = array_map(
+            fn(Category $category) => $category->getId(),
+            $categories
+        );
+
+        $defaultManufacturer = $this->manufacturerRepository->find(1);
+        $defaultLanguage = $this->languageRepository->find(1);
+        $defaultFileType = $this->fileTypeRepository->find(1);
+
+        try {
+            $this->catalogService->insertCatalog(
+                $file,
+                $originFileName,
+                $defaultManufacturer->getName(),
+                $categories_ids,
+                $defaultLanguage->getName(),
+                $defaultFileType->getType(),
+            );
+        } catch (FileAlreadyLoadedException $alreadyLoaded){
+            return;
+        }
     }
 
 }

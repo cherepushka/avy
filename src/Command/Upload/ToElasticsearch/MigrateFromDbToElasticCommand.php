@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Command\Dev;
+namespace App\Command\Upload\ToElasticsearch;
 
-use App\Entity\Category;
-use App\Repository\CatalogRepository;
+use App\Repository\FileRepository;
 use App\Service\Elasticsearch;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,7 +19,7 @@ class MigrateFromDbToElasticCommand extends Command
 
     public function __construct(
         private readonly Elasticsearch $elasticsearch,
-        private readonly CatalogRepository $catalogRepository
+        private readonly FileRepository $fileRepository
     )
     {
         parent::__construct();
@@ -34,7 +33,7 @@ class MigrateFromDbToElasticCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        foreach($this->catalogRepository->findAll() as $catalog){
+        foreach($this->fileRepository->findAll() as $catalog){
 
             $this->elasticsearch->uploadDocument(
                 $catalog->getFilename(),
@@ -42,11 +41,12 @@ class MigrateFromDbToElasticCommand extends Command
                 $catalog->getByteSize(),
                 $catalog->getLang()->getAlias(),
                 $catalog->getText(),
+                $catalog->getFileType()->getAlias(),
                 $catalog->getCategories()->toArray(),
-                $this->catalogRepository->findAllSeries($catalog->getId()),
+                $this->fileRepository->findAllSeries($catalog->getId()),
             );
         }
-       
+
         return Command::SUCCESS;
     }
 }

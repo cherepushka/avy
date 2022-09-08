@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\Dev;
+namespace App\Command\Upload\ToDb;
 
 use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;

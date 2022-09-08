@@ -67,7 +67,7 @@ class Elasticsearch
     public function searchGlobal(string $text, int $from = 0): array
     {
         return $this->client->search([
-            'index' => 'catalogs_alias',
+            'index' => 'files_index_alias',
             'body' => [
                 '_source' => false,
                 'from' => $from,
@@ -104,7 +104,7 @@ class Elasticsearch
         $fields[] = 'categories-full-text';
 
         return $this->client->search([
-            'index' => 'catalogs-seria-_alias',
+            'index' => 'files-seria-_index_alias',
             'ignore_unavailable' => true,
             'body' => [
                 '_source' => false,
@@ -166,7 +166,7 @@ class Elasticsearch
         $fields[] = 'categories-full-text';
 
         return $this->client->search([
-            'index' => 'catalogs-seria-_alias',
+            'index' => 'files-seria-_index_alias',
             'ignore_unavailable' => true,
             'body' => [
                 '_source' => false,
@@ -234,6 +234,7 @@ class Elasticsearch
      * @param int $byteSize - byte size of file
      * @param string $langAlias - language alias of catalog
      * @param string $catalogText
+     * @param string $fileTypeAlias
      * @param Category[] $categories - ids of categories
      * @param Category[] $finalCats
      * @param string $indexPrefix - prefix on index in which new catalog will be uploaded
@@ -246,6 +247,7 @@ class Elasticsearch
         int $byteSize,
         string $langAlias,
         string $catalogText,
+        string $fileTypeAlias,
         array $categories,
         array $finalCats,
         string $indexPrefix = '',
@@ -267,7 +269,7 @@ class Elasticsearch
 
         $this->client->create([
             'id' => uniqid(),
-            'index' => $indexPrefix . 'catalogs',
+            'index' => $indexPrefix . 'files',
             'body' => [
                 'text-content' => $catalogText,
                 'categories-full-text' => $categories_titles,
@@ -275,6 +277,7 @@ class Elasticsearch
                 'origin-file-name' => $originFilename,
                 'lang' => $langAlias,
                 'file-size' => $byteSize,
+                'file-type-alias' => $fileTypeAlias,
                 'exists-products' => $global_is_product,
                 'categories' => $categories_ids,
                 'series' => $series_ids,
@@ -285,7 +288,7 @@ class Elasticsearch
 
             $this->client->create([
                 'id' => uniqid(),
-                'index' => $indexPrefix . 'catalogs-seria-' . $seria->getId(),
+                'index' => $indexPrefix . 'files-seria-' . $seria->getId(),
                 'body' => [
                     'text-content' => $catalogText,
                     'categories-full-text' => $categories_titles,
@@ -293,6 +296,7 @@ class Elasticsearch
                     'origin-file-name' => $originFilename,
                     'lang' => $langAlias,
                     'file-size' => $byteSize,
+                    'file-type-alias' => $fileTypeAlias,
                     'exists-products' => $global_is_product,
                     'categories' => $categories_ids,
                     'series' => $seria->getId(),

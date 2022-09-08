@@ -10,6 +10,7 @@ class CatalogFile
     private string $originName;
     private string $extension;
     private int $byteSize;
+    private string $mimeType;
 
     public function getFullPath(): string
     {
@@ -66,6 +67,18 @@ class CatalogFile
     public function setByteSize(int $byteSize): self
     {
         $this->byteSize = $byteSize;
+
+        return $this;
+    }
+
+    public function getMimeType(): string
+    {
+        return $this->mimeType;
+    }
+
+    public function setMimeType(string $mimeType): self
+    {
+        $this->mimeType = $mimeType;
 
         return $this;
     }

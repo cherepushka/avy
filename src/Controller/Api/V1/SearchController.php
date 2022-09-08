@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 use App\Http\Request\Api\SearchBySeries as SearchBySeries;
 use App\Http\Request\Api\SearchProductSuggests as SearchProductSuggests;
 
-#[Route('/api/v1', name: 'app_api')]
+#[Route('/api/v1', name: 'app_api_v1')]
 class SearchController extends AbstractController
 {
 

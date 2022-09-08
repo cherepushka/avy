@@ -2,10 +2,14 @@
 
 namespace App\Service;
 
+use App\Entity\FileStatus;
+use App\Mapper\FileList\FileTypeGroupedListMapper;
+use App\Model\FileList\FileTypeGrouped\FileList;
+use App\Repository\FileTypeRepository;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use App\Entity\Catalog;
+use App\Entity\File;
 use App\Exception\CategoryNotFoundByIdException;
-use App\Repository\CatalogRepository;
+use App\Repository\FileRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LanguageRepository;
 use App\Repository\ManufacturerRepository;
@@ -15,15 +19,17 @@ use App\Model\File\CatalogFile;
 use App\Exception\FileAlreadyLoadedException;
 use App\Service\Pdf\Storage\StorageServiceFacade;
 
-class CatalogService
+class FileService
 {
 
     public function __construct(
-        private readonly CatalogRepository $catalogRepository,
+        private readonly FileRepository $fileRepository,
         private readonly ManufacturerRepository $manufacturerRepository,
         private readonly LanguageRepository $languageRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly StorageServiceFacade $storageService,
+        private readonly FileTypeRepository $fileTypeRepository,
+        private readonly FileTypeGroupedListMapper $fileTypeGroupedListMapper,
     ){}
 
     /**
@@ -36,8 +42,9 @@ class CatalogService
         string          $manufacturer_name,
         array           $categories_ids,
         string          $language_name,
-        string          $text
-    ): Catalog
+        string          $fileType,
+        ?string         $text = null
+    ): File
     {
         $file = $this->storageService->saveUploadedCatalog($uploadedFile);
 
@@ -48,14 +55,21 @@ class CatalogService
 
         $manufacturer = $this->manufacturerRepository->findOneByName($manufacturer_name);
         $language = $this->languageRepository->findOneByName($language_name);
+        $fileType = $this->fileTypeRepository->findOneBy(['type' => $fileType]);
 
-        $catalog = (new Catalog())
+        $catalog = (new File())
             ->setFilename($file->getName())
             ->setOriginFilename($origin_filename)
             ->setManufacturer($manufacturer)
             ->setLang($language)
             ->setByteSize($file->getByteSize())
-            ->setText($text);
+            ->setFileStatus(FileStatus::NEW)
+            ->setFileType($fileType)
+            ->setMimeType($file->getMimeType());
+
+        if ($text !== null) {
+            $catalog->setText($text);
+        }
 
         $categories = new ArrayCollection();
         foreach ($categories_ids as $category_id) {
@@ -69,7 +83,7 @@ class CatalogService
         }
 
         $catalog->setCategories($categories);
-        $this->catalogRepository->add($catalog, true);
+        $this->fileRepository->add($catalog, true);
 
         return $catalog;
     }
@@ -82,7 +96,7 @@ class CatalogService
         $byte_size = $file->getByteSize();
         $raw_content = $this->storageService->getRawContentFromCatalogFile($file->getName());
 
-        foreach ($this->catalogRepository->findAllByByteSize($byte_size) as $item){
+        foreach ($this->fileRepository->findAllByByteSize($byte_size) as $item){
 
             if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content){
                 return true;
@@ -90,6 +104,19 @@ class CatalogService
         }
 
         return false;
+    }
+
+    public function getFilesInCategoryGroupedByType(int $category_id): FileList
+    {
+        $category = $this->categoryRepository->find($category_id);
+
+        if (null === $category){
+            throw new CategoryNotFoundByIdException($category_id);
+        }
+
+        $files = $this->fileRepository->findAllByCategory($category_id);
+
+        return $this->fileTypeGroupedListMapper->map($files);
     }
 
 }
