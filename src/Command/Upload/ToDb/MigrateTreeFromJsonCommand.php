@@ -46,7 +46,8 @@ class MigrateTreeFromJsonCommand extends Command
             $categoryNewItem = (new Category())
                 ->setId($item['id'])
                 ->setTitle($item['title'])
-                ->setLink($item['link']);
+                ->setLink($item['link'])
+                ->setProductsExist(false);
 
             if ($categoryParentItem){
                 $categoryNewItem->setParent($categoryParentItem);
