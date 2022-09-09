@@ -116,7 +116,8 @@ class Elasticsearch
                         "fields" => [
                             "categories-full-text^1.5",
                             "text-content",
-                        ]
+                        ],
+                        'minimum_should_match' => '80%'
                     ]
                 ],
                 'collapse' => [
@@ -186,7 +187,8 @@ class Elasticsearch
                                     "fields" => [
                                         "categories-full-text^1.5",
                                         "text-content",
-                                    ]
+                                    ],
+                                    'minimum_should_match' => '80%'
                                 ]
                             ]
                         ]
