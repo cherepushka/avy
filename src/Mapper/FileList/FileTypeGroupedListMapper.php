@@ -27,22 +27,21 @@ class FileTypeGroupedListMapper
             $fileTypeEntity = $file->getFileType();
             $fileType = $fileTypeEntity->getType();
 
-            if (isset($items[$fileType])){
-
-                /** @var FileListItem $fileListItem */
-                $fileListItem = $items[$fileType];
-
-                $downloadLink = $this->router->generate('app_files_download', ['name' => $file->getFilename()],
-                    UrlGeneratorInterface::ABSOLUTE_URL);
-
-                $fileListItem->appendFile(new ItemFile(
-                    $file->getOriginFilename(),
-                    $file->getByteSize(),
-                    $downloadLink
-                ));
-            } else {
+            if (!isset($items[$fileType])){
                 $items[$fileType] = new FileListItem($fileTypeEntity->getName());
             }
+
+            /** @var FileListItem $fileListItem */
+            $fileListItem = $items[$fileType];
+
+            $downloadLink = $this->router->generate('app_files_download', ['name' => $file->getFilename()],
+                UrlGeneratorInterface::ABSOLUTE_URL);
+
+            $fileListItem->appendFile(new ItemFile(
+                $file->getOriginFilename(),
+                $file->getByteSize(),
+                $downloadLink
+            ));
         }
 
         return new FileList($items);
