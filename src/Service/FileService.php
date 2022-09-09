@@ -96,7 +96,7 @@ class FileService
         $byte_size = $file->getByteSize();
         $raw_content = $this->storageService->getRawContentFromCatalogFile($file->getName());
 
-        foreach ($this->fileRepository->findAllByByteSize($byte_size) as $item){
+        foreach ($this->fileRepository->findBy(['byte_size' => $byte_size]) as $item){
 
             if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content){
                 return true;

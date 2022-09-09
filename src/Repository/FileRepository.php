@@ -43,28 +43,6 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
-     * @deprecated
-     * @throws NonUniqueResultException
-     */
-    public function findOneByFilename(string $filename): ?File
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.filename = :val')
-            ->setParameter('val', $filename)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
-    public function findAllByOriginFilename(string $filename): array
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.origin_filename = :val')
-            ->setParameter('val', $filename)
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
      * @param int $category_id
      * @return File[]
      */
@@ -84,37 +62,39 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $catalog_id
+     * @param int $file_id
      * @return Category[]
      */
-    public function findAllSeries(int $catalog_id): array
+    public function findAllSeries(int $file_id): array
     {
         $rsm = new ResultSetMappingBuilder($this->_em);
         $rsm->addRootEntityFromClassMetadata(Category::class, 'cat');
 
         $query = $this->_em->createNativeQuery('
-            SELECT cat.* FROM catalog_category cc
-                LEFT JOIN category cat ON cc.category_id = cat.id
+            SELECT cat.* FROM file_category fc
+                LEFT JOIN category cat ON fc.category_id = cat.id
                 LEFT JOIN category cat2 ON cat.id = cat2.parent 
-            WHERE cc.catalog_id = ?
+            WHERE fc.file_id = ?
             AND cat2.id IS NULL
         ', $rsm);
 
-        $query->setParameter(1, $catalog_id);
+        $query->setParameter(1, $file_id);
 
         return $query->getResult();
     }
 
     /**
-     * @param int $byte_size
      * @return File[]
      */
-    public function findAllByByteSize(int $byte_size): array
+    public function findAllPdfsWithText(): array
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.byte_size = :val')
-            ->setParameter('val', $byte_size)
-            ->getQuery()
-            ->getResult();
+        $query = $this->_em->createQuery("
+            SELECT f FROM App\Entity\File f 
+            WHERE f.text IS NOT NULL 
+                AND f.mimeType = 'application/pdf'
+        ");
+
+        return $query->getResult();
     }
+
 }

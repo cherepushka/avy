@@ -24,13 +24,14 @@ class FileTypeGroupedListMapper
         $items = [];
 
         foreach ($files as $file){
-            $fileType = $file->getFileType();
-            $fileTypeAlias = $fileType->getAlias();
+            $fileTypeEntity = $file->getFileType();
+            $fileType = $fileTypeEntity->getType();
 
-            if (isset($items[$fileTypeAlias])){
+            if (isset($items[$fileType])){
 
                 /** @var FileListItem $fileListItem */
-                $fileListItem = $items[$fileTypeAlias];
+                $fileListItem = $items[$fileType];
+
                 $downloadLink = $this->router->generate('app_files_download', ['name' => $file->getFilename()],
                     UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -40,7 +41,7 @@ class FileTypeGroupedListMapper
                     $downloadLink
                 ));
             } else {
-                $items[$fileTypeAlias] = new FileListItem($fileType->getType(), $fileTypeAlias);
+                $items[$fileType] = new FileListItem($fileTypeEntity->getName());
             }
         }
 

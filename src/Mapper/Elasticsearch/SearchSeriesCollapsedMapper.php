@@ -28,7 +28,7 @@ class SearchSeriesCollapsedMapper extends AbstractResponseMapper
                     ->setSeries($series_id)
                     ->setLangAlias($inner_fields['lang'][0])
                     ->setByteSize($inner_fields['file-size'][0])
-                    ->setDownloadLink($this->router->generate('app_catalogs_pdf_show', [
+                    ->setDownloadLink($this->router->generate('app_files_download', [
                         'name' => $inner_fields['file-name'][0]
                     ], UrlGeneratorInterface::ABSOLUTE_URL))
                     ->setOriginName($inner_fields['origin-file-name'][0])

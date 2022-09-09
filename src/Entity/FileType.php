@@ -17,7 +17,7 @@ class FileType
     private string $type;
 
     #[ORM\Column(type: 'string', unique: true, nullable: false)]
-    private string $alias;
+    private string $name;
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $description = null;
@@ -39,14 +39,14 @@ class FileType
         return $this;
     }
 
-    public function getAlias(): string
+    public function getName(): string
     {
-        return $this->alias;
+        return $this->name;
     }
 
-    public function setAlias(string $alias): self
+    public function setName(string $name): self
     {
-        $this->alias = $alias;
+        $this->name = $name;
 
         return $this;
     }

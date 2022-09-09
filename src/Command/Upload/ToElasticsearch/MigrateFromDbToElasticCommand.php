@@ -33,7 +33,9 @@ class MigrateFromDbToElasticCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        foreach($this->fileRepository->findAll() as $catalog){
+        $files = $this->fileRepository->findAllPdfsWithText();
+
+        foreach($files as $catalog){
 
             $this->elasticsearch->uploadDocument(
                 $catalog->getFilename(),
@@ -41,7 +43,7 @@ class MigrateFromDbToElasticCommand extends Command
                 $catalog->getByteSize(),
                 $catalog->getLang()->getAlias(),
                 $catalog->getText(),
-                $catalog->getFileType()->getAlias(),
+                $catalog->getFileType()->getType(),
                 $catalog->getCategories()->toArray(),
                 $this->fileRepository->findAllSeries($catalog->getId()),
             );

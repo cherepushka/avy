@@ -11,14 +11,14 @@ class FileTypeFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $fileTypes = [
-            (new FileType())->setType('Каталог')
-                ->setAlias('catalog')
+            (new FileType())->setName('Каталог')
+                ->setType('catalog')
                 ->setDescription('Каталог серии'),
-            (new FileType())->setType('Руководство по эксплуатации / инструкция')
-                ->setAlias('manual')
+            (new FileType())->setName('Руководство по эксплуатации / инструкция')
+                ->setType('manual')
                 ->setDescription('Руководство по эксплуатации к серии'),
-            (new FileType())->setType('Опросный лист')
-                ->setAlias('questionnaire')
+            (new FileType())->setName('Опросный лист')
+                ->setType('questionnaire')
                 ->setDescription('Опросный лист для клиентов'),
         ];
 
