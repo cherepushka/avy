@@ -1,0 +1,77 @@
+{
+    "aliases": {
+        "product-suggests_alias": {}
+    },
+    "settings": {
+        "index": {
+            "max_ngram_diff": 10,
+            
+            "analysis": {
+                "filter": {
+                    "catalog_russian_stemmer": {
+                        "type": "stemmer",
+                        "language": "light_russian"
+                    },
+                    "remove_slash_and_space": {
+                        "type": "pattern_replace",
+                        "pattern": "[ -]",
+                        "replacement": ""
+                    },
+                    "2_10_edge_gram": {
+                        "type": "edge_ngram",
+                        "min_gram": 2,
+                        "max_gram": 10
+                    },
+                    "implode_separeted": {
+                        "type": "word_delimiter",
+                        "catenate_all": true,
+                        "split_on_numerics": false,
+                        "split_on_case_change": false,
+                        "stem_english_possessive": false
+                    }
+                },
+                "analyzer": {
+                    "value_content": {
+                        "type": "custom",
+                        "tokenizer": "whitespace",
+                        "filter": [
+                            "lowercase",
+                            "implode_separeted"
+                        ]
+                    },
+                    "concatanated_prefix_content": {
+                        "type": "custom",
+                        "tokenizer": "keyword",
+                        "filter": [
+                            "lowercase",
+                            "remove_slash_and_space",
+                            "2_10_edge_gram"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "_source": {
+            "enabled": true
+        },
+        "properties": {
+            "value": {
+                "type": "text",
+                "analyzer": "value_content",
+                "fields": {
+                    "_search-as-you-type": {
+                        "type": "search_as_you_type",
+                        "analyzer": "value_content"
+                    },
+                    "_concatenated-prefix": {
+                        "type": "text",
+                        "analyzer": "concatanated_prefix_content"
+                    }
+                }
+            },
+            "type": {"type": "keyword"}
+        }
+    }
+}

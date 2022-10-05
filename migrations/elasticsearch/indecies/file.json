@@ -1,0 +1,99 @@
+{
+    "aliases": {
+        "files_index_alias": {}
+    },
+    "settings": {
+        "index": {
+            "analysis": {
+                "filter": {
+                    "russian_stop": {
+                        "type": "stop",
+                        "stopwords": "_russian_"
+                    },
+                    "russian_stemmer": {
+                        "type": "stemmer",
+                        "language": "light_russian"
+                    },
+                    "exclude_pdf_chars": {
+                        "type": "stop",
+                        "stopwords": ["\r", "\n", "•"]
+                    },
+                    "2_10_edge_gram": {
+                        "type": "edge_ngram",
+                        "min_gram": 2,
+                        "max_gram": 10
+                    },
+                    "implode_separeted": {
+                        "type": "word_delimiter",
+                        "catenate_all": true,
+                        "split_on_numerics": false,
+                        "split_on_case_change": false,
+                        "stem_english_possessive": false
+                    }
+                },
+                "analyzer": {
+                    "content": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "exclude_pdf_chars",
+                            "lowercase",
+                            "russian_stop",
+                            "russian_stemmer",
+                            "implode_separeted"
+                        ]
+                    },
+                    "category_content": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                         "filter": [
+                            "lowercase",
+                            "russian_stemmer"
+                        ]
+                    },
+                    "tengram": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "exclude_pdf_chars", 
+                            "lowercase",
+                            "russian_stop", 
+                            "russian_stemmer",
+                            "2_10_edge_gram"
+                        ] 
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "_source": {
+            "enabled": true
+        },
+        "properties": {
+            "text-content" : {
+                "type": "text",
+                "analyzer": "content",
+                "fields" : {
+                    "_tengram" : {
+                        "type": "text",
+                        "analyzer" : "tengram",
+                        "term_vector": "with_positions_offsets"
+                    },
+                    "_search-as-you-type": {
+                        "search_analyzer": "content",
+                        "type" : "search_as_you_type"
+                    }
+                }
+            },
+            "categories-full-text": {"type": "text", "analyzer": "category_content"},
+            "file-name": {"type": "keyword"},
+            "file-type": {"type": "keyword"},
+            "origin-file-name": {"type": "keyword"},
+            "file-size": {"type": "long"},
+            "lang": {"type": "keyword"},
+            "series": {"type": "long"},
+            "exists-products": {"type": "boolean"}
+        }
+    }
+}
