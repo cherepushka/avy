@@ -4,7 +4,6 @@ namespace App\Model\File;
 
 class CatalogLocalTmpFile
 {
-
     private string $fullPath;
     private string $originName;
     private string $extension;
@@ -18,6 +17,7 @@ class CatalogLocalTmpFile
     public function setFullPath(string $fullPath): self
     {
         $this->fullPath = $fullPath;
+
         return $this;
     }
 
@@ -29,6 +29,7 @@ class CatalogLocalTmpFile
     public function setOriginName(string $originName): self
     {
         $this->originName = $originName;
+
         return $this;
     }
 
@@ -40,6 +41,7 @@ class CatalogLocalTmpFile
     public function setExtension(string $extension): self
     {
         $this->extension = $extension;
+
         return $this;
     }
 
@@ -54,5 +56,4 @@ class CatalogLocalTmpFile
 
         return $this;
     }
-
 }

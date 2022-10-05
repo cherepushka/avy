@@ -2,7 +2,6 @@
 
 namespace App\Service\OCR\Google\Filters;
 
-use Exception;
 use Google\Cloud\Vision\V1\AnnotateFileResponse;
 use Google\Cloud\Vision\V1\AnnotateImageResponse;
 use Google\Cloud\Vision\V1\Block;
@@ -14,19 +13,18 @@ use Google\Cloud\Vision\V1\Word;
 
 class ContentFilter
 {
-
     private AnnotateFileResponse $response;
 
     private array $separators = [
-        'UNKNOWN'           => "",
-        'SPACE'             => " ",
-        'SURE_SPACE'        => " ",
-        'EOL_SURE_SPACE'    => " \n",
-        'HYPHEN'            => ' - ',
-        'LINE_BREAK'        => "\n",
+        'UNKNOWN' => '',
+        'SPACE' => ' ',
+        'SURE_SPACE' => ' ',
+        'EOL_SURE_SPACE' => " \n",
+        'HYPHEN' => ' - ',
+        'LINE_BREAK' => "\n",
     ];
 
-    //if text block matching any of these regexps, then it doesn't be in result text
+    // if text block matching any of these regexps, then it doesn't be in result text
     private array $stop_paragraphs_regexps = [
         '#^[\d\W]+$#ui',
     ];
@@ -42,11 +40,10 @@ class ContentFilter
 
         /** @var AnnotateImageResponse $response */
         foreach ($this->response->getResponses() as $response) {
-
             $fullTextAnnotation = $response->getFullTextAnnotation();
 
             // skipping iteration if text content is empty
-            if ($fullTextAnnotation === null){
+            if (null === $fullTextAnnotation) {
                 continue;
             }
 
@@ -55,7 +52,6 @@ class ContentFilter
                 $text .= $this->getFilteredTextFromPage($page);
             }
         }
-
 
         return $text;
     }
@@ -67,7 +63,7 @@ class ContentFilter
         /** @var Block $block */
         foreach ($page->getBlocks()->getIterator() as $block) {
             /** @var Paragraph $paragraph */
-            foreach($block->getParagraphs()->getIterator() as $paragraph){
+            foreach ($block->getParagraphs()->getIterator() as $paragraph) {
                 $text .= $this->getFilteredTextFromParagraphs($paragraph);
             }
         }
@@ -80,15 +76,14 @@ class ContentFilter
         $result_text = '';
 
         /** @var Word $word */
-        foreach ($paragraph->getWords()->getIterator() as $word){
-
+        foreach ($paragraph->getWords()->getIterator() as $word) {
             /** @var Symbol $symbol */
-            foreach($word->getSymbols()->getIterator() as $symbol){
+            foreach ($word->getSymbols()->getIterator() as $symbol) {
                 $result_text .= $symbol->getText();
 
                 $separator = '';
 
-                if($symbol->hasProperty()){
+                if ($symbol->hasProperty()) {
                     /** @var int $text_property */
                     $separator_type = $symbol->getProperty()->getDetectedBreak()->getType();
 
@@ -100,13 +95,12 @@ class ContentFilter
             }
         }
 
-        foreach ($this->stop_paragraphs_regexps as $regexp){
-            if (preg_match($regexp, $result_text) === 1){
+        foreach ($this->stop_paragraphs_regexps as $regexp) {
+            if (1 === preg_match($regexp, $result_text)) {
                 $result_text = '';
             }
         }
 
         return $result_text;
     }
-
 }

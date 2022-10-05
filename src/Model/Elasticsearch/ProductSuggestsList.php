@@ -2,12 +2,10 @@
 
 namespace App\Model\Elasticsearch;
 
-use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 
 class ProductSuggestsList
 {
-
     /**
      * @var string[] $items
      */
@@ -32,5 +30,4 @@ class ProductSuggestsList
     {
         return $this->items;
     }
-
 }

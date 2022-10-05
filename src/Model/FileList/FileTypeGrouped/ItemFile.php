@@ -4,7 +4,6 @@ namespace App\Model\FileList\FileTypeGrouped;
 
 class ItemFile
 {
-
     private string $originName;
     private int $byteSize;
     private string $downloadLink;
@@ -30,5 +29,4 @@ class ItemFile
     {
         return $this->downloadLink;
     }
-
 }

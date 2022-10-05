@@ -7,16 +7,14 @@ use RuntimeException;
 
 class CatalogStorageService implements CatalogStorageServiceInterface
 {
-
     private readonly string $catalogs_dir;
 
     public function __construct(
         string $upload_directory_path,
-    )
-    {
+    ) {
         $this->catalogs_dir = rtrim($upload_directory_path, '\\/');
 
-        if (!is_dir($this->catalogs_dir)){
+        if (!is_dir($this->catalogs_dir)) {
             mkdir($this->catalogs_dir, 0777, true);
         }
     }
@@ -25,7 +23,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
     {
         $newCatalogPath = $this->getFullPathToCatalog($filename);
 
-        if (copy($filepath, $newCatalogPath) === false){
+        if (false === copy($filepath, $newCatalogPath)) {
             throw new RuntimeException("Unable to save file from '$filepath' to '$newCatalogPath'");
         }
 
@@ -36,7 +34,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
     {
         $catalogPath = $this->getFullPathToCatalog($filename);
 
-        if (!unlink($catalogPath)){
+        if (!unlink($catalogPath)) {
             throw new RuntimeException("File in path '$catalogPath' cannot be removed");
         }
     }
@@ -59,7 +57,6 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function getFullPathToCatalog(string $catalogName): string
     {
-        return $this->catalogs_dir . DIRECTORY_SEPARATOR . $catalogName;
+        return $this->catalogs_dir.DIRECTORY_SEPARATOR.$catalogName;
     }
-
 }

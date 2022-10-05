@@ -4,7 +4,6 @@ namespace App\Model;
 
 class ManufacturerItem
 {
-
     private int $id;
     private string $name;
 
@@ -31,5 +30,4 @@ class ManufacturerItem
     {
         return $this->name;
     }
-
 }

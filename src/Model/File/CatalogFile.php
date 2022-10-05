@@ -4,7 +4,6 @@ namespace App\Model\File;
 
 class CatalogFile
 {
-
     private string $fullPath;
     private string $name;
     private string $originName;
@@ -44,6 +43,7 @@ class CatalogFile
     public function setOriginName(string $originName): self
     {
         $this->originName = $originName;
+
         return $this;
     }
 
@@ -82,6 +82,4 @@ class CatalogFile
 
         return $this;
     }
-
-
 }

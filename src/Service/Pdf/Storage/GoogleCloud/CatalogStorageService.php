@@ -8,7 +8,6 @@ use Google\Cloud\Storage\StorageClient;
 
 class CatalogStorageService implements CatalogStorageServiceInterface
 {
-
     private string $bucketName = 'avy-elastic-ocr';
     private Bucket $bucket;
     private string $catalogsDir = 'catalogs';
@@ -16,10 +15,9 @@ class CatalogStorageService implements CatalogStorageServiceInterface
 
     public function __construct(
         string $credentials_path,
-    )
-    {
+    ) {
         $this->storageClient = new StorageClient([
-            'keyFilePath' => $credentials_path
+            'keyFilePath' => $credentials_path,
         ]);
 
         $this->bucket = $this->storageClient->bucket($this->bucketName);
@@ -28,7 +26,7 @@ class CatalogStorageService implements CatalogStorageServiceInterface
     public function uploadFromLocal(string $filepath, string $filename): string
     {
         $this->bucket->upload(fopen($filepath, 'r'), [
-            'name' => $this->getBucketPathToCatalog($filename)
+            'name' => $this->getBucketPathToCatalog($filename),
         ]);
 
         return $this->getFullPathToCatalog($filename);
@@ -70,5 +68,4 @@ class CatalogStorageService implements CatalogStorageServiceInterface
     {
         return sprintf('gs://%s/%s/%s', $this->bucketName, $this->catalogsDir, $catalogName);
     }
-
 }

@@ -26,7 +26,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 )]
 class UploadFilesBySeriaFromCSVCommand extends Command
 {
-
     private string $fluidLineUrl = 'https://fluid-line.ru/';
 
     public function __construct(
@@ -36,8 +35,7 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         private readonly LanguageRepository $languageRepository,
         private readonly FileTypeRepository $fileTypeRepository,
         private readonly string $projectDir
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -54,13 +52,14 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $inputPath = rtrim($input->getArgument('path'), '\\/');
-        $catalogsPath = $this->projectDir . DIRECTORY_SEPARATOR . $inputPath;
+        $catalogsPath = $this->projectDir.DIRECTORY_SEPARATOR.$inputPath;
 
-        foreach ($this->sourceCsvFileIterator($catalogsPath) as $row){
+        foreach ($this->sourceCsvFileIterator($catalogsPath) as $row) {
             $this->handleRow($row[0], $row[1]);
         }
 
         $io->success('Успех');
+
         return Command::SUCCESS;
     }
 
@@ -71,14 +70,13 @@ class UploadFilesBySeriaFromCSVCommand extends Command
     {
         $fileUrls = $this->parseAbsoluteFileUrls($html);
 
-        foreach ($fileUrls as $fileUrl){
-
+        foreach ($fileUrls as $fileUrl) {
             $originFileName = basename($fileUrl);
 
             $tmpFile = tmpfile();
             $tmpCatalogPath = stream_get_meta_data($tmpFile)['uri'];
 
-            if ($this->uploadFileToTmp($tmpCatalogPath, $fileUrl) === false) {
+            if (false === $this->uploadFileToTmp($tmpCatalogPath, $fileUrl)) {
                 dump("Не удалось загрузить файл по url `$fileUrl`");
                 continue;
             }
@@ -107,9 +105,9 @@ class UploadFilesBySeriaFromCSVCommand extends Command
         $result = [];
         preg_match_all('#href=\"(?:https?://fluid-line\.ru/)?([\w\/\-\']+\.\w+)\"#', $html, $matches);
 
-        foreach ($matches[1] as $path){
+        foreach ($matches[1] as $path) {
             $path = ltrim($path, '/');
-            $result[] = $this->fluidLineUrl . $path;
+            $result[] = $this->fluidLineUrl.$path;
         }
 
         return $result;
@@ -134,7 +132,7 @@ class UploadFilesBySeriaFromCSVCommand extends Command
 
         $categories = $this->categoryRepository->findAllParentsList($seria);
         $categories_ids = array_map(
-            fn(Category $category) => $category->getId(),
+            fn (Category $category) => $category->getId(),
             $categories
         );
 
@@ -151,9 +149,8 @@ class UploadFilesBySeriaFromCSVCommand extends Command
                 $defaultLanguage->getName(),
                 $defaultFileType->getType(),
             );
-        } catch (FileAlreadyLoadedException $alreadyLoaded){
+        } catch (FileAlreadyLoadedException $alreadyLoaded) {
             return;
         }
     }
-
 }

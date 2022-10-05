@@ -3,21 +3,21 @@
 namespace App\Service;
 
 use App\Mapper\Elasticsearch\ProductSuggestsMapper;
-use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Mapper\Elasticsearch\SearchDefaultMapper;
 use App\Mapper\Elasticsearch\SearchSeriesCollapsedMapper;
+use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Model\Elasticsearch\ProductSuggestsList;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 
 class SearchService
 {
-
     public function __construct(
-        private readonly Elasticsearch                  $elasticsearch,
-        private readonly SearchDefaultMapper            $defaultResultMapper,
-        private readonly SearchSeriesCollapsedMapper    $searchSeriesCollapsedMapper,
-        private readonly ProductSuggestsMapper          $productSuggestsMapper
-    ){}
+        private readonly Elasticsearch $elasticsearch,
+        private readonly SearchDefaultMapper $defaultResultMapper,
+        private readonly SearchSeriesCollapsedMapper $searchSeriesCollapsedMapper,
+        private readonly ProductSuggestsMapper $productSuggestsMapper
+    ) {
+    }
 
     /**
      * @throws ElasticsearchException
@@ -33,17 +33,16 @@ class SearchService
     }
 
     /**
-     * @param string $text - text for search
-     * @param int[] $series - array of series for filtering
-     * 
+     * @param string $text   - text for search
+     * @param int[]  $series - array of series for filtering
+     *
      * @throws ElasticsearchException
      */
     public function searchSeriesCollapsed(
         string $text,
         ?array $series,
         int $page = 1
-    ): SearchResultList
-    {
+    ): SearchResultList {
         $series_size = 3;
         $from = ($page - 1) * $series_size;
 
@@ -65,16 +64,16 @@ class SearchService
         // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
         $text = addcslashes($text, '+-=&|><!(){}[]^"~*?:\/');
 
-        $text_words = explode(" ", $text);
-        foreach ($text_words as $key => $word){
-            $text_words[$key] = $word . '^' . $key + 1;
+        $text_words = explode(' ', $text);
+        foreach ($text_words as $key => $word) {
+            $text_words[$key] = $word.'^'.$key + 1;
         }
 
         $text_words = array_reverse($text_words);
         $text = implode(' ', $text_words);
-        
+
         $elastic_response = $this->elasticsearch->productSuggests($text);
+
         return $this->productSuggestsMapper->map($elastic_response);
     }
-
 }

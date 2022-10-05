@@ -4,7 +4,6 @@ namespace App\Model;
 
 class LanguageList
 {
-
     /** @var LanguageItem[] */
     private array $items;
 
@@ -19,5 +18,4 @@ class LanguageList
     {
         return $this->items;
     }
-
 }

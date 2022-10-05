@@ -18,7 +18,6 @@ use Symfony\Component\Filesystem\Exception\RuntimeException;
 )]
 class MigrateTreeFromJsonCommand extends Command
 {
-
     public function __construct(
         private readonly string $projectDir,
         private readonly EntityManagerInterface $em,
@@ -49,7 +48,7 @@ class MigrateTreeFromJsonCommand extends Command
                 ->setLink($item['link'])
                 ->setProductsExist(false);
 
-            if ($categoryParentItem){
+            if ($categoryParentItem) {
                 $categoryNewItem->setParent($categoryParentItem);
                 $categoryParentItem->addChild($categoryNewItem);
 
@@ -59,7 +58,7 @@ class MigrateTreeFromJsonCommand extends Command
             $this->em->persist($categoryNewItem);
             $this->em->flush();
 
-            if( isset($item['children']) ) {
+            if (isset($item['children'])) {
                 $this->saveItems($item['children'], $categoryNewItem);
             }
         }
@@ -67,15 +66,15 @@ class MigrateTreeFromJsonCommand extends Command
 
     private function loadTreeFromJson(string $path): array
     {
-        $path = ltrim($path, "\\/");
+        $path = ltrim($path, '\\/');
 
-        if ( !is_file($this->projectDir . \DIRECTORY_SEPARATOR . $path) ){
+        if (!is_file($this->projectDir.\DIRECTORY_SEPARATOR.$path)) {
             throw new FileNotFoundException("Cannot load tree with path '$path'");
         }
 
         $JSON = file_get_contents($path);
-        if (!$JSON){
-            throw new RuntimeException("Error with getting body of file");
+        if (!$JSON) {
+            throw new RuntimeException('Error with getting body of file');
         }
 
         return json_decode($JSON, true);

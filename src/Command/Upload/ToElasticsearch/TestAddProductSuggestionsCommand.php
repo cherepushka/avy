@@ -15,12 +15,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class TestAddProductSuggestionsCommand extends Command
 {
-
     public function __construct(
         private readonly string $projectDir,
         private readonly Elasticsearch $elasticsearch
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -33,13 +31,11 @@ class TestAddProductSuggestionsCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        foreach(glob($this->projectDir . '/.dev-data/hints/*') as $filepath){
-
+        foreach (glob($this->projectDir.'/.dev-data/hints/*') as $filepath) {
             $type = pathinfo($filepath)['filename'];
             $csv_stream = fopen($filepath, 'r');
 
-            while(($row = fgetcsv($csv_stream, 0, "\n")) !== false){
-
+            while (($row = fgetcsv($csv_stream, 0, "\n")) !== false) {
                 $value = $row[0];
                 $this->elasticsearch->uploadProductSuggest($value, $type);
             }

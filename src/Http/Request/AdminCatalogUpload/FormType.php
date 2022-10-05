@@ -9,7 +9,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class FormType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -21,5 +20,4 @@ class FormType extends AbstractType
             ->add('categoryIds', TextType::class)
         ;
     }
-
 }

@@ -5,7 +5,6 @@ namespace App\Repository;
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -54,6 +53,7 @@ class CategoryRepository extends ServiceEntityRepository
 
     /**
      * @param int[] $ids
+     *
      * @return Category[]
      */
     public function findWithoutChildren(array $ids): array
@@ -89,5 +89,4 @@ class CategoryRepository extends ServiceEntityRepository
 
         return $query->getResult();
     }
-
 }

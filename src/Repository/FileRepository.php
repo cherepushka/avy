@@ -2,10 +2,9 @@
 
 namespace App\Repository;
 
-use App\Entity\File;
 use App\Entity\Category;
+use App\Entity\File;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -43,7 +42,6 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $category_id
      * @return File[]
      */
     public function findAllByCategory(int $category_id): array
@@ -62,7 +60,6 @@ class FileRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $file_id
      * @return Category[]
      */
     public function findAllSeries(int $file_id): array
@@ -96,5 +93,4 @@ class FileRepository extends ServiceEntityRepository
 
         return $query->getResult();
     }
-
 }

@@ -8,7 +8,6 @@ use OpenApi\Attributes as OA;
 
 class SearchResultList
 {
-
     /** @var SearchResultItem[] $items */
     #[OA\Property(
         property: 'items',
@@ -33,7 +32,7 @@ class SearchResultList
 
     /**
      * @param SearchResultItem[] $searchResultItems
-     * @param int $total - count if all result hits
+     * @param int                $total             - count if all result hits
      */
     public function __construct(array $searchResultItems, int $page_size, int $total, int $page)
     {
@@ -47,12 +46,13 @@ class SearchResultList
 
     private function setMaxPage(): void
     {
-        if ($this->totalHits === 0){
+        if (0 === $this->totalHits) {
             $this->maxPage = 0;
+
             return;
         }
 
-        $this->maxPage = (int)ceil($this->totalHits / $this->pageSize);
+        $this->maxPage = (int) ceil($this->totalHits / $this->pageSize);
     }
 
     /** @return SearchResultItem[] */
@@ -75,5 +75,4 @@ class SearchResultList
     {
         return $this->maxPage;
     }
-
 }

@@ -16,17 +16,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class MigrateFromDbToElasticCommand extends Command
 {
-
     public function __construct(
         private readonly Elasticsearch $elasticsearch,
         private readonly FileRepository $fileRepository
-    )
-    {
+    ) {
         parent::__construct();
     }
 
     protected function configure(): void
-    {}
+    {
+    }
 
     /**
      * @throws ElasticsearchException
@@ -35,8 +34,7 @@ class MigrateFromDbToElasticCommand extends Command
     {
         $files = $this->fileRepository->findAllPdfsWithText();
 
-        foreach($files as $catalog){
-
+        foreach ($files as $catalog) {
             $this->elasticsearch->uploadDocument(
                 $catalog->getFilename(),
                 $catalog->getOriginFilename(),

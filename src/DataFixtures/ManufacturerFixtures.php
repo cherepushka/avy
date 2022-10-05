@@ -8,7 +8,6 @@ use Doctrine\Persistence\ObjectManager;
 
 class ManufacturerFixtures extends Fixture
 {
-
     public function load(ObjectManager $manager)
     {
         $manufacturers = [
@@ -16,7 +15,7 @@ class ManufacturerFixtures extends Fixture
             (new Manufacturer())->setName('A-Flow'),
         ];
 
-        foreach ($manufacturers as $manufacturer){
+        foreach ($manufacturers as $manufacturer) {
             $manager->persist($manufacturer);
         }
 

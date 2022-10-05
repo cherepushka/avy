@@ -4,7 +4,6 @@ namespace App\Model;
 
 class ManufacturerList
 {
-
     /** @var ManufacturerItem[] */
     private array $manufacturers;
 
@@ -19,5 +18,4 @@ class ManufacturerList
     {
         return $this->manufacturers;
     }
-
 }

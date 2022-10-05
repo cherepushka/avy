@@ -9,7 +9,6 @@ use Google\Cloud\Storage\StorageClient;
 
 class OcrResultStorageService implements OcrResultStorageServiceInterface
 {
-
     private Bucket $bucket;
     private StorageClient $storageClient;
 
@@ -19,7 +18,7 @@ class OcrResultStorageService implements OcrResultStorageServiceInterface
     public function __construct(string $credentials_path)
     {
         $this->storageClient = new StorageClient([
-            'keyFilePath' => $credentials_path
+            'keyFilePath' => $credentials_path,
         ]);
 
         $this->bucket = $this->storageClient->bucket($this->bucketName);
@@ -40,8 +39,7 @@ class OcrResultStorageService implements OcrResultStorageServiceInterface
         $resultsDir = $this->getBucketPathForResults($catalogName);
 
         return $this->bucket->objects([
-            'prefix' => $resultsDir
+            'prefix' => $resultsDir,
         ]);
     }
-
 }

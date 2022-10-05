@@ -7,9 +7,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class Entity
 {
-
-    #[Assert\NotBlank(message: "Текст запроса не должен быть пустым")]
-    #[Assert\Length(min: 1, minMessage: "Текст запроса должен соддержать больше одного символа")]
+    #[Assert\NotBlank(message: 'Текст запроса не должен быть пустым')]
+    #[Assert\Length(min: 1, minMessage: 'Текст запроса должен соддержать больше одного символа')]
     private string $search;
 
     /**
@@ -73,22 +72,24 @@ class Entity
 
     public static function validateSeries(mixed $object, ExecutionContextInterface $context, $payload): void
     {
-        if ($object === null) {
+        if (null === $object) {
             return;
         }
 
-        if (!is_array($object)){
+        if (!is_array($object)) {
             $context->buildViolation('Серии должны быть массивом')
                 ->atPath('series')
                 ->addViolation();
+
             return;
         }
 
-        foreach ($object as $value){
+        foreach ($object as $value) {
             if (!is_int($value)) {
                 $context->buildViolation('Серии должны быть числами')
                     ->atPath('series')
                     ->addViolation();
+
                 return;
             }
         }
@@ -96,15 +97,14 @@ class Entity
 
     public static function validatePage(mixed $object, ExecutionContextInterface $context, $payload): void
     {
-        if ($object === null) {
+        if (null === $object) {
             return;
         }
 
-        if (!is_int($object)){
+        if (!is_int($object)) {
             $context->buildViolation('Страница должна быть числом')
                 ->atPath('page')
                 ->addViolation();
         }
     }
-
 }

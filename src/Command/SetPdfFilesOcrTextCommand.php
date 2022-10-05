@@ -17,28 +17,26 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class SetPdfFilesOcrTextCommand extends Command
 {
-
     public function __construct(
         private readonly StorageServiceFacade $storageServiceFacade,
         private readonly OcrVisionInterface $ocrVision,
         private readonly FileRepository $fileRepository,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
     protected function configure(): void
-    {}
+    {
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $pdfs = $this->fileRepository->findBy([
             'mimeType' => 'application/pdf',
-            'text' => null
+            'text' => null,
         ]);
 
         foreach ($pdfs as $pdf) {
-
             $fileExtension = pathinfo($pdf->getOriginFilename(), PATHINFO_EXTENSION);
             $fileFullPath = $this->storageServiceFacade->getCatalogFullPath($pdf->getFilename());
             $file = (new CatalogFile())

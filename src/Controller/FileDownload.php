@@ -11,19 +11,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FileDownload extends AbstractController
 {
-
     #[Route('/files/download/{name}', name: 'app_files_download', methods: ['GET'])]
     public function show(
-        Request     $request,
+        Request $request,
         StorageServiceFacade $storageServiceFacade
-    ): Response
-    {
+    ): Response {
         $catalogName = $request->attributes->get('name');
 
         $fileContent = $storageServiceFacade->getRawContentFromCatalogFile($catalogName);
 
         $response = new Response($fileContent);
-        //TODO отрефакторить это
+        // TODO отрефакторить это
         $response->headers->set('Content-Type', 'application/pdf');
 
         $disposition = $response->headers->makeDisposition(
@@ -34,5 +32,4 @@ class FileDownload extends AbstractController
 
         return $response;
     }
-
 }

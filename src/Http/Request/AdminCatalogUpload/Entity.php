@@ -5,8 +5,8 @@ namespace App\Http\Request\AdminCatalogUpload;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class Entity{
-
+class Entity
+{
     #[Assert\NotNull(message: 'Файл должен быть загружен')]
     #[Assert\File(
         mimeTypes: ['application/pdf', 'application/x-pdf'],
@@ -92,5 +92,4 @@ class Entity{
     {
         $this->categoryIds = $categoryIds;
     }
-
 }

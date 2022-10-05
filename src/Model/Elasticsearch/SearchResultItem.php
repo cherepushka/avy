@@ -4,7 +4,6 @@ namespace App\Model\Elasticsearch;
 
 class SearchResultItem
 {
-
     private string $suggestText;
     private int $byteSize;
     private string $originName;
@@ -83,5 +82,4 @@ class SearchResultItem
 
         return $this;
     }
-
 }

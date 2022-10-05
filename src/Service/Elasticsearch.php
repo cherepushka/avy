@@ -14,11 +14,10 @@ use GuzzleHttp\Client as GuzzleClient;
 
 class Elasticsearch
 {
-
-    const PRE_TAG = '<highlight>';
-    const POST_TAG = '</highlight>';
-    const STD_INNER_HITS_SIZE = 5;
-    const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'origin-file-name', 'series', 'lang'];
+    public const PRE_TAG = '<highlight>';
+    public const POST_TAG = '</highlight>';
+    public const STD_INNER_HITS_SIZE = 5;
+    public const STD_SEARCH_FIELDS = ['file-size', 'file-name', 'origin-file-name', 'series', 'lang'];
 
     private Client $client;
 
@@ -33,11 +32,10 @@ class Elasticsearch
         string $elasticsearch_cloud_id,
         string $elasticsearch_api_key
     ) {
-
         $Elasticsearch_client = ClientBuilder::create();
         $Elasticsearch_client->setHttpClient(new GuzzleClient());
 
-        switch ($elasticsearch_connection_type){
+        switch ($elasticsearch_connection_type) {
             case 'PASSWORD':
                 $Elasticsearch_client
                     ->setHosts([$elasticsearch_host])
@@ -56,10 +54,6 @@ class Elasticsearch
     }
 
     /**
-     * @param string $text
-     * @param int $from
-     * @return array
-     *
      * @throws ClientResponseException
      * @throws MissingParameterException
      * @throws ServerResponseException
@@ -73,28 +67,28 @@ class Elasticsearch
                 'from' => $from,
                 'fields' => self::STD_SEARCH_FIELDS,
                 'query' => [
-                    "multi_match" => [
-                        "query" => $text,
-                        "fields" => [
-                            "categories-full-text^1.5",
-                            "text-content",
-                            "text-content.tengram"
-                        ]
-                    ]
+                    'multi_match' => [
+                        'query' => $text,
+                        'fields' => [
+                            'categories-full-text^1.5',
+                            'text-content',
+                            'text-content.tengram',
+                        ],
+                    ],
                 ],
                 'highlight' => [
                     'fields' => [
-                        "text-content" => [
-                            "pre_tags" => self::PRE_TAG,
-                            "post_tags" => self::POST_TAG
+                        'text-content' => [
+                            'pre_tags' => self::PRE_TAG,
+                            'post_tags' => self::POST_TAG,
                         ],
-                        "categories-full-text" => [
-                            "pre_tags" => self::PRE_TAG,
-                            "post_tags" => self::POST_TAG
-                        ]
+                        'categories-full-text' => [
+                            'pre_tags' => self::PRE_TAG,
+                            'post_tags' => self::POST_TAG,
+                        ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ])->asArray();
     }
 
@@ -111,14 +105,14 @@ class Elasticsearch
                 'from' => $from,
                 'size' => $series_size,
                 'query' => [
-                    "multi_match" => [
-                        "query" => $text,
-                        "fields" => [
-                            "categories-full-text^1.5",
-                            "text-content",
+                    'multi_match' => [
+                        'query' => $text,
+                        'fields' => [
+                            'categories-full-text^1.5',
+                            'text-content',
                         ],
-                        'minimum_should_match' => '80%'
-                    ]
+                        'minimum_should_match' => '80%',
+                    ],
                 ],
                 'collapse' => [
                     'field' => 'series',
@@ -131,33 +125,33 @@ class Elasticsearch
                             'fields' => [
                                 'text-content' => [
                                     'pre_tags' => self::PRE_TAG,
-                                    'post_tags' => self::POST_TAG
+                                    'post_tags' => self::POST_TAG,
                                 ],
-                                "categories-full-text" => [
-                                    "pre_tags" => self::PRE_TAG,
-                                    "post_tags" => self::POST_TAG
-                                ]
-                            ]
-                        ]
+                                'categories-full-text' => [
+                                    'pre_tags' => self::PRE_TAG,
+                                    'post_tags' => self::POST_TAG,
+                                ],
+                            ],
+                        ],
                     ],
-                    'max_concurrent_group_searches' => 3
+                    'max_concurrent_group_searches' => 3,
                 ],
                 'sort' => [
-                    'exists-products' => 'desc'
+                    'exists-products' => 'desc',
                 ],
-                "aggs" => [
-                    "total" => [
-                        "cardinality" => [
-                            "field" => "series"
-                        ]
-                    ]
-                ]
-            ]
+                'aggs' => [
+                    'total' => [
+                        'cardinality' => [
+                            'field' => 'series',
+                        ],
+                    ],
+                ],
+            ],
         ])->asArray();
     }
 
     /**
-     * Search in 'catalogs' index and collapsing result on 'series' field
+     * Search in 'catalogs' index and collapsing result on 'series' field.
      *
      * @throws ElasticsearchException
      */
@@ -175,24 +169,24 @@ class Elasticsearch
                 'size' => $series_size,
                 'query' => [
                     'bool' => [
-                        "filter" => [
-                            "terms" => [
-                                "series" => $series_ids
-                            ]
+                        'filter' => [
+                            'terms' => [
+                                'series' => $series_ids,
+                            ],
                         ],
-                        "must"=> [
+                        'must' => [
                             [
-                                "multi_match" => [
-                                    "query" => $text,
-                                    "fields" => [
-                                        "categories-full-text^1.5",
-                                        "text-content",
+                                'multi_match' => [
+                                    'query' => $text,
+                                    'fields' => [
+                                        'categories-full-text^1.5',
+                                        'text-content',
                                     ],
-                                    'minimum_should_match' => '80%'
-                                ]
-                            ]
-                        ]
-                    ]
+                                    'minimum_should_match' => '80%',
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'collapse' => [
                     'field' => 'series',
@@ -205,41 +199,37 @@ class Elasticsearch
                             'fields' => [
                                 'text-content' => [
                                     'pre_tags' => self::PRE_TAG,
-                                    'post_tags' => self::POST_TAG
+                                    'post_tags' => self::POST_TAG,
                                 ],
-                                "categories-full-text" => [
-                                    "pre_tags" => self::PRE_TAG,
-                                    "post_tags" => self::POST_TAG
-                                ]
-                            ]
-                        ]
+                                'categories-full-text' => [
+                                    'pre_tags' => self::PRE_TAG,
+                                    'post_tags' => self::POST_TAG,
+                                ],
+                            ],
+                        ],
                     ],
-                    'max_concurrent_group_searches' => 3
+                    'max_concurrent_group_searches' => 3,
                 ],
                 'sort' => [
-                    'exists-products' => 'desc'
+                    'exists-products' => 'desc',
                 ],
-                "aggs" => [
-                    "total" => [
-                        "cardinality" => [
-                            "field" => "series"
-                        ]
-                    ]
-                ]
-            ]
+                'aggs' => [
+                    'total' => [
+                        'cardinality' => [
+                            'field' => 'series',
+                        ],
+                    ],
+                ],
+            ],
         ])->asArray();
     }
 
     /**
-     * @param string $filename
-     * @param string $originFilename
-     * @param int $byteSize - byte size of file
-     * @param string $langAlias - language alias of catalog
-     * @param string $catalogText
-     * @param string $fileTypeAlias
-     * @param Category[] $categories - ids of categories
+     * @param int        $byteSize    - byte size of file
+     * @param string     $langAlias   - language alias of catalog
+     * @param Category[] $categories  - ids of categories
      * @param Category[] $finalCats
-     * @param string $indexPrefix - prefix on index in which new catalog will be uploaded
+     * @param string     $indexPrefix - prefix on index in which new catalog will be uploaded
      *
      * @throws ElasticsearchException
      */
@@ -253,25 +243,24 @@ class Elasticsearch
         array $categories,
         array $finalCats,
         string $indexPrefix = '',
-    ): void
-    {
+    ): void {
         $series_ids = [];
         $global_is_product = false;
-        foreach ($finalCats as $seria){
+        foreach ($finalCats as $seria) {
             $series_ids[] = $seria->getId();
             $global_is_product = $seria->isProductsExist() ? true : $global_is_product;
         }
 
         $categories_ids = [];
         $categories_titles = [];
-        foreach($categories as $category) {
+        foreach ($categories as $category) {
             $categories_ids[] = $category->getId();
             $categories_titles[] = $category->getTitle();
         }
 
         $this->client->create([
             'id' => uniqid(),
-            'index' => $indexPrefix . 'files',
+            'index' => $indexPrefix.'files',
             'body' => [
                 'text-content' => $catalogText,
                 'categories-full-text' => $categories_titles,
@@ -283,14 +272,13 @@ class Elasticsearch
                 'exists-products' => $global_is_product,
                 'categories' => $categories_ids,
                 'series' => $series_ids,
-            ]
+            ],
         ]);
 
         foreach ($finalCats as $seria) {
-
             $this->client->create([
                 'id' => uniqid(),
-                'index' => $indexPrefix . 'files-seria-' . $seria->getId(),
+                'index' => $indexPrefix.'files-seria-'.$seria->getId(),
                 'body' => [
                     'text-content' => $catalogText,
                     'categories-full-text' => $categories_titles,
@@ -302,7 +290,7 @@ class Elasticsearch
                     'exists-products' => $global_is_product,
                     'categories' => $categories_ids,
                     'series' => $seria->getId(),
-                ]
+                ],
             ]);
         }
     }
@@ -317,29 +305,29 @@ class Elasticsearch
         return $this->client->search([
             'index' => 'product-suggests_alias',
             'body' => [
-                "_source" => false,
-                "query" => [
-                    "query_string" => [
-                        "query" => $text,
-                        "fields" => [
-                            "value",
-                            "value._search-as-you-type._2gram",
-                            "value._search-as-you-type._3gram",
-                            "value._concatenated-prefix"
-                        ]
-                    ]
-                ],
-                "collapse" => [
-                    "field" => "type",
-                    "inner_hits" => [
-                        "_source"  => false,
-                        "fields" => ["value"],
-                        "name" => "value",
-                        "size" => 2
+                '_source' => false,
+                'query' => [
+                    'query_string' => [
+                        'query' => $text,
+                        'fields' => [
+                            'value',
+                            'value._search-as-you-type._2gram',
+                            'value._search-as-you-type._3gram',
+                            'value._concatenated-prefix',
+                        ],
                     ],
-                    "max_concurrent_group_searches" => 4
-                ]
-            ]
+                ],
+                'collapse' => [
+                    'field' => 'type',
+                    'inner_hits' => [
+                        '_source' => false,
+                        'fields' => ['value'],
+                        'name' => 'value',
+                        'size' => 2,
+                    ],
+                    'max_concurrent_group_searches' => 4,
+                ],
+            ],
         ])->asArray();
     }
 
@@ -350,11 +338,11 @@ class Elasticsearch
     {
         $this->client->create([
             'id' => uniqid(),
-            'index' => $indexPrefix . 'product-suggests',
+            'index' => $indexPrefix.'product-suggests',
             'body' => [
                 'value' => $text,
                 'type' => $type,
-            ]
+            ],
         ]);
     }
 }

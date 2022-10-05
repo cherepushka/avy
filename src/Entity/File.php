@@ -31,15 +31,15 @@ class File
     private string $text;
 
     #[ORM\ManyToOne(targetEntity: Manufacturer::class)]
-    #[ORM\JoinColumn(name: "manufacturer_id", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'manufacturer_id', referencedColumnName: 'id', nullable: false)]
     private Manufacturer $manufacturer;
 
     #[ORM\ManyToOne(targetEntity: Language::class)]
-    #[ORM\JoinColumn(name: "lang_id", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'lang_id', referencedColumnName: 'id', nullable: false)]
     private Language $lang;
 
     #[ORM\ManyToOne(targetEntity: FileType::class)]
-    #[ORM\JoinColumn(name: "fileType_id", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'fileType_id', referencedColumnName: 'id', nullable: false)]
     private FileType $fileType;
 
     #[ORM\Column(type: 'string', enumType: FileStatus::class, options: ['default' => FileStatus::NEW])]
@@ -195,7 +195,7 @@ class File
     #[ORM\PrePersist]
     public function setCreatedAt(): self
     {
-        if (!isset($this->created_at) || $this->getCreatedAt() === null){
+        if (!isset($this->created_at) || null === $this->getCreatedAt()) {
             $this->created_at = new DateTimeImmutable();
         }
 

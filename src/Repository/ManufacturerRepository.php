@@ -58,7 +58,7 @@ class ManufacturerRepository extends ServiceEntityRepository
     /**
      * @throws NonUniqueResultException
      */
-    public function findOneByName( string $name): ?Manufacturer
+    public function findOneByName(string $name): ?Manufacturer
     {
         return $this->createQueryBuilder('m')
             ->andWhere('m.name = :val')

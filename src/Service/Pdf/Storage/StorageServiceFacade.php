@@ -9,11 +9,11 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class StorageServiceFacade
 {
-
     public function __construct(
         private readonly CatalogStorageServiceInterface $catalogStorageService,
         private readonly SluggerInterface $slugger
-    ){}
+    ) {
+    }
 
     public function saveUploadedCatalog(UploadedFile $file): CatalogFile
     {
@@ -56,7 +56,6 @@ class StorageServiceFacade
     }
 
     /**
-     * @param string $filename
      * @return resource
      */
     public function saveCatalogTmpCopy(string $filename)
@@ -71,12 +70,13 @@ class StorageServiceFacade
 
     /**
      * @param resource $tmpFile
+     *
      * @return string - absolute path to file
      */
     public function getPathToTmpFile($tmpFile): string
     {
         $tmpFileMetadata = stream_get_meta_data($tmpFile);
+
         return $tmpFileMetadata['uri'];
     }
-
 }

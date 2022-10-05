@@ -10,24 +10,23 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class FileTypeGroupedListMapper
 {
-
     public function __construct(
         private readonly UrlGeneratorInterface $router,
-    ){}
+    ) {
+    }
 
     /**
      * @param File[] $files
-     * @return FileList
      */
     public function map(array $files): FileList
     {
         $items = [];
 
-        foreach ($files as $file){
+        foreach ($files as $file) {
             $fileTypeEntity = $file->getFileType();
             $fileType = $fileTypeEntity->getType();
 
-            if (!isset($items[$fileType])){
+            if (!isset($items[$fileType])) {
                 $items[$fileType] = new FileListItem($fileTypeEntity->getName());
             }
 
@@ -46,5 +45,4 @@ class FileTypeGroupedListMapper
 
         return new FileList($items);
     }
-
 }

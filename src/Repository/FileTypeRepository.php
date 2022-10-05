@@ -16,7 +16,6 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class FileTypeRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, FileType::class);
@@ -39,5 +38,4 @@ class FileTypeRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
 }

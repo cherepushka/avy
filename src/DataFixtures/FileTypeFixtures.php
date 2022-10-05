@@ -22,7 +22,7 @@ class FileTypeFixtures extends Fixture
                 ->setDescription('Опросный лист для клиентов'),
         ];
 
-        foreach ($fileTypes as $entity){
+        foreach ($fileTypes as $entity) {
             $manager->persist($entity);
         }
 

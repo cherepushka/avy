@@ -11,23 +11,23 @@ use Doctrine\ORM\Mapping as ORM;
 class Category
 {
     #[ORM\Id]
-    #[ORM\Column(name: "id", type: 'integer')]
+    #[ORM\Column(name: 'id', type: 'integer')]
     private int $id;
 
-    #[ORM\Column(name: "title", type: "string", length: 255, nullable: false)]
+    #[ORM\Column(name: 'title', type: 'string', length: 255, nullable: false)]
     private string $title;
 
-    #[ORM\Column(name: "link", type: "string", length: 255, nullable: false)]
+    #[ORM\Column(name: 'link', type: 'string', length: 255, nullable: false)]
     private string $link;
 
-    #[ORM\OneToMany(mappedBy: "parent", targetEntity: self::class, fetch: "EXTRA_LAZY")]
+    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: self::class, fetch: 'EXTRA_LAZY')]
     private Collection $children;
 
-    #[ORM\ManyToOne(targetEntity: self::class, fetch: "EXTRA_LAZY", inversedBy: "children")]
-    #[ORM\JoinColumn(name: "parent", referencedColumnName: "id")]
+    #[ORM\ManyToOne(targetEntity: self::class, fetch: 'EXTRA_LAZY', inversedBy: 'children')]
+    #[ORM\JoinColumn(name: 'parent', referencedColumnName: 'id')]
     private ?self $parent;
 
-    #[ORM\Column(name: 'productsExist', type: 'boolean', options: ["default" => false])]
+    #[ORM\Column(name: 'productsExist', type: 'boolean', options: ['default' => false])]
     private bool $productsExist;
 
     public function __construct()
@@ -79,7 +79,6 @@ class Category
 
     /**
      * @param Collection<Category> $children
-     * @return Category
      */
     public function setChildren(Collection $children): self
     {
@@ -118,5 +117,4 @@ class Category
 
         return $this;
     }
-
 }

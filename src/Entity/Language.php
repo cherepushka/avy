@@ -47,6 +47,4 @@ class Language
 
         return $this;
     }
-
-
 }

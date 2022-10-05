@@ -3,25 +3,25 @@
 namespace App\Controller\Api\V1;
 
 use App\Attribute\RequestJson;
+use App\Http\Request\Api\SearchBySeries;
+use App\Http\Request\Api\SearchProductSuggests;
 use App\Model\Elasticsearch\Default\SearchResultList;
 use App\Model\Elasticsearch\ProductSuggestsList;
 use App\Service\SearchService;
 use Elastic\Elasticsearch\Exception\ElasticsearchException;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use OpenApi\Attributes as OA;
-use App\Http\Request\Api\SearchBySeries as SearchBySeries;
-use App\Http\Request\Api\SearchProductSuggests as SearchProductSuggests;
 
 #[Route('/api/v1', name: 'app_api_v1')]
 class SearchController extends AbstractController
 {
-
     public function __construct(
         private readonly SearchService $searchService,
-    ){}
+    ) {
+    }
 
     /**
      * @throws ElasticsearchException
@@ -51,7 +51,6 @@ class SearchController extends AbstractController
     /**
      * @throws ElasticsearchException
      */
-
     #[Route('/search/product-suggests', name: '_product_suggests', methods: ['POST'])]
     #[OA\Response(
         response: 200,
@@ -67,7 +66,7 @@ class SearchController extends AbstractController
         $searchText = $requestEntity->getSearch();
 
         $items = $this->searchService->productSuggests($searchText);
+
         return $this->json($items->getItems());
     }
-
 }

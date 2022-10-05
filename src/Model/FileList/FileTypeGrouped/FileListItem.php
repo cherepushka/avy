@@ -4,7 +4,6 @@ namespace App\Model\FileList\FileTypeGrouped;
 
 class FileListItem
 {
-
     private string $typeName;
 
     /**
@@ -13,7 +12,6 @@ class FileListItem
     private array $files;
 
     /**
-     * @param string $typeName
      * @param ItemFile[] $files
      */
     public function __construct(string $typeName, array $files = [])
@@ -39,5 +37,4 @@ class FileListItem
     {
         $this->files[] = $itemFile;
     }
-
 }

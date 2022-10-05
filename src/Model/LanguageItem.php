@@ -4,7 +4,6 @@ namespace App\Model;
 
 class LanguageItem
 {
-
     private int $id;
     private string $name;
     private string $alias;
@@ -44,7 +43,4 @@ class LanguageItem
 
         return $this;
     }
-
-
-
 }

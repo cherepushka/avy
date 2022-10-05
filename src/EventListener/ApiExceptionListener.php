@@ -10,7 +10,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -20,10 +19,11 @@ class ApiExceptionListener
 {
     public function __construct(
         private readonly ExceptionMappingResolver $resolver,
-        private readonly LoggerInterface          $logger,
-        private readonly SerializerInterface      $serializer,
-        private readonly bool                     $isDebug = false
-    ){}
+        private readonly LoggerInterface $logger,
+        private readonly SerializerInterface $serializer,
+        private readonly bool $isDebug = false
+    ) {
+    }
 
     public function __invoke(ExceptionEvent $event): void
     {

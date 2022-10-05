@@ -20,7 +20,7 @@ class SetIsProductsExistStatus extends Command
     public function __construct(
         private readonly string $projectDir,
         private readonly CategoryRepository $categoryRepository
-    ){
+    ) {
         parent::__construct();
     }
 
@@ -33,7 +33,7 @@ class SetIsProductsExistStatus extends Command
     {
         $uploaded_series = $this->loadSeriesAsArr($input->getArgument('seriesPath'));
 
-        foreach($uploaded_series as $series){
+        foreach ($uploaded_series as $series) {
             $new_series = $this->categoryRepository->find($series)
                 ->setProductsExist(true);
 
@@ -45,17 +45,17 @@ class SetIsProductsExistStatus extends Command
 
     private function loadSeriesAsArr(string $path): array
     {
-        $path = ltrim($path, "\\/");
+        $path = ltrim($path, '\\/');
 
-        if ( !is_file($this->projectDir . \DIRECTORY_SEPARATOR . $path) ){
+        if (!is_file($this->projectDir.\DIRECTORY_SEPARATOR.$path)) {
             throw new FileNotFoundException("Cannot load tree with path '$path'");
         }
 
         $content = file_get_contents($path);
-        if (!$content){
-            throw new RuntimeException("Error with getting body of file");
+        if (!$content) {
+            throw new RuntimeException('Error with getting body of file');
         }
 
-        return explode(",", $content);
+        return explode(',', $content);
     }
 }

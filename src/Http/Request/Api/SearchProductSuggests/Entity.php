@@ -6,8 +6,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Entity
 {
-
-
     #[Assert\NotBlank(message: 'Поле `search` не должно быть пустым')]
     #[Assert\Length(min: 1, minMessage: 'Поле `search` должно содержать хотя бы один символ')]
     private string $search;
@@ -23,5 +21,4 @@ class Entity
 
         return $this;
     }
-
 }

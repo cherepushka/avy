@@ -62,5 +62,4 @@ class FileType
 
         return $this;
     }
-
 }

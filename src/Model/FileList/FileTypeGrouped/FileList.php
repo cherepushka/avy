@@ -7,7 +7,6 @@ use OpenApi\Attributes as OA;
 
 class FileList
 {
-
     /** @var FileListItem[] $items */
     #[OA\Property(
         property: 'fileType',
@@ -27,5 +26,4 @@ class FileList
     {
         return $this->items;
     }
-
 }

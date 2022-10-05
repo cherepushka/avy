@@ -2,26 +2,25 @@
 
 namespace App\Service;
 
-use App\Entity\FileStatus;
-use App\Mapper\FileList\FileTypeGroupedListMapper;
-use App\Model\FileList\FileTypeGrouped\FileList;
-use App\Repository\FileTypeRepository;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Entity\File;
+use App\Entity\FileStatus;
 use App\Exception\CategoryNotFoundByIdException;
-use App\Repository\FileRepository;
+use App\Exception\FileAlreadyLoadedException;
+use App\Mapper\FileList\FileTypeGroupedListMapper;
+use App\Model\File\CatalogFile;
+use App\Model\FileList\FileTypeGrouped\FileList;
 use App\Repository\CategoryRepository;
+use App\Repository\FileRepository;
+use App\Repository\FileTypeRepository;
 use App\Repository\LanguageRepository;
 use App\Repository\ManufacturerRepository;
+use App\Service\Pdf\Storage\StorageServiceFacade;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NonUniqueResultException;
-use App\Model\File\CatalogFile;
-use App\Exception\FileAlreadyLoadedException;
-use App\Service\Pdf\Storage\StorageServiceFacade;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileService
 {
-
     public function __construct(
         private readonly FileRepository $fileRepository,
         private readonly ManufacturerRepository $manufacturerRepository,
@@ -30,25 +29,25 @@ class FileService
         private readonly StorageServiceFacade $storageService,
         private readonly FileTypeRepository $fileTypeRepository,
         private readonly FileTypeGroupedListMapper $fileTypeGroupedListMapper,
-    ){}
+    ) {
+    }
 
     /**
      * @throws NonUniqueResultException
      * @throws FileAlreadyLoadedException
      */
     public function insertCatalog(
-        UploadedFile    $uploadedFile,
-        string          $origin_filename,
-        string          $manufacturer_name,
-        array           $categories_ids,
-        string          $language_name,
-        string          $fileType,
-        ?string         $text = null
-    ): File
-    {
+        UploadedFile $uploadedFile,
+        string $origin_filename,
+        string $manufacturer_name,
+        array $categories_ids,
+        string $language_name,
+        string $fileType,
+        ?string $text = null
+    ): File {
         $file = $this->storageService->saveUploadedCatalog($uploadedFile);
 
-        if ($this->isDocumentAlreadyLoaded($file)){
+        if ($this->isDocumentAlreadyLoaded($file)) {
             $this->storageService->deleteCatalog($file->getName());
             throw new FileAlreadyLoadedException($file->getOriginName());
         }
@@ -67,7 +66,7 @@ class FileService
             ->setFileType($fileType)
             ->setMimeType($file->getMimeType());
 
-        if ($text !== null) {
+        if (null !== $text) {
             $catalog->setText($text);
         }
 
@@ -89,16 +88,15 @@ class FileService
     }
 
     /**
-     * Checking if document is already in queue or was uploaded
+     * Checking if document is already in queue or was uploaded.
      */
     private function isDocumentAlreadyLoaded(CatalogFile $file): bool
     {
         $byte_size = $file->getByteSize();
         $raw_content = $this->storageService->getRawContentFromCatalogFile($file->getName());
 
-        foreach ($this->fileRepository->findBy(['byte_size' => $byte_size]) as $item){
-
-            if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content){
+        foreach ($this->fileRepository->findBy(['byte_size' => $byte_size]) as $item) {
+            if ($this->storageService->getRawContentFromCatalogFile($item->getFilename()) === $raw_content) {
                 return true;
             }
         }
@@ -110,7 +108,7 @@ class FileService
     {
         $category = $this->categoryRepository->find($category_id);
 
-        if (null === $category){
+        if (null === $category) {
             throw new CategoryNotFoundByIdException($category_id);
         }
 
@@ -118,5 +116,4 @@ class FileService
 
         return $this->fileTypeGroupedListMapper->map($files);
     }
-
 }

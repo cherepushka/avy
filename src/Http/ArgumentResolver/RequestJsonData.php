@@ -15,11 +15,11 @@ use Throwable;
 
 class RequestJsonData implements ArgumentValueResolverInterface
 {
-
     public function __construct(
-        private readonly SerializerInterface $serializer, 
+        private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator
-    ){}
+    ) {
+    }
 
     public function supports(Request $request, ArgumentMetadata $argument): bool
     {
@@ -45,5 +45,4 @@ class RequestJsonData implements ArgumentValueResolverInterface
 
         yield $model;
     }
-
 }

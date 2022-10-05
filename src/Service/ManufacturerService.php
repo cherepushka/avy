@@ -2,25 +2,25 @@
 
 namespace App\Service;
 
-use App\Model\ManufacturerItem;
 use App\Entity\Manufacturer;
+use App\Model\ManufacturerItem;
 use App\Model\ManufacturerList;
 use App\Repository\ManufacturerRepository;
 use Doctrine\ORM\NonUniqueResultException;
 
 class ManufacturerService
 {
-
     public function __construct(
         private readonly ManufacturerRepository $manufacturerRepository
-    ) {}
+    ) {
+    }
 
     public function getAll(): ManufacturerList
     {
         $manufacturers = $this->manufacturerRepository->findAll();
 
         $items = array_map(
-            fn(Manufacturer $manufacturer) => (new ManufacturerItem())
+            fn (Manufacturer $manufacturer) => (new ManufacturerItem())
                 ->setId($manufacturer->getId())
                 ->setName($manufacturer->getName()),
             $manufacturers
@@ -40,5 +40,4 @@ class ManufacturerService
             ->setId($manufacturer->getId())
             ->setName($manufacturer->getName());
     }
-
 }

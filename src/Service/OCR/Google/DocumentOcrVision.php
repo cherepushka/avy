@@ -23,7 +23,6 @@ use Google\Cloud\Vision\V1\OutputConfig;
 
 class DocumentOcrVision implements OcrVisionInterface
 {
-
     private ImageAnnotatorClient $visionClient;
 
     /**
@@ -35,10 +34,9 @@ class DocumentOcrVision implements OcrVisionInterface
         private readonly CatalogStorageService $gcCatalogStorageService,
         private readonly OcrResultStorageService $ocrResultStorageService,
         private readonly ContentFilter $contentFilter,
-    )
-    {
+    ) {
         $this->visionClient = new ImageAnnotatorClient([
-            'credentials' => $credentials_path
+            'credentials' => $credentials_path,
         ]);
     }
 
@@ -49,8 +47,8 @@ class DocumentOcrVision implements OcrVisionInterface
      */
     public function catalogGetTextSync(CatalogFile $file): string
     {
-        //Catalog must be stored on GoogleStorage for this type of OCR handling
-        if (!$this->gcCatalogStorageService->exists($file->getName())){
+        // Catalog must be stored on GoogleStorage for this type of OCR handling
+        if (!$this->gcCatalogStorageService->exists($file->getName())) {
             $tmpFile = $this->storageServiceFacade->saveCatalogTmpCopy($file->getName());
             $tmpFilePath = $this->storageServiceFacade->getPathToTmpFile($tmpFile);
             $cloudFilePath = $this->gcCatalogStorageService->uploadFromLocal($tmpFilePath, $file->getName());
@@ -67,14 +65,14 @@ class DocumentOcrVision implements OcrVisionInterface
         $outputDir = $this->ocrResultStorageService->getFullPathForResults($file->getName());
         $outputConfig = $this->generateOutputConf($outputDir);
 
-        # prepare request using configs set above
+        // prepare request using configs set above
         $request = (new AsyncAnnotateFileRequest())
             ->setFeatures([$feature])
             ->setInputConfig($inputConfig)
             ->setOutputConfig($outputConfig);
         $requests = [$request];
 
-        # make request
+        // make request
         $operation = $this->visionClient->asyncBatchAnnotateFiles($requests);
         $operation->pollUntilComplete();
 
@@ -91,7 +89,6 @@ class DocumentOcrVision implements OcrVisionInterface
         $text = '';
 
         foreach ($objects as $object) {
-
             $jsonString = $object->downloadAsString();
             $file_response = new AnnotateFileResponse();
             $file_response->mergeFromJsonString($jsonString);
@@ -129,5 +126,4 @@ class DocumentOcrVision implements OcrVisionInterface
             ->setGcsDestination($gcsDestination)
             ->setBatchSize($batchSize);
     }
-
 }

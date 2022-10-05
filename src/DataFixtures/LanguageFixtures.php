@@ -8,7 +8,6 @@ use Doctrine\Persistence\ObjectManager;
 
 class LanguageFixtures extends Fixture
 {
-
     public function load(ObjectManager $manager)
     {
         $languages = [
@@ -16,7 +15,7 @@ class LanguageFixtures extends Fixture
             (new Language())->setName('Английский')->setAlias('eng'),
         ];
 
-        foreach ($languages as $language){
+        foreach ($languages as $language) {
             $manager->persist($language);
         }
 
