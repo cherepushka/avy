@@ -6,10 +6,8 @@
 является Elasticsearch
 
 ## TODO
-- Потестить загрузку каталогов
 - Потестировать загрузку каталогов
 - Тесты
-- Линтер
 - Сделать страницы с ошибками для админ панели
 
 ## Требование к окружению:
@@ -27,15 +25,7 @@
 
 <hr>
 
-## Установка (development)
-1. `composer install --dev`
-2. Заполнить `.env` файл необходимыми переменными
-3. `npm install --save-dev`
-4. `npm run dev` или `npm run watch`
-5. `php bin/console doctrine:migrations:migrate`
-6. `php bin/console doctrine:fixtures:load`
-7. `php bin/console migrate:TreeFromJson ./.dev-data/category-tree.json`  
-    \- загрузка тестовых данных о дереве категорий
-8. `php bin/console migrate:productsWithExistingSeries` -  
-    Загрузка информации о сериях с существующими продуктами
-9. `mkdir ./.credentials` - данные для авторизации в API
+## Документация
+- [Установка проекта](docs/INSTALL.md)
+- [API спецификация](docs/API.md)
+
